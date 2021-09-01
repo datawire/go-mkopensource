@@ -45,11 +45,20 @@ func VendorList() ([]golist.Package, error) {
 			// of which are things we care about.
 		} else if strings.HasPrefix(line, "# ") {
 			parts := strings.Split(line, " ")
+			// Just do some quick validation of the line format.  We're not tring to be
+			// super strict with the validation, just a quick check that we're not
+			// looking at something totally insane.
 			switch len(parts) {
 			case 3:
-				// ok
-			case 5, 6:
-				if parts[3] != "=>" {
+				// 0 1      2
+				// # module version
+			case 4, 5, 6:
+				// 0 1      2       3      4       5
+				// # module version =>     module version
+				// # module =>      module version
+				// # module version =>     path
+				// # module =>      path
+				if parts[2] != "=>" && parts[3] != "=>" {
 					return nil, fmt.Errorf("malformed line in vendor/modules.txt: %q", line)
 				}
 			default:
