@@ -65,12 +65,18 @@ func DetectLicenses(files map[string][]byte) (map[License]struct{}, error) {
 	hasNonSPDXSource := false
 	hasPatents := false
 
+loop:
 	for filename, filebody := range files {
 
-		if filename == "github.com/miekg/dns/COPYRIGHT" {
+		switch filename {
+		case "github.com/miekg/dns/COPYRIGHT":
 			// This file identifies copyright holders, but
 			// the license info is in the LICENSE file.
-			continue
+			continue loop
+		case "sigs.k8s.io/kustomize/kyaml/LICENSE_TEMPLATE":
+			// This is a template file for generated code,
+			// not an actual license file.
+			continue loop
 		}
 
 		name := filepath.Base(filename)
