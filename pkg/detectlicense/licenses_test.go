@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/datawire/go-mkopensource/pkg/mkopensource/detectlicense"
+	"github.com/datawire/go-mkopensource/pkg/detectlicense"
 )
 
 func licenseListEqual(a, b map[detectlicense.License]struct{}) bool {

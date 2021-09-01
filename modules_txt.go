@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/datawire/go-mkopensource/pkg/mkopensource/golist"
+	"github.com/datawire/go-mkopensource/pkg/golist"
 )
 
 func VendorList() ([]golist.Package, error) {
