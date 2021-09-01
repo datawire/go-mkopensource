@@ -258,8 +258,6 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		licenses[ISC] = struct{}{}
 	case reMatch(reMIT, body):
 		licenses[MIT] = struct{}{}
-	case reMatch(reMIT2, body):
-		licenses[MIT] = struct{}{}
 	case reMatch(reMPL, body):
 		licenses[MPL2] = struct{}{}
 	case reMatch(reCcBySa40, body):
@@ -302,6 +300,9 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		// sigs.k8s.io/yaml/LICENSE
 		licenses[MIT] = struct{}{}
 		licenses[BSD3] = struct{}{}
+	case reMatch(reCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
+		// github.com/shopspring/decimal/LICENSE
+		licenses[MIT] = struct{}{}
 	case string(body) == xzPublicDomain:
 		// github.com/xi2/xz/LICENSE
 		licenses[PublicDomain] = struct{}{}
