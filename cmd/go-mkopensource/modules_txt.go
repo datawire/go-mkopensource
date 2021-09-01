@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/datawire/ambassador/v2/pkg/mkopensource/golist"
+	"github.com/datawire/go-mkopensource/pkg/mkopensource/golist"
 )
 
 func VendorList() ([]golist.Package, error) {
