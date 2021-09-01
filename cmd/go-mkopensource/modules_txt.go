@@ -2,12 +2,12 @@ package main
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/datawire/go-mkopensource/pkg/mkopensource/golist"
 )
@@ -16,7 +16,7 @@ func VendorList() ([]golist.Package, error) {
 	cmd := exec.Command("go", "mod", "vendor")
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(err, "%q", []string{"go", "mod", "vendor"})
+		return nil, fmt.Errorf("%q: %w", []string{"go", "mod", "vendor"}, err)
 	}
 
 	file, err := os.Open("vendor/modules.txt")
@@ -37,10 +37,10 @@ func VendorList() ([]golist.Package, error) {
 				// ok
 			case 5, 6:
 				if parts[3] != "=>" {
-					return nil, errors.Errorf("malformed line in vendor/modules.txt: %q", line)
+					return nil, fmt.Errorf("malformed line in vendor/modules.txt: %q", line)
 				}
 			default:
-				return nil, errors.Errorf("malformed line in vendor/modules.txt: %q", line)
+				return nil, fmt.Errorf("malformed line in vendor/modules.txt: %q", line)
 			}
 			modname := parts[1]
 			modules, err := golist.GoListModules([]string{"-mod=vendor"}, []string{modname})

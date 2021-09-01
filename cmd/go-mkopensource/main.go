@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,7 +16,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 
 	"github.com/datawire/go-mkopensource/pkg/mkopensource/detectlicense"
@@ -51,25 +51,25 @@ func parseArgs() (*CLIArgs, error) {
 		return nil, pflag.ErrHelp
 	}
 	if argparser.NArg() != 0 {
-		return nil, errors.Errorf("expected 0 arguments, got %d: %q", argparser.NArg(), argparser.Args())
+		return nil, fmt.Errorf("expected 0 arguments, got %d: %q", argparser.NArg(), argparser.Args())
 	}
 	switch args.OutputFormat {
 	case "txt":
 		if args.OutputName != "" {
-			return nil, errors.Errorf("--output-name is only valid for --output-mode=tar")
+			return nil, errors.New("--output-name is only valid for --output-mode=tar")
 		}
 	case "tar":
 		if args.OutputName == "" {
-			return nil, errors.Errorf("--output-name is required for --output-mode=tar")
+			return nil, errors.New("--output-name is required for --output-mode=tar")
 		}
 	default:
-		return nil, errors.Errorf("--output-mode must be one of 'tar' or 'txt'")
+		return nil, errors.New("--output-mode must be one of 'tar' or 'txt'")
 	}
 	if !strings.HasPrefix(filepath.Base(args.GoTarFilename), "go1.") || !strings.HasSuffix(args.GoTarFilename, ".tar.gz") {
-		return nil, errors.Errorf("--gotar (%q) doesn't look like a go1.*.tar.gz file", args.GoTarFilename)
+		return nil, fmt.Errorf("--gotar (%q) doesn't look like a go1.*.tar.gz file", args.GoTarFilename)
 	}
 	if args.Package == "" {
-		return nil, errors.Errorf("--package (%q) must be non-empty", args.Package)
+		return nil, fmt.Errorf("--package (%q) must be non-empty", args.Package)
 	}
 	return args, nil
 }
@@ -128,7 +128,7 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 		}
 	}
 	if version == "" || license == nil {
-		return "", nil, errors.Errorf("file %q did not contain %q or %q", goTarFilename, "go/VERSION", "go/LICENSE")
+		return "", nil, fmt.Errorf("file %q did not contain %q or %q", goTarFilename, "go/VERSION", "go/LICENSE")
 	}
 	return version, license, nil
 }
@@ -244,7 +244,7 @@ func Main(args *CLIArgs) error {
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgFiles[pkgName])
 		if err != nil {
-			return errors.Errorf(`%v
+			return fmt.Errorf(`%w
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you
@@ -252,11 +252,11 @@ func Main(args *CLIArgs) error {
 
     You need to update the "github.com/datawire/go-mkopensource/pkg/mkopensource/detectlicense/licenses.go"
     file to correctly detect the license.`,
-				errors.Wrapf(err, "package %q", pkgName))
+				fmt.Errorf("package %q: %w", pkgName, err))
 		}
 		if licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
-			return errors.Wrapf(errors.New("has an unacceptable license for use by Ambassador"),
-				`package %q`, pkgName)
+			return fmt.Errorf(`package %q: %w`, pkgName,
+				errors.New("has an unacceptable license for use by Ambassador"))
 		}
 	}
 
@@ -341,7 +341,7 @@ func Main(args *CLIArgs) error {
 	for _, modKey := range modNames {
 		proprietary, err := licenseIsProprietary(modLicenses[modKey])
 		if err != nil {
-			return errors.Wrapf(err, "module %q", modKey)
+			return fmt.Errorf("module %q: %w", modKey, err)
 		}
 		if proprietary {
 			continue
@@ -373,7 +373,7 @@ func Main(args *CLIArgs) error {
 		sort.Strings(licenseList)
 		depLicenses = strings.Join(licenseList, ", ")
 		if depLicenses == "" {
-			panic(errors.Errorf("this should not happen: empty license string for %q", depName))
+			panic(fmt.Errorf("this should not happen: empty license string for %q", depName))
 		}
 		fmt.Fprintf(table, "\t%s\t%s\t%s\n", depName, depVersion, depLicenses)
 	}
@@ -395,7 +395,7 @@ func Main(args *CLIArgs) error {
 		for pkgName := range pkgFiles {
 			proprietary, err := licenseIsProprietary(pkgLicenses[pkgName])
 			if err != nil {
-				return errors.Wrapf(err, "package %q", pkgName)
+				return fmt.Errorf("package %q: %w", pkgName, err)
 			}
 			switch {
 			case proprietary:

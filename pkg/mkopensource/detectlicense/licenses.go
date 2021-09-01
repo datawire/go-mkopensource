@@ -2,12 +2,11 @@ package detectlicense
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type License struct {
@@ -87,7 +86,7 @@ func DetectLicenses(files map[string][]byte) (map[License]struct{}, error) {
 			strings.HasPrefix(name, "LICENSE"):
 			ls := IdentifyLicenses(filebody)
 			if ls == nil || len(ls) == 0 {
-				return nil, errors.Errorf("could not identify license in file %q", filename)
+				return nil, fmt.Errorf("could not identify license in file %q", filename)
 			}
 			if name == "LICENSE.docs" && len(ls) == 1 {
 				if _, isCc := ls[CcBySa40]; isCc {
@@ -156,7 +155,7 @@ func IdentifySPDXLicenses(body []byte) (map[License]struct{}, error) {
 		id = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(id), "*/"))
 		license, licenseOK := spdxIdentifiers[id]
 		if !licenseOK {
-			return nil, errors.Errorf("unknown SPDX identifier %q", id)
+			return nil, fmt.Errorf("unknown SPDX identifier %q", id)
 		}
 		licenses[license] = struct{}{}
 	}
