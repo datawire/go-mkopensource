@@ -256,7 +256,7 @@ func Main(args *CLIArgs) error {
 		}
 		if licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
 			return fmt.Errorf(`package %q: %w`, pkgName,
-				errors.New("has an unacceptable license for use by Ambassador"))
+				errors.New("has an unacceptable license for use by Ambassador Labs"))
 		}
 	}
 
