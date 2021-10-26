@@ -416,8 +416,7 @@ func Main(args *CLIArgs) error {
 		}
 
 		// Write output
-		var outputFile *os.File = os.Stdout
-		outputFile = os.Stdout
+		outputFile := os.Stdout
 		defer outputFile.Close()
 		outputCompressed := gzip.NewWriter(outputFile)
 		defer outputCompressed.Close()

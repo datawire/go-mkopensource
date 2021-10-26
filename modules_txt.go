@@ -29,7 +29,7 @@ func VendorList() ([]golist.Package, error) {
 	}
 
 	file, err := os.Open("vendor/modules.txt")
-	if err != err {
+	if err != nil {
 		return nil, err
 	}
 	defer file.Close()

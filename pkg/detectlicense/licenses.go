@@ -51,7 +51,7 @@ var (
 
 func expectsNotice(licenses map[License]struct{}) bool {
 	for license := range licenses {
-		if license.NoticeFile == true {
+		if license.NoticeFile {
 			return true
 		}
 	}
@@ -91,7 +91,7 @@ loop:
 			strings.HasPrefix(name, "LEGAL") ||
 			strings.HasPrefix(name, "LICENSE"):
 			ls := IdentifyLicenses(filebody)
-			if ls == nil || len(ls) == 0 {
+			if len(ls) == 0 {
 				return nil, fmt.Errorf("could not identify license in file %q", filename)
 			}
 			if name == "LICENSE.docs" && len(ls) == 1 {
@@ -118,7 +118,7 @@ loop:
 			if err != nil {
 				return nil, err
 			}
-			if ls == nil || len(ls) == 0 {
+			if len(ls) == 0 {
 				hasNonSPDXSource = true
 			}
 			for l := range ls {
