@@ -1,3 +1,5 @@
+//go:generate go run ./types-gen.go
+
 package golist
 
 import (

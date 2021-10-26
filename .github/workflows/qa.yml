@@ -28,3 +28,19 @@ jobs:
           # Specify the most recent (1.Y.Z) Y release
           go-version: '~1.17.0'
       - run: make lint
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          # Since `types.go` varies based on the exact version of Go,
+          # pin an exact (1.Y.Z) Z release.
+          go-version: '1.17.2'
+      - run: make generate
+      - run: |
+          git add .
+          if [[ -n "$(git status --porcelain)" ]]; then
+             PAGER= git diff --cached
+             exit 1
+          fi

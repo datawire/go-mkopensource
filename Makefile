@@ -8,6 +8,10 @@ check:
 	go test -race ./...
 .PHONY: check
 
+generate:
+	go generate ./...
+.PHONY: check
+
 lint: tools/bin/golangci-lint
 	tools/bin/golangci-lint run ./...
 .PHONY: lint
