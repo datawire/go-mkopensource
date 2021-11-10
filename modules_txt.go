@@ -30,6 +30,10 @@ func VendorList() ([]golist.Package, error) {
 
 	file, err := os.Open("vendor/modules.txt")
 	if err != nil {
+		if os.IsNotExist(err) {
+			// If there are no dependencies outside of stdlib.
+			return nil, nil
+		}
 		return nil, err
 	}
 	defer file.Close()
