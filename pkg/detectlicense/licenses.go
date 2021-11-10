@@ -314,6 +314,16 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 	case reMatch(regexp.MustCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
 		// github.com/shopspring/decimal/LICENSE
 		licenses[MIT] = struct{}{}
+	case reMatch(regexp.MustCompile(reBSD3.String()+
+		`-+\n+(Files: \S+\n+)+`+reApacheLicense.String()+
+		`-+\n+(Files: \S+\n+)+`+reMIT.String()+
+		`-+\n+(Files: \S+\n+)+`+reBSD3.String()+
+		`-+\n+(Files: \S+\n+)+`+reMIT.String()),
+		body):
+		// github.com/klauspost/compress/LICENSE
+		licenses[Apache2] = struct{}{}
+		licenses[BSD3] = struct{}{}
+		licenses[MIT] = struct{}{}
 	case string(body) == xzPublicDomain:
 		// github.com/xi2/xz/LICENSE
 		licenses[PublicDomain] = struct{}{}
