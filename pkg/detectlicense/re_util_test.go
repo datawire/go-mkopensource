@@ -7,9 +7,9 @@ import (
 
 // reTest isn't used normally, but is super duper useful for debuging
 // the complex license regexes.
-//
-//nolint:deadcode // See the doc comment above
-func reTest(t *testing.T, re *regexp.Regexp, str string) { //nolint:unused
+
+//nolint:deadcode,unused // See the doc comment above
+func reTest(t *testing.T, re *regexp.Regexp, str string) {
 	t.Helper()
 	if reMatch(re, []byte(str)) {
 		return

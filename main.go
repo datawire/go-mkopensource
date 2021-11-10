@@ -204,6 +204,7 @@ func Main(args *CLIArgs) error {
 	}
 
 	// `go mod vendor`
+	fs := newFSCache()
 	pkgFiles := make(map[string]map[string][]byte)
 	for _, pkg := range listPkgs {
 		vendor := make(map[string][]byte)
@@ -216,11 +217,11 @@ func Main(args *CLIArgs) error {
 				continue
 			}
 			if args.Package == "mod" {
-				if err := collectVendoredPkg(vendor, pkg); err != nil {
+				if err := fs.collectVendoredPkg(vendor, pkg); err != nil {
 					return err
 				}
 			} else {
-				if err := collectPkg(vendor, pkg); err != nil {
+				if err := fs.collectPkg(vendor, pkg); err != nil {
 					return err
 				}
 			}

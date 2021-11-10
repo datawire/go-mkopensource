@@ -16,6 +16,7 @@ type License struct {
 	StrongCopyleft bool // requires the resulting program to be open-source
 }
 
+//nolint:gochecknoglobals // Would be 'const'.
 var (
 	Proprietary = License{Name: "proprietary"}
 
@@ -33,6 +34,8 @@ var (
 )
 
 // https://spdx.org/licenses/
+//
+//nolint:gochecknoglobals // Would be 'const'.
 var (
 	// split with "+" to avoid a false-positive on itself
 	spdxTag = []byte("SPDX-License" + "-Identifier:")
@@ -179,6 +182,7 @@ func IdentifySPDXLicenses(body []byte) (map[License]struct{}, error) {
 	return licenses, nil
 }
 
+//nolint:gochecknoglobals // Would be 'const'.
 var (
 	bsd3funnyAttributionLines = []string{
 		`(?:Copyright [^\n]*(?:\s+All rights reserved\.)? *\n)`,
@@ -228,10 +232,8 @@ specific language governing permissions and limitations under the License.      
 
     This software is provided "as is", without any warranty.
 `
-)
 
-var (
-	yamlHeader = reWrap(`The following files were ported to Go from C files of libyaml, and thus
+	yamlHeader = `The following files were ported to Go from C files of libyaml, and thus
 are still covered by their original (copyright and license|MIT license, with the additional
 copyright start?ing in 2011 when the project was ported over):
 
@@ -244,13 +246,16 @@ copyright start?ing in 2011 when the project was ported over):
     yamlh\.go
     yamlprivateh\.go
 
-`)
-	reYamlV2 = reCompile(yamlHeader + `\s*` + reMIT.String())
+`
+)
 
-	reYamlV3 = reCompile(`\s*` +
+var (
+	reYamlV2 = regexp.MustCompile(reWrap(yamlHeader) + `\s*` + reMIT.String())
+
+	reYamlV3 = regexp.MustCompile(`\s*` +
 		reQuote(`This project is covered by two different licenses: MIT and Apache.`) + `\s*` +
 		`#+ MIT License #+\s*` +
-		yamlHeader + `\s*` +
+		reWrap(yamlHeader) + `\s*` +
 		reMIT.String() + `\s*` +
 		`#+ Apache License #+\s*` +
 		reQuote(`All the remaining project files are covered by the Apache license:`) + `\s*` +
@@ -281,11 +286,11 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		licenses[CcBySa40] = struct{}{}
 
 	// special-purpose hacks
-	case reMatch(reCompile(fmt.Sprintf(`%s\n-+\n+AVL Tree:\n+%s`, reBSD2, reISC)), body):
+	case reMatch(regexp.MustCompile(fmt.Sprintf(`%s\n-+\n+AVL Tree:\n+%s`, reBSD2, reISC)), body):
 		// github.com/emirpasic/gods/LICENSE
 		licenses[BSD2] = struct{}{}
 		licenses[ISC] = struct{}{}
-	case reMatch(reCompile(``+
+	case reMatch(regexp.MustCompile(``+
 		`(?:`+strings.Join(bsd3funnyAttributionLines, `\s*|`)+`\s*)*`+
 		reWrap(``+
 			bsdPrefix+
@@ -299,13 +304,13 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		// github.com/src-d/gcfg/LICENSE
 		// github.com/miekg/dns/LICENSE
 		licenses[BSD3] = struct{}{}
-	case reMatch(reCompile(reQuote(rackspaceHeader)+reApacheLicense.String()), body):
+	case reMatch(regexp.MustCompile(reQuote(rackspaceHeader)+reApacheLicense.String()), body):
 		// github.com/gophercloud/gophercloud/LICENSE
 		licenses[Apache2] = struct{}{}
-	case reMatch(reCompile(fmt.Sprintf(`%s=*\s*The lexer and parser[^\n]*\n[^\n]*below\.%s`, reMIT, reMIT)), body):
+	case reMatch(regexp.MustCompile(fmt.Sprintf(`%s=*\s*The lexer and parser[^\n]*\n[^\n]*below\.%s`, reMIT, reMIT)), body):
 		// github.com/kevinburke/ssh_config/LICENSE
 		licenses[MIT] = struct{}{}
-	case reMatch(reCompile(`Blackfriday is distributed under the Simplified BSD License:\s*`+reBSD2.String()), regexp.MustCompile(`>\s*`).ReplaceAllLiteral(body, []byte{})):
+	case reMatch(regexp.MustCompile(`Blackfriday is distributed under the Simplified BSD License:\s*`+reBSD2.String()), regexp.MustCompile(`>\s*`).ReplaceAllLiteral(body, []byte{})):
 		// gopkg.in/russross/blackfriday.v2/LICENSE.txt
 		licenses[BSD2] = struct{}{}
 	case reMatch(reYamlV2, body):
@@ -313,11 +318,11 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 	case reMatch(reYamlV3, body):
 		licenses[MIT] = struct{}{}
 		licenses[Apache2] = struct{}{}
-	case reMatch(reCompile(reMIT.String()+`\s*`+reBSD3.String()), body):
+	case reMatch(regexp.MustCompile(reMIT.String()+`\s*`+reBSD3.String()), body):
 		// sigs.k8s.io/yaml/LICENSE
 		licenses[MIT] = struct{}{}
 		licenses[BSD3] = struct{}{}
-	case reMatch(reCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
+	case reMatch(regexp.MustCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
 		// github.com/shopspring/decimal/LICENSE
 		licenses[MIT] = struct{}{}
 	case string(body) == xzPublicDomain:
