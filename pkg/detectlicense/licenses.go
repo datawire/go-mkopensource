@@ -62,11 +62,11 @@ func expectsNotice(licenses map[License]struct{}) bool {
 }
 
 func DetectLicenses(files map[string][]byte) (map[License]struct{}, error) {
-	licenses := make(map[License]struct{})
+	licenses := make(map[License][]string)
 	hasNotice := false
 	hasLicenseFile := false
 	hasNonSPDXSource := false
-	hasPatents := false
+	patents := []string(nil)
 
 loop:
 	for filename, filebody := range files {
@@ -106,14 +106,14 @@ loop:
 				}
 			}
 			for l := range ls {
-				licenses[l] = struct{}{}
+				licenses[l] = append(licenses[l], filename)
 			}
 			hasLicenseFile = true
 		case strings.HasPrefix(name, "NOTICE"):
 			hasNotice = true
 		case strings.HasPrefix(name, "PATENTS"):
 			// ignore this file, for now
-			hasPatents = true
+			patents = append(patents, filename)
 		default:
 			// This is a source file; look for an SPDX
 			// identifier.
@@ -125,17 +125,42 @@ loop:
 				hasNonSPDXSource = true
 			}
 			for l := range ls {
-				licenses[l] = struct{}{}
+				licenses[l] = append(licenses[l], filename)
 			}
 		}
 	}
 
-	if !expectsNotice(licenses) && hasNotice {
+	bareLicenses := make(map[License]struct{}, len(licenses))
+	for license := range licenses {
+		bareLicenses[license] = struct{}{}
+	}
+
+	if !expectsNotice(bareLicenses) && hasNotice {
 		return nil, errors.New("the NOTICE file is really only for the Apache 2.0 and MPL 2.0 licenses; something hokey is going on")
 	}
-	if _, hasApache := licenses[Apache2]; hasApache && hasPatents {
-		// TODO: Check if the MPL has a patent grant.  A quick skimming says "seems to explicitly say no", but I'm too tired to actually read the thing.
-		return nil, errors.New("the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on")
+	for _, patentFile := range patents {
+		// TODO: Check if the MPL has a patent grant.  A quick skimming says "seems to explicitly say no", but
+		// I'm too tired to actually read the thing.
+		if _, hasApache := licenses[Apache2]; hasApache {
+			dir := filepath.Dir(patentFile)
+			// We want to blow up if an Apache-licensed thing has a PATENTS file.  But let it through if a
+			// subdirectory of an otherwise-Apache-licensed thing has a different license and includes a
+			// PATENTS file.
+			hasOther := false
+			for license, licenseFiles := range licenses {
+				if license == Apache2 {
+					continue
+				}
+				for _, licenseFile := range licenseFiles {
+					if strings.HasPrefix(licenseFile, dir+"/") {
+						hasOther = true
+					}
+				}
+			}
+			if !hasOther {
+				return nil, errors.New("the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on")
+			}
+		}
 	}
 	if !hasLicenseFile && hasNonSPDXSource {
 		return nil, errors.New("could not identify a license for all sources (had no global LICENSE file)")
@@ -144,7 +169,7 @@ loop:
 	if len(licenses) == 0 {
 		panic(errors.New("should not happen"))
 	}
-	return licenses, nil
+	return bareLicenses, nil
 }
 
 // IdentifySPDX takes the contents of a source-file and looks for SPDX
