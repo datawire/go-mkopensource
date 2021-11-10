@@ -244,15 +244,7 @@ func Main(args *CLIArgs) error {
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgFiles[pkgName])
 		if err != nil {
-			return fmt.Errorf(`%w
-    This probably means that you added or upgraded a dependency, and the
-    automated opensource-license-checker can't confidently detect what
-    the license is.  (This is a good thing, because it is reminding you
-    to check the license of libraries before using them.)
-
-    You need to update the "github.com/datawire/go-mkopensource/pkg/detectlicense/licenses.go"
-    file to correctly detect the license.`,
-				fmt.Errorf("package %q: %w", pkgName, err))
+			return ExplainError(fmt.Errorf("package %q: %w", pkgName, err))
 		}
 		if licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
 			return fmt.Errorf(`package %q: %w`, pkgName,
