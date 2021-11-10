@@ -244,7 +244,8 @@ func Main(args *CLIArgs) error {
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgFiles[pkgName])
 		if err != nil {
-			return ExplainError(fmt.Errorf("package %q: %w", pkgName, err))
+			err = fmt.Errorf("package %q: %w", pkgName, err)
+			return fmt.Errorf("%w\n%s", err, ExplainError(err))
 		}
 		if licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
 			return fmt.Errorf(`package %q: %w`, pkgName,
@@ -308,22 +309,22 @@ func Main(args *CLIArgs) error {
 			modnames = append(modnames, modname)
 		}
 		if len(mainMods) == 1 {
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])) + "\n")
 		} else {
 			sort.Strings(modnames)
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
 		}
 	} else if len(mainLibPkgs) == 0 {
 		if len(mainCmdPkgs) == 1 {
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
 		} else {
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", args.Package)))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", args.Package)) + "\n")
 		}
 	} else {
 		if len(mainLibPkgs) == 1 {
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
 		} else {
-			readme.WriteString(wordwrap(75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", args.Package)))
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", args.Package)) + "\n")
 		}
 	}
 	readme.WriteString("\n")
@@ -372,7 +373,7 @@ func Main(args *CLIArgs) error {
 	table.Flush()
 	if args.OutputFormat == "tar" {
 		readme.WriteString("\n")
-		readme.WriteString(wordwrap(75, "The appropriate license notices and source code are in correspondingly named directories."))
+		readme.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
 	}
 
 	switch args.OutputFormat {
