@@ -42,7 +42,11 @@ func TestGold(t *testing.T) {
 			if expErr == nil {
 				assert.NoError(t, actErr)
 			} else {
-				assert.EqualError(t, actErr, strings.TrimSpace(string(expErr)))
+				if assert.Error(t, actErr) {
+					// Use this instead of assert.EqualError so that we diff
+					// output, which is helpful for long strings.
+					assert.Equal(t, strings.TrimSpace(string(expErr)), actErr.Error())
+				}
 			}
 		})
 	}

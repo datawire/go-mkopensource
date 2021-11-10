@@ -158,6 +158,15 @@ func licenseIsStrongCopyleft(licenses map[detectlicense.License]struct{}) bool {
 	return false
 }
 
+func licenseString(licenseSet map[detectlicense.License]struct{}) string {
+	licenseList := make([]string, 0, len(licenseSet))
+	for license := range licenseSet {
+		licenseList = append(licenseList, license.Name)
+	}
+	sort.Strings(licenseList)
+	return strings.Join(licenseList, ", ")
+}
+
 func Main(args *CLIArgs) error {
 	// Let's do the expensive stuff (stuff that isn't entirely
 	// in-memory) up-front.
@@ -241,16 +250,20 @@ func Main(args *CLIArgs) error {
 	}
 	sort.Strings(pkgNames)
 	pkgLicenses := make(map[string]map[detectlicense.License]struct{})
+	licErrs := []error(nil)
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgFiles[pkgName])
+		if err == nil && licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
+			err = fmt.Errorf("has an unacceptable license for use by Ambassador Labs (%s)",
+				licenseString(pkgLicenses[pkgName]))
+		}
 		if err != nil {
-			err = fmt.Errorf("package %q: %w", pkgName, err)
-			return fmt.Errorf("%w\n%s", err, ExplainError(err))
+			err = fmt.Errorf(`package %q: %w`, pkgName, err)
+			licErrs = append(licErrs, err)
 		}
-		if licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
-			return fmt.Errorf(`package %q: %w`, pkgName,
-				errors.New("has an unacceptable license for use by Ambassador Labs"))
-		}
+	}
+	if len(licErrs) > 0 {
+		return ExplainErrors(licErrs)
 	}
 
 	// Group packages by module & collect module info
@@ -359,12 +372,7 @@ func Main(args *CLIArgs) error {
 			}
 		}
 
-		licenseList := make([]string, 0, len(modLicenses[modKey]))
-		for license := range modLicenses[modKey] {
-			licenseList = append(licenseList, license.Name)
-		}
-		sort.Strings(licenseList)
-		depLicenses = strings.Join(licenseList, ", ")
+		depLicenses = licenseString(modLicenses[modKey])
 		if depLicenses == "" {
 			panic(fmt.Errorf("this should not happen: empty license string for %q", depName))
 		}
