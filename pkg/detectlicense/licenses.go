@@ -80,17 +80,6 @@ loop:
 			// This is a template file for generated code,
 			// not an actual license file.
 			continue loop
-		case "github.com/josharian/intern/license.md":
-			// This is the actual license file although it's lowercase
-			ls := IdentifyLicenses(filebody)
-			if len(ls) == 0 {
-				return nil, fmt.Errorf("could not identify license in file %q", filename)
-			}
-			for l := range ls {
-				licenses[l] = struct{}{}
-			}
-			hasLicenseFile = true
-			continue loop
 		}
 
 		name := filepath.Base(filename)
