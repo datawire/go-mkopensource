@@ -3,7 +3,7 @@ package main
 // This file mimics the behavior of `go mod vendor`.
 
 import (
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,12 +18,12 @@ import (
 
 var (
 	fsFileCache = make(map[string][]byte)
-	fsDirCache  = make(map[string][]os.FileInfo)
+	fsDirCache  = make(map[string][]fs.DirEntry)
 )
 
 func readFile(filename string) ([]byte, error) {
 	if _, done := fsFileCache[filename]; !done {
-		body, err := ioutil.ReadFile(filename)
+		body, err := os.ReadFile(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -32,9 +32,9 @@ func readFile(filename string) ([]byte, error) {
 	return fsFileCache[filename], nil
 }
 
-func readDir(dirname string) ([]os.FileInfo, error) {
+func readDir(dirname string) ([]fs.DirEntry, error) {
 	if _, done := fsDirCache[dirname]; !done {
-		body, err := ioutil.ReadDir(dirname)
+		body, err := os.ReadDir(dirname)
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +54,7 @@ func readDir(dirname string) ([]os.FileInfo, error) {
 //  1. instead of copying them to a ./vendor/ directory, it adds them
 //     to the in-memory 'vendor' map.
 //  2. the match() function takes a full filename, instead of a
-//     (dirname, os.FileInfo) tuple.
+//     (dirname, fs.DirEntry) tuple.
 func collectDir(vendor map[string][]byte, dst, src string, match func(filename string) bool) error {
 	files, err := readDir(src)
 	if err != nil {
@@ -62,7 +62,7 @@ func collectDir(vendor map[string][]byte, dst, src string, match func(filename s
 	}
 	for _, file := range files {
 		filename := filepath.Join(src, file.Name())
-		if file.IsDir() || !file.Mode().IsRegular() || !match(filename) {
+		if file.IsDir() || !file.Type().IsRegular() || !match(filename) {
 			continue
 		}
 		body, err := readFile(filename)

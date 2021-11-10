@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -111,13 +110,13 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 		}
 		switch header.Name {
 		case "go/VERSION":
-			fc, err := ioutil.ReadAll(goTar)
+			fc, err := io.ReadAll(goTar)
 			if err != nil {
 				return "", nil, err
 			}
 			version = "v" + strings.TrimPrefix(strings.TrimSpace(string(fc)), "go")
 		case "go/LICENSE":
-			fc, err := ioutil.ReadAll(goTar)
+			fc, err := io.ReadAll(goTar)
 			if err != nil {
 				return "", nil, err
 			}
