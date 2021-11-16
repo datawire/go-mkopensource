@@ -1,7 +1,7 @@
 package detectlicense_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -46,7 +46,7 @@ func TestIdentifyLicenses(t *testing.T) {
 		"MPL2":         detectlicense.MPL2,
 		"CC-BY-SA-4.0": detectlicense.CcBySa40,
 	}
-	dirInfos, err := ioutil.ReadDir("testdata")
+	dirInfos, err := os.ReadDir("testdata")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,14 +61,14 @@ func TestIdentifyLicenses(t *testing.T) {
 				dirLicenses[allLicenses[licName]] = struct{}{}
 			}
 
-			fileInfos, err := ioutil.ReadDir(filepath.Join("testdata", dirName))
+			fileInfos, err := os.ReadDir(filepath.Join("testdata", dirName))
 			if err != nil {
 				t.Fatal(err)
 			}
 			for _, fileInfo := range fileInfos {
 				fileName := fileInfo.Name()
 				t.Run(fileName, func(t *testing.T) {
-					fileBody, err := ioutil.ReadFile(filepath.Join("testdata", dirName, fileName))
+					fileBody, err := os.ReadFile(filepath.Join("testdata", dirName, fileName))
 					if err != nil {
 						t.Fatal(err)
 					}
