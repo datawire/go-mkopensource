@@ -103,6 +103,8 @@ Program outputs each dependency, version and it's license
 Program outputs just the list of licenses references by the Go standard 
 library and the software dependencies.
 
+When not provided in the command line, `--output-type` is set to `full`
+
 ## Using as a library
 
 The [`github.com/datawire/go-mkopensource/pkg/detectlicense`][detectlicense]
