@@ -30,6 +30,11 @@ type CLIArgs struct {
 	Package       string
 }
 
+const (
+	fullOutputType    = "full"
+	licenseOutputType = "license"
+)
+
 func parseArgs() (*CLIArgs, error) {
 	args := &CLIArgs{}
 	argparser := pflag.NewFlagSet(os.Args[0], pflag.ContinueOnError)
@@ -37,7 +42,7 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.BoolVarP(&help, "help", "h", false, "Show this message")
 	argparser.StringVar(&args.OutputFormat, "output-format", "", "Output format ('tar' or 'txt')")
 	argparser.StringVar(&args.OutputName, "output-name", "", "Name of the root directory in the --output-format=tar tarball")
-	argparser.StringVar(&args.OutputType, "output-type", "full", "What information to generate. 'full' prints all dependencies, versions and it's licenses. 'license' prints only the licenses")
+	argparser.StringVar(&args.OutputType, "output-type", fullOutputType, fmt.Sprintf("Type of information to generate. '%s' prints all dependencies including version and license. '%s' prints only the licenses", fullOutputType, licenseOutputType))
 	argparser.StringVar(&args.GoTarFilename, "gotar", "", "Tarball of the Go stdlib source code")
 	argparser.StringVar(&args.Package, "package", "", "The package(s) to report library usage for")
 	if err := argparser.Parse(os.Args[1:]); err != nil {
@@ -64,7 +69,7 @@ func parseArgs() (*CLIArgs, error) {
 			return nil, errors.New("--output-name is required for --output-mode=tar")
 		}
 	default:
-		return nil, errors.New("--output-mode must be one of 'tar' or 'txt'")
+		return nil, errors.New("--output-format must be one of 'tar' or 'txt'")
 	}
 	if !strings.HasPrefix(filepath.Base(args.GoTarFilename), "go1.") || !strings.HasSuffix(args.GoTarFilename, ".tar.gz") {
 		return nil, fmt.Errorf("--gotar (%q) doesn't look like a go1.*.tar.gz file", args.GoTarFilename)
@@ -72,6 +77,11 @@ func parseArgs() (*CLIArgs, error) {
 	if args.Package == "" {
 		return nil, fmt.Errorf("--package (%q) must be non-empty", args.Package)
 	}
+
+	if args.OutputType != fullOutputType && args.OutputType != licenseOutputType {
+		return nil, errors.New(fmt.Sprintf("--output-type must be one of %s, %s", fullOutputType, licenseOutputType))
+	}
+
 	return args, nil
 }
 
@@ -317,9 +327,9 @@ func Main(args *CLIArgs) error {
 	sort.Strings(mainLibPkgs)
 
 	// Generate the readme file.
-	readme, err2 := generateReadme(args.Package, args.OutputFormat, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
-	if err2 != nil {
-		return err2
+	readme, generationErr := generateReadme(args.Package, args.OutputFormat, args.OutputType, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+	if generationErr != nil {
+		return generationErr
 	}
 
 	switch args.OutputFormat {
@@ -387,8 +397,33 @@ func Main(args *CLIArgs) error {
 	return nil
 }
 
-func generateReadme(packages string, outputFormat string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
+func generateReadme(packages string, outputFormat string, outputType string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
 	readme := new(bytes.Buffer)
+
+	switch outputType {
+	case licenseOutputType:
+		getLicenseOnlyHeader(packages, mainMods, readme, mainLibPkgs, mainCmdPkgs)
+		err := generateLicenseInfo(readme, modLicenses)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		getFullHeader(packages, mainMods, readme, mainLibPkgs, mainCmdPkgs)
+		readme.WriteString("\n")
+		err := generateFullInfo(readme, modNames, modLicenses, modInfos, goVersion)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if outputFormat == "tar" {
+		readme.WriteString("\n")
+		readme.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
+	}
+	return readme, nil
+}
+
+func getFullHeader(packages string, mainMods map[string]struct{}, readme *bytes.Buffer, mainLibPkgs []string, mainCmdPkgs []string) {
 	if packages == "mod" {
 		modnames := make([]string, 0, len(mainMods))
 		for modname := range mainMods {
@@ -413,15 +448,43 @@ func generateReadme(packages string, outputFormat string, mainMods map[string]st
 			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
 		}
 	}
-	readme.WriteString("\n")
+}
 
+func getLicenseOnlyHeader(packages string, mainMods map[string]struct{}, readme *bytes.Buffer, mainLibPkgs []string, mainCmdPkgs []string) {
+	if packages == "mod" {
+		modnames := make([]string, 0, len(mainMods))
+		for modname := range mainMods {
+			modnames = append(modnames, modname)
+		}
+		if len(mainMods) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q includes software under the following licenses:", modnames[0])) + "\n")
+		} else {
+			sort.Strings(modnames)
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q includes software under the following licenses:", modnames)) + "\n")
+		}
+	} else if len(mainLibPkgs) == 0 {
+		if len(mainCmdPkgs) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q includes software under the following licenses:", path.Base(mainCmdPkgs[0]))) + "\n")
+		} else {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q includes software under the following licenses:", packages)) + "\n")
+		}
+	} else {
+		if len(mainLibPkgs) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q includes software under the following licenses:", mainLibPkgs[0])) + "\n")
+		} else {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q includes software under the following licenses:", packages)) + "\n")
+		}
+	}
+}
+
+func generateFullInfo(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
 	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
 	io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
 	io.WriteString(table, "  \t----\t-------\t----------\n")
 	for _, modKey := range modNames {
 		proprietary, err := licenseIsProprietary(modLicenses[modKey])
 		if err != nil {
-			return nil, fmt.Errorf("module %q: %w", modKey, err)
+			return fmt.Errorf("module %q: %w", modKey, err)
 		}
 		if proprietary {
 			continue
@@ -453,10 +516,18 @@ func generateReadme(packages string, outputFormat string, mainMods map[string]st
 		fmt.Fprintf(table, "\t%s\t%s\t%s\n", depName, depVersion, depLicenses)
 	}
 	table.Flush()
+	return nil
+}
 
-	if outputFormat == "tar" {
-		readme.WriteString("\n")
-		readme.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
+func generateLicenseInfo(readme *bytes.Buffer, modLicenses map[string]map[detectlicense.License]struct{}) error {
+	licenses := make(map[detectlicense.License]struct{})
+	for _, modLicenses := range modLicenses {
+		for license := range modLicenses {
+			licenses[license] = struct{}{}
+		}
 	}
-	return readme, nil
+
+	licenseString := licenseString(licenses)
+	readme.WriteString(licenseString + "\n")
+	return nil
 }
