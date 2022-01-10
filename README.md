@@ -15,8 +15,8 @@ a Go program; there is nothing special about `go-mkopensource`.
 TL;DR: run one of
 
 ```shell
-go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt >OPENSOURCE.md
-go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=tar --output-name=mything >mything.OPENSOURCE.tar.gz
+go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt --output-type=full >OPENSOURCE.md
+go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=tar --output-name=mything --output-type=licenses >mything.OPENSOURCE.tar.gz
 #               \________________  ________________/ \_____  ____/ \_________________________________  _______________________________/
 #                                \/                        \/                                        \/
 #                         Getting set up           Target to describe                          Output format
@@ -40,7 +40,7 @@ path.  For example, `--gotar=$HOME/Downloads/go1.17.2.tar.gz`.
 The `--package=` flag tells `go-mkopensource` which Go packages it
 should produce a report for.  You can either
 
- - pass it an string that you would pass to `go list` like `./...` or
+ - pass it a string that you would pass to `go list` like `./...` or
    `./cmd/mything`, or
  - pass the special value `mod` to describe the entire Go module of
    the current directory.
@@ -89,6 +89,19 @@ This is what the `--output-name=` flag is for, it tells
 `go-mkopensource` what to use for the name of the directory inside of
 the tarball (since it does not know the name of the file that you are
 directing the output to).
+
+### Output type
+
+Parameter --output-type controls what is printed in the output.
+
+#### `--output-type=full`
+
+Program outputs each dependency, version and it's license
+
+#### `--output-type=license`
+
+Program outputs just the list of licenses references by the Go standard 
+library and the software dependencies.
 
 ## Using as a library
 
