@@ -1,0 +1,8 @@
+/OPENSOURCE.md
+/github.com/davecgh/go-spew/LICENSE
+/github.com/josharian/intern/LICENSE.md
+/github.com/pmezard/go-difflib/LICENSE
+/github.com/stretchr/testify/LICENSE
+/gopkg.in/yaml.v3/LICENSE
+/gopkg.in/yaml.v3/NOTICE
+/std/LICENSE
