@@ -24,6 +24,7 @@ import (
 type CLIArgs struct {
 	OutputFormat string
 	OutputName   string
+	OutputType   string
 
 	GoTarFilename string
 	Package       string
@@ -36,6 +37,7 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.BoolVarP(&help, "help", "h", false, "Show this message")
 	argparser.StringVar(&args.OutputFormat, "output-format", "", "Output format ('tar' or 'txt')")
 	argparser.StringVar(&args.OutputName, "output-name", "", "Name of the root directory in the --output-format=tar tarball")
+	argparser.StringVar(&args.OutputType, "output-type", "full", "What information to generate. 'full' prints all dependencies, versions and it's licenses. 'license' prints only the licenses")
 	argparser.StringVar(&args.GoTarFilename, "gotar", "", "Tarball of the Go stdlib source code")
 	argparser.StringVar(&args.Package, "package", "", "The package(s) to report library usage for")
 	if err := argparser.Parse(os.Args[1:]); err != nil {
@@ -315,73 +317,9 @@ func Main(args *CLIArgs) error {
 	sort.Strings(mainLibPkgs)
 
 	// Generate the readme file.
-	readme := new(bytes.Buffer)
-	if args.Package == "mod" {
-		modnames := make([]string, 0, len(mainMods))
-		for modname := range mainMods {
-			modnames = append(modnames, modname)
-		}
-		if len(mainMods) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])) + "\n")
-		} else {
-			sort.Strings(modnames)
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
-		}
-	} else if len(mainLibPkgs) == 0 {
-		if len(mainCmdPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
-		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", args.Package)) + "\n")
-		}
-	} else {
-		if len(mainLibPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
-		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", args.Package)) + "\n")
-		}
-	}
-	readme.WriteString("\n")
-	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
-	io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
-	io.WriteString(table, "  \t----\t-------\t----------\n")
-	for _, modKey := range modNames {
-		proprietary, err := licenseIsProprietary(modLicenses[modKey])
-		if err != nil {
-			return fmt.Errorf("module %q: %w", modKey, err)
-		}
-		if proprietary {
-			continue
-		}
-		modVal := modInfos[modKey]
-		var depName, depVersion, depLicenses string
-		if modVal == nil {
-			depName = "the Go language standard library (\"std\")"
-			depVersion = goVersion
-		} else {
-			depName = modVal.Path
-			depVersion = modVal.Version
-			if modVal.Replace != nil {
-				if modVal.Replace.Version == "" {
-					depVersion = "(modified)"
-				} else {
-					if modVal.Replace.Path != modVal.Path {
-						depName = fmt.Sprintf("%s (modified from %s)", modVal.Replace.Path, modVal.Path)
-					}
-					depVersion = modVal.Replace.Version
-				}
-			}
-		}
-
-		depLicenses = licenseString(modLicenses[modKey])
-		if depLicenses == "" {
-			panic(fmt.Errorf("this should not happen: empty license string for %q", depName))
-		}
-		fmt.Fprintf(table, "\t%s\t%s\t%s\n", depName, depVersion, depLicenses)
-	}
-	table.Flush()
-	if args.OutputFormat == "tar" {
-		readme.WriteString("\n")
-		readme.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
+	readme, err2 := generateReadme(args.Package, args.OutputFormat, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+	if err2 != nil {
+		return err2
 	}
 
 	switch args.OutputFormat {
@@ -447,4 +385,78 @@ func Main(args *CLIArgs) error {
 	}
 
 	return nil
+}
+
+func generateReadme(packages string, outputFormat string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
+	readme := new(bytes.Buffer)
+	if packages == "mod" {
+		modnames := make([]string, 0, len(mainMods))
+		for modname := range mainMods {
+			modnames = append(modnames, modname)
+		}
+		if len(mainMods) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])) + "\n")
+		} else {
+			sort.Strings(modnames)
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
+		}
+	} else if len(mainLibPkgs) == 0 {
+		if len(mainCmdPkgs) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
+		} else {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", packages)) + "\n")
+		}
+	} else {
+		if len(mainLibPkgs) == 1 {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
+		} else {
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
+		}
+	}
+	readme.WriteString("\n")
+
+	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
+	io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
+	io.WriteString(table, "  \t----\t-------\t----------\n")
+	for _, modKey := range modNames {
+		proprietary, err := licenseIsProprietary(modLicenses[modKey])
+		if err != nil {
+			return nil, fmt.Errorf("module %q: %w", modKey, err)
+		}
+		if proprietary {
+			continue
+		}
+		modVal := modInfos[modKey]
+		var depName, depVersion, depLicenses string
+		if modVal == nil {
+			depName = "the Go language standard library (\"std\")"
+			depVersion = goVersion
+		} else {
+			depName = modVal.Path
+			depVersion = modVal.Version
+			if modVal.Replace != nil {
+				if modVal.Replace.Version == "" {
+					depVersion = "(modified)"
+				} else {
+					if modVal.Replace.Path != modVal.Path {
+						depName = fmt.Sprintf("%s (modified from %s)", modVal.Replace.Path, modVal.Path)
+					}
+					depVersion = modVal.Replace.Version
+				}
+			}
+		}
+
+		depLicenses = licenseString(modLicenses[modKey])
+		if depLicenses == "" {
+			panic(fmt.Errorf("this should not happen: empty license string for %q", depName))
+		}
+		fmt.Fprintf(table, "\t%s\t%s\t%s\n", depName, depVersion, depLicenses)
+	}
+	table.Flush()
+
+	if outputFormat == "tar" {
+		readme.WriteString("\n")
+		readme.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
+	}
+	return readme, nil
 }
