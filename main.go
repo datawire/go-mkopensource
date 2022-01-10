@@ -79,7 +79,7 @@ func parseArgs() (*CLIArgs, error) {
 	}
 
 	if args.OutputType != fullOutputType && args.OutputType != licenseOutputType {
-		return nil, errors.New(fmt.Sprintf("--output-type must be one of %s, %s", fullOutputType, licenseOutputType))
+		return nil, fmt.Errorf("--output-type must be one of %s, %s", fullOutputType, licenseOutputType)
 	}
 
 	return args, nil
