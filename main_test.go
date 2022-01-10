@@ -1,6 +1,8 @@
 package main_test
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +15,7 @@ import (
 	main "github.com/datawire/go-mkopensource"
 )
 
-func TestGold(t *testing.T) {
+func TestTxtOutput(t *testing.T) {
 	root, err := os.Getwd()
 	require.NoError(t, err)
 
@@ -31,8 +33,7 @@ func TestGold(t *testing.T) {
 
 			require.NoError(t, os.Chdir(filepath.Join("testdata", name)))
 
-			expectedError := getExpectedError(t)
-			expectedOutput := getExpectedOutput(t)
+			expectedError := getFileContents(t, "expected_err.txt")
 
 			originalStdOut, r, w := interceptStdOut()
 			defer func() {
@@ -52,7 +53,9 @@ func TestGold(t *testing.T) {
 
 				programOutput, readErr := io.ReadAll(r)
 				require.NoError(t, readErr)
-				assert.Equal(t, expectedOutput, programOutput)
+
+				expectedOutput := getFileContents(t, "expected_output.txt")
+				assert.Equal(t, string(expectedOutput), string(programOutput))
 			} else {
 				if assert.Error(t, actErr) {
 					// Use this instead of assert.EqualError so that we diff
@@ -64,6 +67,81 @@ func TestGold(t *testing.T) {
 	}
 }
 
+func TestTarOutput(t *testing.T) {
+	root, err := os.Getwd()
+	require.NoError(t, err)
+
+	direntries, err := os.ReadDir("testdata")
+	require.NoError(t, err)
+	for _, direntry := range direntries {
+		if !direntry.IsDir() {
+			continue
+		}
+		name := direntry.Name()
+		t.Run(name, func(t *testing.T) {
+			defer func() {
+				require.NoError(t, os.Chdir(root))
+			}()
+
+			require.NoError(t, os.Chdir(filepath.Join("testdata", name)))
+
+			expectedError := getFileContents(t, "expected_err.txt")
+
+			originalStdOut, r, w := interceptStdOut()
+			defer func() {
+				os.Stdout = originalStdOut
+			}()
+
+			actErr := main.Main(&main.CLIArgs{
+				OutputFormat:  "tar",
+				OutputName:    "",
+				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:       "mod",
+			})
+
+			_ = w.Close()
+
+			if expectedError == nil {
+				require.NoError(t, actErr)
+
+				fileContents, err := listTarContents(t, r)
+				require.NoError(t, err)
+
+				expectedTarContents := getFileContents(t, "expected_tar_contents.txt")
+				assert.Equal(t, string(expectedTarContents), fileContents)
+			} else {
+				if assert.Error(t, actErr) {
+					// Use this instead of assert.EqualError so that we diff
+					// output, which is helpful for long strings.
+					assert.Equal(t, strings.TrimSpace(string(expectedError)), actErr.Error())
+				}
+			}
+		})
+	}
+}
+
+func listTarContents(t *testing.T, r *os.File) (string, error) {
+	gzipFile, err := gzip.NewReader(r)
+	if err != nil {
+		return "", err
+	}
+
+	tarFile := tar.NewReader(gzipFile)
+	files := []string{}
+	for {
+		header, err := tarFile.Next()
+		if err == io.EOF {
+			break // End of archive
+		}
+
+		require.NoError(t, err)
+		files = append(files, header.Name)
+	}
+
+	fileContents := strings.Join(files, "\n")
+	return fileContents, nil
+}
+
 func interceptStdOut() (originalStdOut *os.File, r *os.File, w *os.File) {
 	originalStdOut = os.Stdout
 
@@ -72,18 +150,10 @@ func interceptStdOut() (originalStdOut *os.File, r *os.File, w *os.File) {
 	return originalStdOut, r, w
 }
 
-func getExpectedError(t *testing.T) []byte {
-	expErr, err := os.ReadFile("expected_err.txt")
+func getFileContents(t *testing.T, path string) []byte {
+	expErr, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		require.NoError(t, err)
 	}
 	return expErr
-}
-
-func getExpectedOutput(t *testing.T) []byte {
-	expectedOutput, err := os.ReadFile("expected_output.txt")
-	if err != nil && !os.IsNotExist(err) {
-		require.NoError(t, err)
-	}
-	return expectedOutput
 }
