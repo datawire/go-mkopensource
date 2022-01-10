@@ -1,7 +1,7 @@
 package main_test
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,7 +50,7 @@ func TestGold(t *testing.T) {
 			if expectedError == nil {
 				require.NoError(t, actErr)
 
-				programOutput, readErr := ioutil.ReadAll(r)
+				programOutput, readErr := io.ReadAll(r)
 				require.NoError(t, readErr)
 				assert.Equal(t, expectedOutput, programOutput)
 			} else {
