@@ -1,0 +1,6 @@
+The Go module "testmod" incorporates the following Free and Open Source
+software:
+
+    Name                                      Version  License(s)
+    ----                                      -------  ----------
+    the Go language standard library ("std")  v1.17.3  3-clause BSD license
