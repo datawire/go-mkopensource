@@ -15,23 +15,67 @@ import (
 	main "github.com/datawire/go-mkopensource"
 )
 
-func TestFullTxtOutput(t *testing.T) {
-	root, err := os.Getwd()
+func TestGolden(t *testing.T) {
+	testCases := []struct {
+		testName       string
+		testData       string
+		packagesFlag   string
+		outputTypeFlag string
+	}{
+		{
+			testName:       "",
+			testData:       "testdata/00-intern-old",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/01-intern-new",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/02-replace",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/03-multierror",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/04-nodeps",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/05-subpatent",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testName:       "",
+			testData:       "testdata/06-multiple-licenses",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+	}
+
+	workingDir, err := os.Getwd()
 	require.NoError(t, err)
 
-	direntries, err := os.ReadDir("testdata")
-	require.NoError(t, err)
-	for _, direntry := range direntries {
-		if !direntry.IsDir() {
-			continue
-		}
-		name := direntry.Name()
-		t.Run(name, func(t *testing.T) {
+	for _, testCase := range testCases {
+		t.Run(testCase.testName, func(t *testing.T) {
 			defer func() {
-				require.NoError(t, os.Chdir(root))
+				require.NoError(t, os.Chdir(workingDir))
 			}()
 
-			require.NoError(t, os.Chdir(filepath.Join("testdata", name)))
+			require.NoError(t, os.Chdir(testCase.testData))
 
 			expectedError := getFileContents(t, "expected_err.txt")
 
@@ -43,7 +87,8 @@ func TestFullTxtOutput(t *testing.T) {
 			actErr := main.Main(&main.CLIArgs{
 				OutputFormat:  "txt",
 				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       "mod",
+				Package:       testCase.packagesFlag,
+				OutputType:    testCase.outputTypeFlag,
 			})
 
 			_ = w.Close()
