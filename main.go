@@ -463,22 +463,22 @@ func getLicenseOnlyHeader(packages string, mainMods map[string]struct{}, readme 
 			modnames = append(modnames, modname)
 		}
 		if len(mainMods) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q includes software under the following licenses:", modnames[0])) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q includes software under the following licenses:", modnames[0])) + " ")
 		} else {
 			sort.Strings(modnames)
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q includes software under the following licenses:", modnames)) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q includes software under the following licenses:", modnames)) + " ")
 		}
 	} else if len(mainLibPkgs) == 0 {
 		if len(mainCmdPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q includes software under the following licenses:", path.Base(mainCmdPkgs[0]))) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q includes software under the following licenses:", path.Base(mainCmdPkgs[0]))) + " ")
 		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q includes software under the following licenses:", packages)) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q includes software under the following licenses:", packages)) + " ")
 		}
 	} else {
 		if len(mainLibPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q includes software under the following licenses:", mainLibPkgs[0])) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q includes software under the following licenses:", mainLibPkgs[0])) + " ")
 		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q includes software under the following licenses:", packages)) + "\n")
+			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q includes software under the following licenses:", packages)) + " ")
 		}
 	}
 }
