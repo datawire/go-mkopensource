@@ -441,18 +441,22 @@ func getFullHeader(packages string, mainMods map[string]struct{}, readme *bytes.
 			sort.Strings(modnames)
 			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
 		}
-	} else if len(mainLibPkgs) == 0 {
+		return
+	}
+
+	if len(mainLibPkgs) == 0 {
 		if len(mainCmdPkgs) == 1 {
 			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
 		} else {
 			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", packages)) + "\n")
 		}
+		return
+	}
+
+	if len(mainLibPkgs) == 1 {
+		readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
 	} else {
-		if len(mainLibPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
-		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
-		}
+		readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
 	}
 }
 
