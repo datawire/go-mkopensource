@@ -59,6 +59,11 @@ func parseArgs() (*CLIArgs, error) {
 	if argparser.NArg() != 0 {
 		return nil, fmt.Errorf("expected 0 arguments, got %d: %q", argparser.NArg(), argparser.Args())
 	}
+
+	if args.OutputType != fullOutputType && args.OutputType != licenseOutputType {
+		return nil, fmt.Errorf("--output-type must be one of '%s', '%s'", fullOutputType, licenseOutputType)
+	}
+
 	switch args.OutputFormat {
 	case "txt":
 		if args.OutputName != "" {
@@ -68,18 +73,19 @@ func parseArgs() (*CLIArgs, error) {
 		if args.OutputName == "" {
 			return nil, errors.New("--output-name is required for --output-mode=tar")
 		}
+		if args.OutputType != fullOutputType {
+			return nil, fmt.Errorf("--output-type should be set to '%s' for --output-mode=tar", fullOutputType)
+		}
+
 	default:
 		return nil, errors.New("--output-format must be one of 'tar' or 'txt'")
 	}
+
 	if !strings.HasPrefix(filepath.Base(args.GoTarFilename), "go1.") || !strings.HasSuffix(args.GoTarFilename, ".tar.gz") {
 		return nil, fmt.Errorf("--gotar (%q) doesn't look like a go1.*.tar.gz file", args.GoTarFilename)
 	}
 	if args.Package == "" {
 		return nil, fmt.Errorf("--package (%q) must be non-empty", args.Package)
-	}
-
-	if args.OutputType != fullOutputType && args.OutputType != licenseOutputType {
-		return nil, fmt.Errorf("--output-type must be one of %s, %s", fullOutputType, licenseOutputType)
 	}
 
 	return args, nil
