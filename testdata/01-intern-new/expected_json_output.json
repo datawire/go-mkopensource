@@ -1,0 +1,1 @@
+{"dependencies":[{"name":"the Go language standard library (\"std\")","version":"v1.17.3","licenses":["3-clause BSD license"]},{"name":"github.com/josharian/intern","version":"v1.0.1-0.20211109044230-42b52b674af5","licenses":["MIT license"]}]}

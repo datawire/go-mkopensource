@@ -1,2 +1,0 @@
-The Go module "testmod" includes open source software under the following
-licenses: 3-clause BSD license

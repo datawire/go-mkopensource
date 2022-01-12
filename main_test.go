@@ -21,36 +21,77 @@ func TestGolden(t *testing.T) {
 		testData       string
 		packagesFlag   string
 		outputTypeFlag string
+		expectedOutput string
 	}{
 		{
-			testName:       "",
+			testName:       "01-intern-new - markdown output",
 			testData:       "testdata/01-intern-new",
 			packagesFlag:   "mod",
 			outputTypeFlag: "markdown",
+			expectedOutput: "expected_markdown_output.txt",
 		},
 		{
-			testName:       "",
+			testName:       "02-replace - markdown output",
 			testData:       "testdata/02-replace",
 			packagesFlag:   "mod",
 			outputTypeFlag: "markdown",
+			expectedOutput: "expected_markdown_output.txt",
 		},
 		{
-			testName:       "",
+			testName:       "04-nodeps - markdown output",
 			testData:       "testdata/04-nodeps",
 			packagesFlag:   "mod",
 			outputTypeFlag: "markdown",
+			expectedOutput: "expected_markdown_output.txt",
 		},
 		{
-			testName:       "",
+			testName:       "05-subpatent - markdown output",
 			testData:       "testdata/05-subpatent",
 			packagesFlag:   "mod",
 			outputTypeFlag: "markdown",
+			expectedOutput: "expected_markdown_output.txt",
 		},
 		{
-			testName:       "",
+			testName:       "06-multiple-licenses - markdown output",
 			testData:       "testdata/06-multiple-licenses",
 			packagesFlag:   "mod",
 			outputTypeFlag: "markdown",
+			expectedOutput: "expected_markdown_output.txt",
+		},
+		{
+			testName:       "01-intern-new - json output",
+			testData:       "testdata/01-intern-new",
+			packagesFlag:   "mod",
+			outputTypeFlag: "json",
+			expectedOutput: "expected_json_output.json",
+		},
+		{
+			testName:       "02-replace - json output",
+			testData:       "testdata/02-replace",
+			packagesFlag:   "mod",
+			outputTypeFlag: "json",
+			expectedOutput: "expected_json_output.json",
+		},
+		{
+			testName:       "04-nodeps - json output",
+			testData:       "testdata/04-nodeps",
+			packagesFlag:   "mod",
+			outputTypeFlag: "json",
+			expectedOutput: "expected_json_output.json",
+		},
+		{
+			testName:       "05-subpatent - json output",
+			testData:       "testdata/05-subpatent",
+			packagesFlag:   "mod",
+			outputTypeFlag: "json",
+			expectedOutput: "expected_json_output.json",
+		},
+		{
+			testName:       "06-multiple-licenses - json output",
+			testData:       "testdata/06-multiple-licenses",
+			packagesFlag:   "mod",
+			outputTypeFlag: "json",
+			expectedOutput: "expected_json_output.json",
 		},
 	}
 
@@ -83,7 +124,8 @@ func TestGolden(t *testing.T) {
 			programOutput, readErr := io.ReadAll(r)
 			require.NoError(t, readErr)
 
-			expectedOutput := getFileContents(t, "expected_full_output.txt")
+			expectedOutput := getFileContents(t, testCase.expectedOutput)
+
 			assert.Equal(t, string(expectedOutput), string(programOutput))
 		})
 	}
@@ -139,59 +181,6 @@ func getWorkingDir(t *testing.T) string {
 	workingDir, err := os.Getwd()
 	require.NoError(t, err)
 	return workingDir
-}
-
-func TestLicenseTxtOutput(t *testing.T) {
-	root, err := os.Getwd()
-	require.NoError(t, err)
-
-	direntries, err := os.ReadDir("testdata")
-	require.NoError(t, err)
-	for _, direntry := range direntries {
-		if !direntry.IsDir() {
-			continue
-		}
-		name := direntry.Name()
-		t.Run(name, func(t *testing.T) {
-			defer func() {
-				require.NoError(t, os.Chdir(root))
-			}()
-
-			require.NoError(t, os.Chdir(filepath.Join("testdata", name)))
-
-			expectedError := getFileContents(t, "expected_err.txt")
-
-			originalStdOut, r, w := interceptStdOut()
-			defer func() {
-				os.Stdout = originalStdOut
-			}()
-
-			actErr := main.Main(&main.CLIArgs{
-				OutputFormat:  "txt",
-				OutputType:    "license",
-				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       "mod",
-			})
-
-			_ = w.Close()
-
-			if expectedError == nil {
-				require.NoError(t, actErr)
-
-				programOutput, readErr := io.ReadAll(r)
-				require.NoError(t, readErr)
-
-				expectedOutput := getFileContents(t, "expected_license_output.txt")
-				assert.Equal(t, string(expectedOutput), string(programOutput))
-			} else {
-				if assert.Error(t, actErr) {
-					// Use this instead of assert.EqualError so that we diff
-					// output, which is helpful for long strings.
-					assert.Equal(t, strings.TrimSpace(string(expectedError)), actErr.Error())
-				}
-			}
-		})
-	}
 }
 
 func TestTarOutput(t *testing.T) {
