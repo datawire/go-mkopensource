@@ -26,31 +26,31 @@ func TestGolden(t *testing.T) {
 			testName:       "",
 			testData:       "testdata/01-intern-new",
 			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			outputTypeFlag: "markdown",
 		},
 		{
 			testName:       "",
 			testData:       "testdata/02-replace",
 			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			outputTypeFlag: "markdown",
 		},
 		{
 			testName:       "",
 			testData:       "testdata/04-nodeps",
 			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			outputTypeFlag: "markdown",
 		},
 		{
 			testName:       "",
 			testData:       "testdata/05-subpatent",
 			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			outputTypeFlag: "markdown",
 		},
 		{
 			testName:       "",
 			testData:       "testdata/06-multiple-licenses",
 			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			outputTypeFlag: "markdown",
 		},
 	}
 

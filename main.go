@@ -31,8 +31,8 @@ type CLIArgs struct {
 }
 
 const (
-	fullOutputType    = "full"
-	licenseOutputType = "license"
+	markdownOutputType = "markdown"
+	licenseOutputType  = "license"
 )
 
 func parseArgs() (*CLIArgs, error) {
@@ -42,7 +42,7 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.BoolVarP(&help, "help", "h", false, "Show this message")
 	argparser.StringVar(&args.OutputFormat, "output-format", "", "Output format ('tar' or 'txt')")
 	argparser.StringVar(&args.OutputName, "output-name", "", "Name of the root directory in the --output-format=tar tarball")
-	argparser.StringVar(&args.OutputType, "output-type", fullOutputType, fmt.Sprintf("Type of information to generate. '%s' prints all dependencies including version and license. '%s' prints only the licenses", fullOutputType, licenseOutputType))
+	argparser.StringVar(&args.OutputType, "output-type", markdownOutputType, fmt.Sprintf("Type of information to generate. '%s' prints all dependencies including version and license. '%s' prints only the licenses", markdownOutputType, licenseOutputType))
 	argparser.StringVar(&args.GoTarFilename, "gotar", "", "Tarball of the Go stdlib source code")
 	argparser.StringVar(&args.Package, "package", "", "The package(s) to report library usage for")
 	if err := argparser.Parse(os.Args[1:]); err != nil {
@@ -60,8 +60,8 @@ func parseArgs() (*CLIArgs, error) {
 		return nil, fmt.Errorf("expected 0 arguments, got %d: %q", argparser.NArg(), argparser.Args())
 	}
 
-	if args.OutputType != fullOutputType && args.OutputType != licenseOutputType {
-		return nil, fmt.Errorf("--output-type must be one of '%s', '%s'", fullOutputType, licenseOutputType)
+	if args.OutputType != markdownOutputType && args.OutputType != licenseOutputType {
+		return nil, fmt.Errorf("--output-type must be one of '%s', '%s'", markdownOutputType, licenseOutputType)
 	}
 
 	switch args.OutputFormat {
@@ -73,8 +73,8 @@ func parseArgs() (*CLIArgs, error) {
 		if args.OutputName == "" {
 			return nil, errors.New("--output-name is required for --output-mode=tar")
 		}
-		if args.OutputType != fullOutputType {
-			return nil, fmt.Errorf("--output-type should be set to '%s' for --output-mode=tar", fullOutputType)
+		if args.OutputType != markdownOutputType {
+			return nil, fmt.Errorf("--output-type should be set to '%s' for --output-mode=tar", markdownOutputType)
 		}
 
 	default:
