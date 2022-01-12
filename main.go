@@ -404,7 +404,8 @@ func Main(args *CLIArgs) error {
 	return nil
 }
 
-func generateOutput(packages string, outputFormat string, outputType string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
+func generateOutput(packages string, outputFormat string, outputType string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string,
+	modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
 	output := new(bytes.Buffer)
 
 	switch outputType {
