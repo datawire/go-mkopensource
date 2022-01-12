@@ -15,7 +15,7 @@ import (
 	main "github.com/datawire/go-mkopensource"
 )
 
-func TestGolden(t *testing.T) {
+func TestGold(t *testing.T) {
 	testCases := []struct {
 		testName       string
 		testData       string
