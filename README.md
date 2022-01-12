@@ -15,8 +15,8 @@ a Go program; there is nothing special about `go-mkopensource`.
 TL;DR: run one of
 
 ```shell
-go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt --output-type=full >OPENSOURCE.md
-go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=tar --output-name=mything --output-type=licenses >mything.OPENSOURCE.tar.gz
+go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt --output-type=markdown >OPENSOURCE.md
+go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=tar --output-name=mything >mything.OPENSOURCE.tar.gz
 #               \________________  ________________/ \_____  ____/ \_________________________________  _______________________________/
 #                                \/                        \/                                        \/
 #                         Getting set up           Target to describe                          Output format
@@ -92,18 +92,17 @@ directing the output to).
 
 ### Output type
 
-Parameter --output-type controls what is printed in the output.
+Parameter --output-type controls for output format.
+When parameter is not provided in the command line or value is incorrect, `--output-type` is set to `markdown`
+This parameter only applies wht `--ouput-format` is `txt`
 
-#### `--output-type=full`
+#### `--output-type=markdown`
 
-Program outputs each dependency, version and it's license
+Program outputs dependency information in markdown format
 
-#### `--output-type=license`
+#### `--output-type=json`
 
-Program outputs just the list of licenses references by the Go standard 
-library and the software dependencies.
-
-When not provided in the command line, `--output-type` is set to `full`
+Program outputs dependency information in markdown format
 
 ## Using as a library
 
