@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"os/exec"
@@ -488,9 +489,9 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 }
 
 func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
-	jsonOutput := dependencyInfo{
-		Dependencies: []dependency{},
-	}
+	allLicenses := map[detectlicense.License]struct{}{}
+
+	jsonOutput := dependencies.NewDependencyInfo()
 
 	for _, modKey := range modNames {
 		proprietary, err := licenseIsProprietary(modLicenses[modKey])
@@ -503,7 +504,7 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 
 		modVal := modInfos[modKey]
 
-		dependencyDetails := dependency{
+		dependencyDetails := dependencies.Dependency{
 			Name:     getDependencyName(modVal),
 			Version:  getDependencyVersion(modVal, goVersion),
 			Licenses: []string{},
@@ -511,10 +512,19 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 
 		for license := range modLicenses[modKey] {
 			dependencyDetails.Licenses = append(dependencyDetails.Licenses, license.Name)
+			allLicenses[license] = struct{}{}
 		}
 		sort.Strings(dependencyDetails.Licenses)
 
 		jsonOutput.Dependencies = append(jsonOutput.Dependencies, dependencyDetails)
+	}
+
+	for license := range allLicenses {
+		if license.Url == "" {
+			_, _ = fmt.Fprintf(os.Stderr, "Could not find Url for license '%s'", license.Name)
+			os.Exit(3)
+		}
+		jsonOutput.Licenses[license.Name] = license.Url
 	}
 
 	jsonString, err := json.Marshal(jsonOutput)
