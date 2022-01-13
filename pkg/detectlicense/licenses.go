@@ -11,9 +11,10 @@ import (
 
 type License struct {
 	Name           string
-	NoticeFile     bool // are NOTICE files "a thing" for this license?
-	WeakCopyleft   bool // requires that library to be open-source
-	StrongCopyleft bool // requires the resulting program to be open-source
+	NoticeFile     bool   // are NOTICE files "a thing" for this license?
+	WeakCopyleft   bool   // requires that library to be open-source
+	StrongCopyleft bool   // requires the resulting program to be open-source
+	Url            string // Location of the license description
 }
 
 //nolint:gochecknoglobals // Would be 'const'.
@@ -22,13 +23,13 @@ var (
 
 	PublicDomain = License{Name: "public domain"}
 
-	Apache2 = License{Name: "Apache License 2.0", NoticeFile: true}
-	BSD1    = License{Name: "1-clause BSD license"}
-	BSD2    = License{Name: "2-clause BSD license"}
-	BSD3    = License{Name: "3-clause BSD license"}
-	ISC     = License{Name: "ISC license"}
-	MIT     = License{Name: "MIT license"}
-	MPL2    = License{Name: "Mozilla Public License 2.0", NoticeFile: true, WeakCopyleft: true}
+	Apache2 = License{Name: "Apache License 2.0", NoticeFile: true, Url: "https://opensource.org/licenses/Apache-2.0"}
+	BSD1    = License{Name: "1-clause BSD license", Url: "https://opensource.org/licenses/BSD-1-Clause"}
+	BSD2    = License{Name: "2-clause BSD license", Url: "https://opensource.org/licenses/BSD-2-Clause"}
+	BSD3    = License{Name: "3-clause BSD license", Url: "https://opensource.org/licenses/BSD-3-Clause"}
+	ISC     = License{Name: "ISC license", Url: "https://opensource.org/licenses/ISC"}
+	MIT     = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
+	MPL2    = License{Name: "Mozilla Public License 2.0", NoticeFile: true, WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
 
 	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International", StrongCopyleft: true}
 )
