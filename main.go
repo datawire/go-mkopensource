@@ -97,14 +97,14 @@ func main() {
 	args, err := parseArgs()
 	if err != nil {
 		if err == pflag.ErrHelp {
-			os.Exit(0)
+			os.Exit(int(ShowProgramHelp))
 		}
 		fmt.Fprintf(os.Stderr, "%s: %v\nTry '%s --help' for more information.\n", os.Args[0], err, os.Args[0])
-		os.Exit(2)
+		os.Exit(int(InvalidArgumentsError))
 	}
 	if err := Main(args); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
-		os.Exit(1)
+		os.Exit(int(DependencyGenerationError))
 	}
 }
 
@@ -530,7 +530,7 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 	jsonString, err := json.Marshal(jsonOutput)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", err)
-		os.Exit(2)
+		os.Exit(int(MarshallJsonError))
 	}
 
 	readme.Write(jsonString)
