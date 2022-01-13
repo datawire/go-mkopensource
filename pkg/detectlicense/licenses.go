@@ -29,9 +29,10 @@ var (
 	BSD3    = License{Name: "3-clause BSD license", Url: "https://opensource.org/licenses/BSD-3-Clause"}
 	ISC     = License{Name: "ISC license", Url: "https://opensource.org/licenses/ISC"}
 	MIT     = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
-	MPL2    = License{Name: "Mozilla Public License 2.0", NoticeFile: true, WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
-
-	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International", StrongCopyleft: true}
+	MPL2    = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
+		WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
+	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International",
+		StrongCopyleft: true, Url: "https://creativecommons.org/licenses/by-sa/4.0/legalcode"}
 )
 
 // https://spdx.org/licenses/

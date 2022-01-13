@@ -1,7 +1,8 @@
 package main
 
 type dependencyInfo struct {
-	Dependencies []dependency `json:"dependencies"`
+	Dependencies []dependency      `json:"dependencies"`
+	Licenses     map[string]string `json:"licenseInfo"`
 }
 
 type dependency struct {
