@@ -97,7 +97,7 @@ func main() {
 	args, err := parseArgs()
 	if err != nil {
 		if err == pflag.ErrHelp {
-			os.Exit(int(ShowProgramHelp))
+			os.Exit(int(NoError))
 		}
 		fmt.Fprintf(os.Stderr, "%s: %v\nTry '%s --help' for more information.\n", os.Args[0], err, os.Args[0])
 		os.Exit(int(InvalidArgumentsError))
@@ -522,7 +522,7 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 	for license := range allLicenses {
 		if license.Url == "" {
 			_, _ = fmt.Fprintf(os.Stderr, "Could not find Url for license '%s'", license.Name)
-			os.Exit(3)
+			os.Exit(int(MissingLicenseUrlError))
 		}
 		jsonOutput.Licenses[license.Name] = license.Url
 	}

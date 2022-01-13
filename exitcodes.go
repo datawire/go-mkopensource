@@ -3,8 +3,9 @@ package main
 type exitCode int
 
 const (
-	ShowProgramHelp exitCode = iota
+	NoError exitCode = iota
 	DependencyGenerationError
 	InvalidArgumentsError
 	MarshallJsonError
+	MissingLicenseUrlError
 )
