@@ -490,10 +490,7 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
 	allLicenses := map[detectlicense.License]struct{}{}
 
-	jsonOutput := dependencyInfo{
-		Dependencies: []dependency{},
-		Licenses:     map[string]string{},
-	}
+	jsonOutput := NewDependencyInfo()
 
 	for _, modKey := range modNames {
 		proprietary, err := licenseIsProprietary(modLicenses[modKey])
