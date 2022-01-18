@@ -32,12 +32,14 @@ var (
 	GPL3 = License{Name: "GNU General Public License Version 3", StrongCopyleft: true,
 		Url: "https://opensource.org/licenses/GPL-3.0"}
 	ISC    = License{Name: "ISC license", Url: "https://opensource.org/licenses/ISC"}
-	LGPL21 = License{Name: "GNU Lesser General Public License Version 2.1", WeakCopyleft: true}
-	MIT    = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
-	MPL2   = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
+	LGPL21 = License{Name: "GNU Lesser General Public License Version 2.1", WeakCopyleft: true,
+		Url: "https://spdx.org/licenses/LGPL-2.1-or-later.html"}
+	MIT  = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
+	MPL2 = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
 		WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
-	PSF         = License{Name: "Python Software Foundation license", Url: "https://docs.python.org/3.9/license.html"}
-	Unicode2015 = License{Name: "Unicode License Agreement for Data Files and Software (2015)"}
+	PSF         = License{Name: "Python Software Foundation license", Url: "https://spdx.org/licenses/PSF-2.0.html"}
+	Unicode2015 = License{Name: "Unicode License Agreement for Data Files and Software (2015)",
+		Url: "https://spdx.org/licenses/Unicode-DFS-2015.html"}
 )
 
 // https://spdx.org/licenses/
