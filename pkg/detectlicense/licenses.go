@@ -23,18 +23,21 @@ var (
 
 	PublicDomain = License{Name: "public domain"}
 
-	Apache2 = License{Name: "Apache License 2.0", NoticeFile: true, Url: "https://opensource.org/licenses/Apache-2.0"}
-	BSD1    = License{Name: "1-clause BSD license", Url: "https://opensource.org/licenses/BSD-1-Clause"}
-	BSD2    = License{Name: "2-clause BSD license", Url: "https://opensource.org/licenses/BSD-2-Clause"}
-	BSD3    = License{Name: "3-clause BSD license", Url: "https://opensource.org/licenses/BSD-3-Clause"}
-	ISC     = License{Name: "ISC license", Url: "https://opensource.org/licenses/ISC"}
-	MIT     = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
-	MPL2    = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
-		WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
+	Apache2  = License{Name: "Apache License 2.0", NoticeFile: true, Url: "https://opensource.org/licenses/Apache-2.0"}
+	BSD1     = License{Name: "1-clause BSD license", Url: "https://opensource.org/licenses/BSD-1-Clause"}
+	BSD2     = License{Name: "2-clause BSD license", Url: "https://opensource.org/licenses/BSD-2-Clause"}
+	BSD3     = License{Name: "3-clause BSD license", Url: "https://opensource.org/licenses/BSD-3-Clause"}
 	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International",
 		StrongCopyleft: true, Url: "https://creativecommons.org/licenses/by-sa/4.0/legalcode"}
-	GPL3   = License{Name: "GNU General Public License Version 3", Url: "https://opensource.org/licenses/GPL-3.0"}
-	Python = License{Name: "Python Software Foundation license", Url: "https://docs.python.org/3.9/license.html"}
+	GPL3 = License{Name: "GNU General Public License Version 3", StrongCopyleft: true,
+		Url: "https://opensource.org/licenses/GPL-3.0"}
+	ISC    = License{Name: "ISC license", Url: "https://opensource.org/licenses/ISC"}
+	LGPL21 = License{Name: "GNU Lesser General Public License Version 2.1", WeakCopyleft: true}
+	MIT    = License{Name: "MIT license", Url: "https://opensource.org/licenses/MIT"}
+	MPL2   = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
+		WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
+	PSF         = License{Name: "Python Software Foundation license", Url: "https://docs.python.org/3.9/license.html"}
+	Unicode2015 = License{Name: "Unicode License Agreement for Data Files and Software (2015)"}
 )
 
 // https://spdx.org/licenses/
