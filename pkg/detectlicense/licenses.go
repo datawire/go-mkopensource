@@ -33,6 +33,8 @@ var (
 		WeakCopyleft: true, Url: "https://opensource.org/licenses/MPL-2.0"}
 	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International",
 		StrongCopyleft: true, Url: "https://creativecommons.org/licenses/by-sa/4.0/legalcode"}
+	GPL3   = License{Name: "GNU General Public License Version 3", Url: "https://opensource.org/licenses/GPL-3.0"}
+	Python = License{Name: "Python Software Foundation license", Url: "https://docs.python.org/3.9/license.html"}
 )
 
 // https://spdx.org/licenses/
