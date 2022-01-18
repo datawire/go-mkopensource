@@ -94,7 +94,7 @@ directing the output to).
 
 Parameter --output-type controls for output format.
 When parameter is not provided in the command line or value is incorrect, `--output-type` is set to `markdown`
-This parameter only applies wht `--ouput-format` is `txt`
+This parameter only applies when `--ouput-format` is `txt`
 
 #### `--output-type=markdown`
 
@@ -102,7 +102,7 @@ Program outputs dependency information in markdown format
 
 #### `--output-type=json`
 
-Program outputs dependency information in markdown format
+Program outputs dependency information in json format
 
 ## Using as a library
 
