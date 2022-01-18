@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"os/exec"
@@ -490,7 +491,7 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
 	allLicenses := map[detectlicense.License]struct{}{}
 
-	jsonOutput := NewDependencyInfo()
+	jsonOutput := dependencies.NewDependencyInfo()
 
 	for _, modKey := range modNames {
 		proprietary, err := licenseIsProprietary(modLicenses[modKey])
@@ -503,7 +504,7 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 
 		modVal := modInfos[modKey]
 
-		dependencyDetails := dependency{
+		dependencyDetails := dependencies.Dependency{
 			Name:     getDependencyName(modVal),
 			Version:  getDependencyVersion(modVal, goVersion),
 			Licenses: []string{},
