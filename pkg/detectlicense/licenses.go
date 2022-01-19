@@ -21,7 +21,7 @@ type License struct {
 var (
 	Proprietary = License{Name: "proprietary"}
 
-	PublicDomain = License{Name: "public domain"}
+	PublicDomain = License{Name: "Public domain"}
 
 	Apache2  = License{Name: "Apache License 2.0", NoticeFile: true, Url: "https://opensource.org/licenses/Apache-2.0"}
 	BSD1     = License{Name: "1-clause BSD license", Url: "https://opensource.org/licenses/BSD-1-Clause"}
