@@ -1,5 +1,7 @@
 package dependencies
 
+import "encoding/json"
+
 type DependencyInfo struct {
 	Dependencies []Dependency      `json:"dependencies"`
 	Licenses     map[string]string `json:"licenseInfo"`
@@ -16,4 +18,12 @@ func NewDependencyInfo() DependencyInfo {
 		Dependencies: []Dependency{},
 		Licenses:     map[string]string{},
 	}
+}
+
+func (d *DependencyInfo) Unmarshal(data []byte) error {
+	if err := json.Unmarshal(data, d); err != nil {
+		return err
+	}
+
+	return nil
 }
