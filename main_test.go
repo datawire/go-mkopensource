@@ -3,6 +3,7 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ import (
 	main "github.com/datawire/go-mkopensource"
 )
 
-func TestGold(t *testing.T) {
+func TestSuccessfulMarkdownOutput(t *testing.T) {
 	testCases := []struct {
 		testName       string
 		testData       string
@@ -58,6 +59,52 @@ func TestGold(t *testing.T) {
 			outputTypeFlag: "markdown",
 			expectedOutput: "expected_markdown_output.txt",
 		},
+	}
+
+	workingDir := getWorkingDir(t)
+
+	for _, testCase := range testCases {
+		t.Run(testCase.testName, func(t *testing.T) {
+			defer func() {
+				require.NoError(t, os.Chdir(workingDir))
+			}()
+
+			require.NoError(t, os.Chdir(testCase.testData))
+
+			originalStdOut, r, w := interceptStdOut()
+			defer func() {
+				os.Stdout = originalStdOut
+			}()
+
+			actErr := main.Main(&main.CLIArgs{
+				OutputFormat:  "txt",
+				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:       testCase.packagesFlag,
+				OutputType:    testCase.outputTypeFlag,
+			})
+
+			_ = w.Close()
+
+			require.NoError(t, actErr)
+
+			programOutput, readErr := io.ReadAll(r)
+			require.NoError(t, readErr)
+
+			expectedOutput := getFileContents(t, testCase.expectedOutput)
+
+			assert.Equal(t, string(expectedOutput), string(programOutput))
+		})
+	}
+}
+
+func TestSuccessfulJsonOutput(t *testing.T) {
+	testCases := []struct {
+		testName       string
+		testData       string
+		packagesFlag   string
+		outputTypeFlag string
+		expectedOutput string
+	}{
 		{
 			testName:       "01-intern-new - json output",
 			testData:       "testdata/01-intern-new",
@@ -121,12 +168,10 @@ func TestGold(t *testing.T) {
 
 			require.NoError(t, actErr)
 
-			programOutput, readErr := io.ReadAll(r)
-			require.NoError(t, readErr)
+			jsonOutput := getDependencyInfoFromReader(t, r)
+			expectedJson := getDependencyInfoFromFile(t, testCase.expectedOutput)
 
-			expectedOutput := getFileContents(t, testCase.expectedOutput)
-
-			assert.Equal(t, string(expectedOutput), string(programOutput))
+			assert.Equal(t, expectedJson, jsonOutput)
 		})
 	}
 }
@@ -272,4 +317,22 @@ func getFileContents(t *testing.T, path string) []byte {
 		require.NoError(t, err)
 	}
 	return expErr
+}
+
+func getDependencyInfoFromFile(t *testing.T, path string) *dependencies.DependencyInfo {
+	f, err := os.Open(path)
+	require.NoError(t, err)
+
+	return getDependencyInfoFromReader(t, f)
+}
+
+func getDependencyInfoFromReader(t *testing.T, r io.Reader) *dependencies.DependencyInfo {
+	data, readErr := io.ReadAll(r)
+	require.NoError(t, readErr)
+
+	jsonOutput := &dependencies.DependencyInfo{}
+	err := jsonOutput.Unmarshal(data)
+	require.NoError(t, err)
+
+	return jsonOutput
 }
