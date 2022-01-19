@@ -1,0 +1,11 @@
+The Go module "testmod" incorporates the following Free and Open Source
+software:
+
+    Name                                      Version                               License(s)
+    ----                                      -------                               ----------
+    the Go language standard library ("std")  v1.17.3                               3-clause BSD license
+    github.com/davecgh/go-spew                v1.1.0                                ISC license
+    github.com/josharian/intern               v1.0.1-0.20211109044230-42b52b674af5  MIT license
+    github.com/pmezard/go-difflib             v1.0.0                                3-clause BSD license
+    github.com/stretchr/testify               v1.7.0                                MIT license
+    gopkg.in/yaml.v3                          v3.0.0-20200313102051-9f266ea9e77c    Apache License 2.0, MIT license
