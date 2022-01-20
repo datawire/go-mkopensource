@@ -2,11 +2,11 @@ package dependencies
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
 )
 
+//nolint:gochecknoglobals // Can't be a constant
 var knownLicenses = map[string]detectlicense.License{
 	detectlicense.Proprietary.Name:  detectlicense.Proprietary,
 	detectlicense.PublicDomain.Name: detectlicense.PublicDomain,
@@ -56,7 +56,7 @@ func (d *DependencyInfo) UpdateLicenseList() error {
 		for _, licenseName := range dependency.Licenses {
 			license, ok := knownLicenses[licenseName]
 			if !ok {
-				return errors.New(fmt.Sprintf("License details for '%s' are not known", licenseName))
+				return fmt.Errorf("license details for '%s' are not known", licenseName)
 			}
 			usedLicenses[license.Name] = license
 		}

@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+//nolint:gochecknoglobals // Can't be a constant
 var (
 	emptyDependencies = dependencies.DependencyInfo{
 		Dependencies: []dependencies.Dependency{},
