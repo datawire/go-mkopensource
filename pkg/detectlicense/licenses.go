@@ -49,7 +49,7 @@ var (
 	// split with "+" to avoid a false-positive on itself
 	spdxTag = []byte("SPDX-License" + "-Identifier:")
 
-	spdxIdentifiers = map[string]License{
+	SpdxIdentifiers = map[string]License{
 		"Apache-2.0":        Apache2,
 		"BSD-1-Clause":      BSD1,
 		"BSD-2-Clause":      BSD2,
@@ -200,7 +200,7 @@ func IdentifySPDXLicenses(body []byte) (map[License]struct{}, error) {
 		body = body[idEnd:]
 
 		id = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(id), "*/"))
-		license, licenseOK := spdxIdentifiers[id]
+		license, licenseOK := SpdxIdentifiers[id]
 		if !licenseOK {
 			return nil, fmt.Errorf("unknown SPDX identifier %q", id)
 		}
