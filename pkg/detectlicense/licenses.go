@@ -50,14 +50,18 @@ var (
 	spdxTag = []byte("SPDX-License" + "-Identifier:")
 
 	spdxIdentifiers = map[string]License{
-		"Apache-2.0":   Apache2,
-		"BSD-1-Clause": BSD1,
-		"BSD-2-Clause": BSD2,
-		"BSD-3-Clause": BSD3,
-		"ISC":          ISC,
-		"MIT":          MIT,
-		"MPL-2.0":      MPL2,
-		"CC-BY-SA-4.0": CcBySa40,
+		"Apache-2.0":        Apache2,
+		"BSD-1-Clause":      BSD1,
+		"BSD-2-Clause":      BSD2,
+		"BSD-3-Clause":      BSD3,
+		"CC-BY-SA-4.0":      CcBySa40,
+		"GPL-3.0-only":      GPL3,
+		"ISC":               ISC,
+		"LGPL-2.1-or-later": LGPL21,
+		"MIT":               MIT,
+		"MPL-2.0":           MPL2,
+		"PSF-2.0":           PSF,
+		"Unicode-DFS-2015":  Unicode2015,
 	}
 )
 
