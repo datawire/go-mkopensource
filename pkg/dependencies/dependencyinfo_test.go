@@ -89,25 +89,25 @@ func TestLicenseListIsCorrect(t *testing.T) {
 			"Several dependencies with different licenses",
 			dependenciesWithUniqueLicenses,
 			map[string]string{
-				detectlicense.MIT.Name:  detectlicense.MIT.Url,
-				detectlicense.BSD1.Name: detectlicense.BSD1.Url},
+				detectlicense.MIT.Name:  detectlicense.MIT.URL,
+				detectlicense.BSD1.Name: detectlicense.BSD1.URL},
 		},
 		{
 			"A dependency with multiple licenses",
 			dependencyWithMultipleLicenses,
 			map[string]string{
-				detectlicense.GPL3.Name: detectlicense.GPL3.Url,
-				detectlicense.BSD2.Name: detectlicense.BSD2.Url,
+				detectlicense.GPL3.Name: detectlicense.GPL3.URL,
+				detectlicense.BSD2.Name: detectlicense.BSD2.URL,
 			},
 		},
 		{
 			"Dependencies with overlapping licenses",
 			dependenciesWithOverlappingLicenses,
 			map[string]string{
-				detectlicense.GPL3.Name:    detectlicense.GPL3.Url,
-				detectlicense.BSD2.Name:    detectlicense.BSD2.Url,
-				detectlicense.Apache2.Name: detectlicense.Apache2.Url,
-				detectlicense.GPL3.Name:    detectlicense.GPL3.Url,
+				detectlicense.GPL3.Name:    detectlicense.GPL3.URL,
+				detectlicense.BSD2.Name:    detectlicense.BSD2.URL,
+				detectlicense.Apache2.Name: detectlicense.Apache2.URL,
+				detectlicense.GPL3.Name:    detectlicense.GPL3.URL,
 			},
 		},
 		{
