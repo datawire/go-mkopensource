@@ -31,8 +31,8 @@ var (
 		StrongCopyleft: true, URL: "https://creativecommons.org/licenses/by-sa/4.0/legalcode"}
 	GPL3 = License{Name: "GNU General Public License Version 3", StrongCopyleft: true,
 		URL: "https://opensource.org/licenses/GPL-3.0"}
-	ISC    = License{Name: "ISC license", URL: "https://opensource.org/licenses/ISC"}
-	LGPL21 = License{Name: "GNU Lesser General Public License Version 2.1", WeakCopyleft: true,
+	ISC           = License{Name: "ISC license", URL: "https://opensource.org/licenses/ISC"}
+	LGPL21OrLater = License{Name: "GNU Lesser General Public License v2.1 or later", WeakCopyleft: true,
 		URL: "https://spdx.org/licenses/LGPL-2.1-or-later.html"}
 	MIT  = License{Name: "MIT license", URL: "https://opensource.org/licenses/MIT"}
 	MPL2 = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
@@ -57,7 +57,7 @@ var (
 		"CC-BY-SA-4.0":      CcBySa40,
 		"GPL-3.0-only":      GPL3,
 		"ISC":               ISC,
-		"LGPL-2.1-or-later": LGPL21,
+		"LGPL-2.1-or-later": LGPL21OrLater,
 		"MIT":               MIT,
 		"MPL-2.0":           MPL2,
 		"PSF-2.0":           PSF,
