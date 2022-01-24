@@ -154,10 +154,12 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 
 func licenseIsProprietary(licenses map[detectlicense.License]struct{}) (bool, error) {
 	_, proprietary := licenses[detectlicense.Proprietary]
-	if proprietary && len(licenses) != 1 {
-		return false, errors.New("mixed proprietary and open-source licenses")
+	// For now fail anything with a proprietary license.
+	// TODO: aosorio - In the future the correct logic sould be to only accept proprietary licenses on Ambassador owned software.
+	if proprietary {
+		return true, errors.New("proprietary licenses are used")
 	}
-	return proprietary, nil
+	return false, nil
 }
 
 func licenseIsWeakCopyleft(licenses map[detectlicense.License]struct{}) bool {
