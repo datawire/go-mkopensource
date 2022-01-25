@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"os/exec"
@@ -81,7 +80,7 @@ func parseArgs() (*CLIArgs, error) {
 		return nil, fmt.Errorf("--output-type must be one of '%s', '%s'", markdownOutputType, jsonOutputType)
 	}
 
-	if args.ApplicationType != internalApplication && args.OutputType != externalApplication {
+	if args.ApplicationType != internalApplication && args.ApplicationType != externalApplication {
 		return nil, fmt.Errorf("--application-type must be one of '%s', '%s'", internalApplication, externalApplication)
 	}
 
@@ -351,7 +350,9 @@ func Main(args *CLIArgs) error {
 	sort.Strings(mainLibPkgs)
 
 	// Generate the readme file.
-	readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+	licenseUsage := getAllowedLicenseUsage(args.ApplicationType)
+
+	readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseUsage, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
 	if generationErr != nil {
 		return generationErr
 	}
@@ -418,20 +419,33 @@ func Main(args *CLIArgs) error {
 	return nil
 }
 
-func generateOutput(packages string, outputFormat string, outputType string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string,
-	modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (*bytes.Buffer, error) {
+func getAllowedLicenseUsage(applicationType string) detectlicense.AllowedLicenseUse {
+	var licenseUsage detectlicense.AllowedLicenseUse
+	switch applicationType {
+	case internalApplication:
+		licenseUsage = detectlicense.OnAmbassadorServers
+	default:
+		licenseUsage = detectlicense.Unrestricted
+	}
+	return licenseUsage
+}
+
+func generateOutput(packages string, outputFormat string, outputType string, licenseUsage detectlicense.AllowedLicenseUse,
+	mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string,
+	modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module,
+	goVersion string) (*bytes.Buffer, error) {
 	output := new(bytes.Buffer)
 
 	switch outputType {
 	case jsonOutputType:
-		err := jsonOutput(output, modNames, modLicenses, modInfos, goVersion)
+		err := jsonOutput(output, modNames, modLicenses, modInfos, goVersion, licenseUsage)
 		if err != nil {
 			return nil, err
 		}
 	default:
 		markdownHeader(packages, mainMods, output, mainLibPkgs, mainCmdPkgs)
 		output.WriteString("\n")
-		err := markdownOutput(output, modNames, modLicenses, modInfos, goVersion)
+		err := markdownOutput(output, modNames, modLicenses, modInfos, goVersion, licenseUsage)
 		if err != nil {
 			return nil, err
 		}
@@ -475,8 +489,9 @@ func markdownHeader(packages string, mainMods map[string]struct{}, readme *bytes
 	}
 }
 
-func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
-	dependencyList, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
+func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{},
+	modInfos map[string]*golist.Module, goVersion string, usage detectlicense.AllowedLicenseUse) error {
+	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, usage)
 	if generationErr != nil {
 		return generationErr
 	}
@@ -497,8 +512,9 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 	return nil
 }
 
-func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
-	dependencyList, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
+func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{},
+	modInfos map[string]*golist.Module, goVersion string, usage detectlicense.AllowedLicenseUse) error {
+	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, usage)
 	if generationErr != nil {
 		return generationErr
 	}
@@ -511,64 +527,4 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 
 	readme.Write(jsonString)
 	return nil
-}
-
-func generateDependencyList(modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (dependencies.DependencyInfo, error) {
-	jsonOutput := dependencies.NewDependencyInfo()
-
-	for _, modKey := range modNames {
-		ambassadorProprietary := isAmbassadorProprietary(modLicenses[modKey])
-		if ambassadorProprietary {
-			continue
-		}
-
-		modVal := modInfos[modKey]
-
-		dependencyDetails := dependencies.Dependency{
-			Name:     getDependencyName(modVal),
-			Version:  getDependencyVersion(modVal, goVersion),
-			Licenses: []string{},
-		}
-
-		for license := range modLicenses[modKey] {
-			dependencyDetails.Licenses = append(dependencyDetails.Licenses, license.Name)
-		}
-		sort.Strings(dependencyDetails.Licenses)
-
-		jsonOutput.Dependencies = append(jsonOutput.Dependencies, dependencyDetails)
-	}
-
-	if err := jsonOutput.UpdateLicenseList(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Could not generate list of license URLs: %v\n", err)
-		os.Exit(int(DependencyGenerationError))
-	}
-	return jsonOutput, nil
-}
-
-func getDependencyName(modVal *golist.Module) string {
-	if modVal == nil {
-		return "the Go language standard library (\"std\")"
-	}
-
-	if modVal.Replace != nil && modVal.Replace.Version != "" && modVal.Replace.Path != modVal.Path {
-		return fmt.Sprintf("%s (modified from %s)", modVal.Replace.Path, modVal.Path)
-	}
-
-	return modVal.Path
-}
-
-func getDependencyVersion(modVal *golist.Module, goVersion string) string {
-	if modVal == nil {
-		return goVersion
-	}
-
-	if modVal.Replace != nil {
-		if modVal.Replace.Version == "" {
-			return "(modified)"
-		} else {
-			return modVal.Replace.Version
-		}
-	}
-
-	return modVal.Version
 }

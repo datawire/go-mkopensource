@@ -111,7 +111,7 @@ func (d *DependencyInfo) CheckLicenses(allowedLicenses detectlicense.AllowedLice
 			}
 
 			if license.AllowedUse < allowedLicenses {
-				return fmt.Errorf("license '%s' should not be used since it doesn't meet the useage requirements", license.Name)
+				return fmt.Errorf("license '%s' should not be used since it should not run on customer servers", license.Name)
 			}
 		}
 	}
