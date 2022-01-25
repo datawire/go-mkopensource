@@ -24,9 +24,10 @@ import (
 )
 
 type CLIArgs struct {
-	OutputFormat string
-	OutputName   string
-	OutputType   string
+	OutputFormat    string
+	OutputName      string
+	OutputType      string
+	ApplicationType string
 
 	GoTarFilename string
 	Package       string
@@ -37,12 +38,12 @@ const (
 	markdownOutputType = "markdown"
 	jsonOutputType     = "json"
 
-	// Validation to do on the licenses.
+	// Validations to do on the licenses.
 	// The only validation for "internal" is to check chat forbidden licenses are not used
-	internalUsage = "internal"
+	internalApplication = "internal"
 	// "external" applications have additional license requirements as documented in
 	//https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157
-	externalUsage = "external"
+	externalApplication = "external"
 )
 
 func parseArgs() (*CLIArgs, error) {
@@ -54,12 +55,13 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.StringVar(&args.OutputName, "output-name", "", "Name of the root directory in the --output-format=tar tarball")
 	argparser.StringVar(&args.OutputType, "output-type", markdownOutputType,
 		fmt.Sprintf("Format used when printing dependency information. One of: %s, %s", markdownOutputType, jsonOutputType))
-	argparser.StringVar(&args.OutputType, "application-type", externalUsage,
-		fmt.Sprintf("Where will the application run. One of: %s, %s\n"+
-			"Internal applications are run on Ambassador servers.\n"+
-			"External applications run on client-controlled infrastructure", internalUsage, externalUsage))
 	argparser.StringVar(&args.GoTarFilename, "gotar", "", "Tarball of the Go stdlib source code")
 	argparser.StringVar(&args.Package, "package", "", "The package(s) to report library usage for")
+	argparser.StringVar(&args.ApplicationType, "application-type", externalApplication,
+		fmt.Sprintf("Where will the application run. One of: %s, %s\n"+
+			"Internal applications are run on Ambassador servers.\n"+
+			"External applications run on client-controlled infrastructure", internalApplication, externalApplication))
+
 	if err := argparser.Parse(os.Args[1:]); err != nil {
 		return nil, err
 	}
@@ -77,6 +79,10 @@ func parseArgs() (*CLIArgs, error) {
 
 	if args.OutputType != markdownOutputType && args.OutputType != jsonOutputType {
 		return nil, fmt.Errorf("--output-type must be one of '%s', '%s'", markdownOutputType, jsonOutputType)
+	}
+
+	if args.ApplicationType != internalApplication && args.OutputType != externalApplication {
+		return nil, fmt.Errorf("--application-type must be one of '%s', '%s'", internalApplication, externalApplication)
 	}
 
 	switch args.OutputFormat {
@@ -493,6 +499,22 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 }
 
 func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
+	jsonOutput, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
+	if generationErr != nil {
+		return generationErr
+	}
+
+	jsonString, marshallErr := json.Marshal(jsonOutput)
+	if marshallErr != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", marshallErr)
+		os.Exit(int(MarshallJsonError))
+	}
+
+	readme.Write(jsonString)
+	return nil
+}
+
+func generateDependencyList(modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) (dependencies.DependencyInfo, error) {
 	jsonOutput := dependencies.NewDependencyInfo()
 
 	for _, modKey := range modNames {
@@ -521,15 +543,7 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 		_, _ = fmt.Fprintf(os.Stderr, "Could not generate list of license URLs: %v\n", err)
 		os.Exit(int(DependencyGenerationError))
 	}
-
-	jsonString, err := json.Marshal(jsonOutput)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", err)
-		os.Exit(int(MarshallJsonError))
-	}
-
-	readme.Write(jsonString)
-	return nil
+	return jsonOutput, nil
 }
 
 func getDependencyName(modVal *golist.Module) string {
