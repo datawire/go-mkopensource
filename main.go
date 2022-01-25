@@ -520,11 +520,11 @@ func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]
 	}
 
 	for license := range allLicenses {
-		if license.Url == "" {
-			_, _ = fmt.Fprintf(os.Stderr, "Could not find Url for license '%s'", license.Name)
-			os.Exit(int(MissingLicenseUrlError))
+		if license.URL == "" {
+			_, _ = fmt.Fprintf(os.Stderr, "Could not find UELURL for license '%s'", license.Name)
+			os.Exit(int(MissingLicenseURLError))
 		}
-		jsonOutput.Licenses[license.Name] = license.Url
+		jsonOutput.Licenses[license.Name] = license.URL
 	}
 
 	jsonString, err := json.Marshal(jsonOutput)
