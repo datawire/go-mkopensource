@@ -476,35 +476,34 @@ func markdownHeader(packages string, mainMods map[string]struct{}, readme *bytes
 }
 
 func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
+	dependencyList, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
+	if generationErr != nil {
+		return generationErr
+	}
+
 	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
 	io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
 	io.WriteString(table, "  \t----\t-------\t----------\n")
-	for _, modKey := range modNames {
-		ambassadorProprietary := isAmbassadorProprietary(modLicenses[modKey])
-		if ambassadorProprietary {
-			continue
+
+	for _, dependency := range dependencyList.Dependencies {
+		depLicenses := strings.Join(dependency.Licenses, ", ")
+		if depLicenses == "" {
+			panic(fmt.Errorf("this should not happen: empty license string for %q", dependency.Name))
 		}
 
-		modVal := modInfos[modKey]
-		depName := getDependencyName(modVal)
-		depVersion := getDependencyVersion(modVal, goVersion)
-		depLicenses := licenseString(modLicenses[modKey])
-		if depLicenses == "" {
-			panic(fmt.Errorf("this should not happen: empty license string for %q", depName))
-		}
-		fmt.Fprintf(table, "\t%s\t%s\t%s\n", depName, depVersion, depLicenses)
+		fmt.Fprintf(table, "\t%s\t%s\t%s\n", dependency.Name, dependency.Version, depLicenses)
 	}
 	table.Flush()
 	return nil
 }
 
 func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module, goVersion string) error {
-	jsonOutput, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
+	dependencyList, generationErr := generateDependencyList(modNames, modLicenses, modInfos, goVersion)
 	if generationErr != nil {
 		return generationErr
 	}
 
-	jsonString, marshallErr := json.Marshal(jsonOutput)
+	jsonString, marshallErr := json.Marshal(dependencyList)
 	if marshallErr != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", marshallErr)
 		os.Exit(int(MarshallJsonError))
