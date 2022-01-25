@@ -33,8 +33,16 @@ type CLIArgs struct {
 }
 
 const (
+	// Type of output to generate
 	markdownOutputType = "markdown"
 	jsonOutputType     = "json"
+
+	// Validation to do on the licenses.
+	// The only validation for "internal" is to check chat forbidden licenses are not used
+	internalUsage = "internal"
+	// "external" applications have additional license requirements as documented in
+	//https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157
+	externalUsage = "external"
 )
 
 func parseArgs() (*CLIArgs, error) {
@@ -44,7 +52,12 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.BoolVarP(&help, "help", "h", false, "Show this message")
 	argparser.StringVar(&args.OutputFormat, "output-format", "", "Output format ('tar' or 'txt')")
 	argparser.StringVar(&args.OutputName, "output-name", "", "Name of the root directory in the --output-format=tar tarball")
-	argparser.StringVar(&args.OutputType, "output-type", markdownOutputType, fmt.Sprintf("Format used when printing dependency information. One of: %s, %s", markdownOutputType, jsonOutputType))
+	argparser.StringVar(&args.OutputType, "output-type", markdownOutputType,
+		fmt.Sprintf("Format used when printing dependency information. One of: %s, %s", markdownOutputType, jsonOutputType))
+	argparser.StringVar(&args.OutputType, "application-type", externalUsage,
+		fmt.Sprintf("Where will the application run. One of: %s, %s\n"+
+			"Internal applications are run on Ambassador servers.\n"+
+			"External applications run on client-controlled infrastructure", internalUsage, externalUsage))
 	argparser.StringVar(&args.GoTarFilename, "gotar", "", "Tarball of the Go stdlib source code")
 	argparser.StringVar(&args.Package, "package", "", "The package(s) to report library usage for")
 	if err := argparser.Parse(os.Args[1:]); err != nil {
