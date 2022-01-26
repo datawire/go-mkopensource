@@ -352,20 +352,25 @@ func Main(args *CLIArgs) error {
 	// Generate the readme file.
 	licenseUsage := getAllowedLicenseUsage(args.ApplicationType)
 
-	readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseUsage, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
-	if generationErr != nil {
-		return generationErr
-	}
-
 	switch args.OutputFormat {
 	case "txt":
+		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseUsage, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+		if generationErr != nil {
+			return generationErr
+		}
+
 		if _, err := readme.WriteTo(os.Stdout); err != nil {
 			return err
 		}
 	case "tar":
 		// Build a listing of all files to go in to the tarball
-		tarfiles := make(map[string][]byte)
-		tarfiles["OPENSOURCE.md"] = readme.Bytes()
+		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, licenseUsage, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+		if generationErr != nil {
+			return generationErr
+		}
+
+		tarFiles := make(map[string][]byte)
+		tarFiles["OPENSOURCE.md"] = readme.Bytes()
 		for pkgName := range pkgFiles {
 			ambassadorProprietary := isAmbassadorProprietary(pkgLicenses[pkgName])
 			switch {
@@ -373,14 +378,14 @@ func Main(args *CLIArgs) error {
 				// don't include anything
 			case licenseIsWeakCopyleft(pkgLicenses[pkgName]):
 				// include everything
-				for filename, filebody := range pkgFiles[pkgName] {
-					tarfiles[filename] = filebody
+				for filename, fileBody := range pkgFiles[pkgName] {
+					tarFiles[filename] = fileBody
 				}
 			default:
 				// just include metadata
-				for filename, filebody := range pkgFiles[pkgName] {
+				for filename, fileBody := range pkgFiles[pkgName] {
 					if matchMetadata(filename) {
-						tarfiles[filename] = filebody
+						tarFiles[filename] = fileBody
 					}
 				}
 			}
@@ -394,13 +399,13 @@ func Main(args *CLIArgs) error {
 		outputTar := tar.NewWriter(outputCompressed)
 		defer outputTar.Close()
 
-		filenames := make([]string, 0, len(tarfiles))
-		for filename := range tarfiles {
+		filenames := make([]string, 0, len(tarFiles))
+		for filename := range tarFiles {
 			filenames = append(filenames, filename)
 		}
 		sort.Strings(filenames)
 		for _, filename := range filenames {
-			body := tarfiles[filename]
+			body := tarFiles[filename]
 			err := outputTar.WriteHeader(&tar.Header{
 				Typeflag: tar.TypeReg,
 				Name:     args.OutputName + "/" + filename,
