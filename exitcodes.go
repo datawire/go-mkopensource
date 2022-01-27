@@ -7,5 +7,4 @@ const (
 	DependencyGenerationError exitCode = 1
 	InvalidArgumentsError     exitCode = 2
 	MarshallJsonError         exitCode = 3
-	MissingLicenseURLError    exitCode = 4
 )
