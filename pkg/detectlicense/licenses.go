@@ -19,7 +19,7 @@ type License struct {
 
 //nolint:gochecknoglobals // Would be 'const'.
 var (
-	Proprietary = License{Name: "proprietary"}
+	AmbassadorProprietary = License{Name: "proprietary Ambassador software"}
 
 	PublicDomain = License{Name: "Public domain"}
 
@@ -74,7 +74,13 @@ func expectsNotice(licenses map[License]struct{}) bool {
 	return false
 }
 
-func DetectLicenses(files map[string][]byte) (map[License]struct{}, error) {
+func DetectLicenses(packageName string, files map[string][]byte) (map[License]struct{}, error) {
+	if strings.HasPrefix(packageName, "github.com/datawire/telepresence2-proprietary/") {
+		// Ambassador's proprietary software has a proprietary license
+		softwareLicenses := map[License]struct{}{AmbassadorProprietary: {}}
+		return softwareLicenses, nil
+	}
+
 	licenses := make(map[License][]string)
 	hasNotice := false
 	hasLicenseFile := false
@@ -178,6 +184,7 @@ loop:
 			}
 		}
 	}
+
 	if !hasLicenseFile && hasNonSPDXSource {
 		return nil, errors.New("could not identify a license for all sources (had no global LICENSE file)")
 	}
