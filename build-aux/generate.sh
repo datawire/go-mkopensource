@@ -13,16 +13,33 @@ validate_required_variable BUILD_HOME
 validate_required_variable BUILD_TMP
 
 pushd "${BUILD_HOME}" >/dev/null
-if [ -f go.mod ]; then
+#TODO: Enable if statement
+#if [ -f go.mod ]; then
+if [ ! true ]; then
   validate_required_variable GO_VERSION
 
   pushd "${BUILD_SCRIPTS}/../cmd/go-mkopensource" >/dev/null
   go build -o "${BUILD_SCRIPTS}/" .
   popd >/dev/null
 
-  ${BUILD_SCRIPTS}/scan-go.sh
+  "${BUILD_SCRIPTS}/scan-go.sh"
 fi
 
+if [ -n "${PYTHON_PACKAGES}" ]; then
+  validate_required_variable PYTHON_VERSION
+
+  pushd "${BUILD_SCRIPTS}/../cmd/py-mkopensource" >/dev/null
+  go build -o "${BUILD_SCRIPTS}/docker" .
+  popd >/dev/null
+
+  pushd "${BUILD_SCRIPTS}/docker" >/dev/null
+  docker build -f py_builder.dockerfile --build-arg PYTHON_VERSION="${PYTHON_VERSION}" -t "py-deps-builder" --target python_dependency_scanner .
+  popd >/dev/null
+
+  docker run --rm --env APPLICATION \
+    --volume "${BUILD_TMP}":/temp \
+    py-deps-builder /scripts/scan-py.sh ;\
+fi
 
 # Generate LICENSES.md
 (
@@ -33,7 +50,6 @@ fi
     if [ -f "${BUILD_TMP}/js_licenses.txt" ]; then cat "${BUILD_TMP}/js_licenses.txt"; fi
   ) | sort | uniq
 ) >"${BUILD_HOME}/LICENSES.md"
-
 
 # Generate OPENSOURCE.md
 (
@@ -70,6 +86,5 @@ cd "${HOME}"
 #Build images to scan dependencies
 pushd "${SCRIPT_DIR}/docker" >/dev/null
 cp -a "${JS_MKOPENSOURCE}" "${PY_MKOPENSOURCE}" "${GO_MKOPENSOURCE}" .
-docker build -f builders.dockerfile --build-arg PYTHON_VERSION="${PYTHON_VERSION}" -t "py-deps-builder" --target python_dependency_scanner .
-docker build -f builders.dockerfile --build-arg NODE_VERSION="${NODE_VERSION}" -t "js-deps-builder" --target npm_dependency_scanner .
+docker build -f js_builder.dockerfile --build-arg NODE_VERSION="${NODE_VERSION}" -t "js-deps-builder" --target npm_dependency_scanner .
 popd >/dev/null
