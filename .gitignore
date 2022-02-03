@@ -1,7 +1,7 @@
 # Build output
-go-mkopensource
-py-mkopensource
-js-mkopensource
+cmd/go-mkopensource/go-mkopensource
+cmd/py-mkopensource/py-mkopensource
+cmd/js-mkopensource/js-mkopensource
 
 # `go mod vendor`
 vendor/
