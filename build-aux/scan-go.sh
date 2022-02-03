@@ -16,8 +16,6 @@ download_go_tar() {
 }
 
 scan_go_package() {
-  echo >&2 "Getting GO dependencies"
-
    ${BUILD_SCRIPTS}/go-mkopensource --output-format=txt --package=mod --output-type=markdown --gotar="${GO_TAR}" >"${GO_DEPENDENCIES}"
 
   DEPENDENCY_INFO="${BUILD_TMP}/go_dependencies.json"

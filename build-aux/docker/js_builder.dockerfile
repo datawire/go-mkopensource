@@ -16,4 +16,6 @@ COPY js-mkopensource *.sh customLicenseFormat.json ./
 RUN chmod +x *.sh js-mkopensource
 
 WORKDIR /app
+COPY npm_dependencies.tar ./
+RUN tar xf npm_dependencies.tar && rm -f npm_dependencies.tar
 

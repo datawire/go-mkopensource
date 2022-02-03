@@ -1,5 +1,5 @@
 #!/bin/env bash
-set -ex
+set -e
 set -o pipefail
 
 archive_dependencies() {
@@ -17,8 +17,8 @@ validate_required_variable BUILD_HOME
 validate_required_variable BUILD_TMP
 
 pushd "${BUILD_HOME}" >/dev/null
-#TODO: Enable if statement
 if [ -f go.mod ]; then
+  echo "Scanning Go dependency licenses"
   validate_required_variable GO_VERSION
 
   pushd "${BUILD_SCRIPTS}/../cmd/go-mkopensource" >/dev/null
@@ -29,6 +29,7 @@ if [ -f go.mod ]; then
 fi
 
 if [ -n "${PYTHON_PACKAGES}" ]; then
+  echo "Scanning Python dependency licenses"
   validate_required_variable PYTHON_VERSION
 
   archive_dependencies "${BUILD_SCRIPTS}/docker/python_dependencies.tar" "${PYTHON_PACKAGES}"
@@ -44,6 +45,25 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
   docker run --rm --env APPLICATION \
     --volume "${BUILD_TMP}":/temp \
     py-deps-builder /scripts/scan-py.sh ;\
+fi
+
+if [ -n "${NPM_PACKAGES}" ]; then
+  echo "Scanning Node.Js dependency licenses"
+  validate_required_variable NODE_VERSION
+
+  archive_dependencies "${BUILD_SCRIPTS}/docker/npm_dependencies.tar" "${NPM_PACKAGES}"
+
+  pushd "${BUILD_SCRIPTS}/../cmd/js-mkopensource" >/dev/null
+  go build -o "${BUILD_SCRIPTS}/docker" .
+  popd >/dev/null
+
+  pushd "${BUILD_SCRIPTS}/docker" >/dev/null
+  docker build -f js_builder.dockerfile --build-arg NODE_VERSION="${NODE_VERSION}" -t "js-deps-builder" --target npm_dependency_scanner .
+  popd >/dev/null
+
+  docker run --rm --env APPLICATION \
+    --volume "${BUILD_TMP}":/temp \
+    js-deps-builder /scripts/scan-js.sh ;\
 fi
 
 # Generate LICENSES.md
@@ -73,23 +93,3 @@ fi
     echo -e "\n"
   fi
 ) >"${BUILD_HOME}/OPENSOURCE.md"
-
-exit 0
-
-validate_required_variable "PYTHON_VERSION"
-validate_required_variable "NODE_VERSION"
-
-validate_required_variable "JS_MKOPENSOURCE"
-validate_required_variable "PY_MKOPENSOURCE"
-validate_required_variable "GO_MKOPENSOURCE"
-
-validate_required_variable "APPLICATION"
-
-SCRIPT_DIR="$(dirname $(realpath $0))"
-cd "${HOME}"
-
-#Build images to scan dependencies
-pushd "${SCRIPT_DIR}/docker" >/dev/null
-cp -a "${JS_MKOPENSOURCE}" "${PY_MKOPENSOURCE}" "${GO_MKOPENSOURCE}" .
-docker build -f js_builder.dockerfile --build-arg NODE_VERSION="${NODE_VERSION}" -t "js-deps-builder" --target npm_dependency_scanner .
-popd >/dev/null

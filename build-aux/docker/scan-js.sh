@@ -26,7 +26,6 @@ scan_npm_package() {
 }
 
 cd /app
-tar -xf /temp/dependencies.tar
 
 # Get dependencies for each package.json
 DEPENDENCIES="js_deps.json"
