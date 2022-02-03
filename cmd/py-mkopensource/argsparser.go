@@ -9,8 +9,6 @@ type cliArgs struct {
 	outputType OutputType
 }
 
-var outputType *string
-
 type OutputType string
 
 const (
@@ -19,6 +17,8 @@ const (
 )
 
 func parseArgs() (cliArgs, error) {
+	var outputType *string
+
 	args := cliArgs{}
 	outputType = flag.String("output-type", string(markdownOutputType), fmt.Sprintf("Format used when "+
 		"printing dependency information. One of: %s, %s", markdownOutputType, jsonOutputType))

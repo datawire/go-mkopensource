@@ -4,6 +4,6 @@ type exitCode int
 
 const (
 	DependencyGenerationError exitCode = 1
-	MarshallJsonError                  = 2
-	WriteError                         = 3
+	MarshallJsonError         exitCode = 2
+	WriteError                exitCode = 3
 )
