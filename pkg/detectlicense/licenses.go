@@ -345,6 +345,10 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 	case reMatch(reYamlV3, body):
 		licenses[MIT] = struct{}{}
 		licenses[Apache2] = struct{}{}
+	case reMatch(regexp.MustCompile(`[^\n]* licensed under:\s*`+reApacheLicense.String()+`\s*-*\s*[^\n]* licensed under:\s*`+reBSD3.String()), body):
+		// sigs.k8s.io/json/LICENSE
+		licenses[Apache2] = struct{}{}
+		licenses[BSD3] = struct{}{}
 	case reMatch(regexp.MustCompile(reMIT.String()+`\s*`+reBSD3.String()), body):
 		// sigs.k8s.io/yaml/LICENSE
 		licenses[MIT] = struct{}{}
