@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	main "github.com/datawire/go-mkopensource"
+	main "github.com/datawire/go-mkopensource/cmd/go-mkopensource"
 )
 
 func TestSuccessfulMarkdownOutput(t *testing.T) {
