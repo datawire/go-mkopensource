@@ -23,7 +23,6 @@ scan_python_package() {
 }
 
 cd /app
-tar -xf /temp/dependencies.tar
 
 # Get dependencies for each requirements.txt
 DEPENDENCIES="py_deps.txt"

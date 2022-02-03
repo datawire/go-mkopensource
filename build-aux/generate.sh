@@ -2,6 +2,10 @@
 set -ex
 set -o pipefail
 
+archive_dependencies() {
+  tar -vf "$1" -c $2
+}
+
 #TODO: Remove DOCKER_BUILDKIT
 DOCKER_BUILDKIT=0
 
@@ -14,8 +18,7 @@ validate_required_variable BUILD_TMP
 
 pushd "${BUILD_HOME}" >/dev/null
 #TODO: Enable if statement
-#if [ -f go.mod ]; then
-if [ ! true ]; then
+if [ -f go.mod ]; then
   validate_required_variable GO_VERSION
 
   pushd "${BUILD_SCRIPTS}/../cmd/go-mkopensource" >/dev/null
@@ -27,6 +30,8 @@ fi
 
 if [ -n "${PYTHON_PACKAGES}" ]; then
   validate_required_variable PYTHON_VERSION
+
+  archive_dependencies "${BUILD_SCRIPTS}/docker/python_dependencies.tar" "${PYTHON_PACKAGES}"
 
   pushd "${BUILD_SCRIPTS}/../cmd/py-mkopensource" >/dev/null
   go build -o "${BUILD_SCRIPTS}/docker" .

@@ -60,3 +60,6 @@ COPY py-mkopensource *.sh ./
 RUN chmod +x *.sh py-mkopensource
 
 RUN ln -s /buildroot /app
+WORKDIR /app
+COPY python_dependencies.tar ./
+RUN tar xf python_dependencies.tar && rm -f python_dependencies.tar

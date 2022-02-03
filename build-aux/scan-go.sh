@@ -7,13 +7,11 @@ BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 
 validate_required_variable BUILD_HOME
 validate_required_variable BUILD_TMP
+validate_required_variable GO_VERSION
 
-check_go_tar() {
-  validate_required_variable GO_TAR
-
+download_go_tar() {
   if [ ! -f "${GO_TAR}" ]; then
-    echo "Go tar '${GO_TAR}' does not exist" >&2
-    exit 1
+    curl -o "${GO_TAR}" --fail -L "https://dl.google.com/go/go${GO_VERSION}.src.tar.gz"
   fi
 }
 
@@ -30,7 +28,8 @@ scan_go_package() {
 
 cd "${BUILD_HOME}"
 
-check_go_tar
+export GO_TAR="${BUILD_TMP}/go${GO_VERSION}.src.tar.gz"
+download_go_tar
 scan_go_package
 
 # Restore old state
