@@ -1,6 +1,6 @@
-# go-mkopensource
+# js-mkopensource
 
-`py-mkopensource` is a program for generating reports of the libraries
+`js-mkopensource` is a program for generating reports of the libraries
 used by a piece of Node.Js code, in order to be in compliance with the
 attribution requirements of various opensource licenses.
 
@@ -10,7 +10,7 @@ You may clone the repo and run the following commands (or any of the
 other usual ways of building)
 
 ```shell
-cd cmd/py-mkopensource
+cd cmd/js-mkopensource
 go build .
 ```
 

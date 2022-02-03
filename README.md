@@ -1,5 +1,6 @@
 ## Command line tool Docs
 * [go-mkopensource](/cmd/go-mkopensource/README.md)
+* [js-mkopensource](/cmd/js-mkopensource/README.md)
 
 ## Building
 
