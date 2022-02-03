@@ -1,31 +1,14 @@
-###
-# This dockerfile builds the base image for the builder container. See
-# the main Dockerfile for more information about what the builder
-# container is and how code in this repo is built.
-#
-# Originally this base was built as part of the builder container's
-# bootstrap process. We discovered that minor network interruptions
-# would break these steps, and such interruptions were common on our
-# cloud CI system. We decided to separate out these steps so that any
-# one of them is much less likely to be the cause of a network-related
-# failure, i.e. a flake.
-#
-# See the comment before the build_builder_base() function in builder.sh
-# to see when and how often this base image is built and pushed.
-##
-
-# This argument controls the base image that is used for our build
-# container.
 ########################################
 # Python dependency scanner
 ########################################
-FROM docker.io/frolvlad/alpine-glibc:alpine-3.12_glibc-2.32 as python_dependency_scanner
+
+FROM docker.io/frolvlad/alpine-glibc:alpine-3.15 as python_dependency_scanner
 
 WORKDIR /buildroot
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/buildroot/bin
 
-ARG PYTHON_VERSION="~3.8.10"
+ARG PYTHON_VERSION="~3.9.7"
 RUN apk --no-cache add \
     bash \
     gcc \
@@ -33,27 +16,47 @@ RUN apk --no-cache add \
     musl-dev \
     curl \
     cython \
-    gawk \
+    docker-cli \
+    git \
+    iptables \
     jq \
     libcap \
     libcap-dev \
     libffi-dev \
     ncurses \
-    openssh-client \
     openssl-dev \
-    py3-pip \
+    py3-pip=~20.3.4 \
     python3=$PYTHON_VERSION \
     python3-dev \
+    rust \
+    cargo \
+    patchelf \
     rsync \
     sudo \
-    && ln -s /usr/bin/python3 /usr/bin/python
+    yaml-dev \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && chmod u+s $(which docker)
 
-# We _must_ pin pip to a version before 20.3 because orjson appears to only have
-# PEP513 compatible wheels, which are supported before 20.3 but (apparently)
-# not in 20.3. We can only upgrade pip to 20.3 after we verify that orjson has
-# PEP600 compatible wheels for our linux platform, or we start building orjson
-# from source using a rust toolchain.
-RUN pip3 install -U pip==20.2.4 pip-tools==5.3.1
+# Consult
+# https://github.com/jazzband/pip-tools/#versions-and-compatibility to
+# select a pip-tools version that corresponds to the 'py3-pip' and
+# 'python3' versions above.
+RUN pip3 install pip-tools==6.3.1
+
+# The YAML parser is... special. To get the C version, we need to install Cython and libyaml, then
+# build it locally -- just using pip won't work.
+#
+# Download, build, and install PyYAML.
+RUN mkdir /tmp/pyyaml && \
+  cd /tmp/pyyaml && \
+  curl -o pyyaml-5.4.1.1.tar.gz -L https://github.com/yaml/pyyaml/archive/refs/tags/5.4.1.1.tar.gz && \
+  tar xzf pyyaml-5.4.1.1.tar.gz && \
+  cd pyyaml-5.4.1.1 && \
+  python3 setup.py --with-libyaml install
+
+# orjson is also special.  The wheels on PyPI rely on glibc, so we
+# need to use cargo/rustc/patchelf to build a musl-compatible version.
+RUN pip3 install orjson==3.6.6
 
 WORKDIR /scripts
 COPY py-mkopensource *.sh ./
