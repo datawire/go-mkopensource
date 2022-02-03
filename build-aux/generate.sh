@@ -6,9 +6,6 @@ archive_dependencies() {
   tar -vf "$1" -c $2
 }
 
-#TODO: Remove DOCKER_BUILDKIT
-DOCKER_BUILDKIT=0
-
 BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 . "${BUILD_SCRIPTS}/docker/imports.sh"
 
