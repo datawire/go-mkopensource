@@ -147,6 +147,9 @@ loop:
 		case "github.com/telepresenceio/telepresence/v2/LICENSES.md":
 			// Licenses for telepresence are in LICENSE and not in LICENSES.md
 			continue loop
+		case "github.com/datawire/ambassador/v2/LICENSES.md":
+			// Licenses for ambassador are in LICENSE and not in LICENSES.md
+			continue loop
 		}
 
 		name := filepath.Base(filename)
