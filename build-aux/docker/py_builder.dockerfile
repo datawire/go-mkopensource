@@ -19,6 +19,7 @@ RUN apk --no-cache add \
     docker-cli \
     git \
     iptables \
+    gawk \
     jq \
     libcap \
     libcap-dev \
@@ -53,10 +54,6 @@ RUN mkdir /tmp/pyyaml && \
   tar xzf pyyaml-5.4.1.1.tar.gz && \
   cd pyyaml-5.4.1.1 && \
   python3 setup.py --with-libyaml install
-
-# orjson is also special.  The wheels on PyPI rely on glibc, so we
-# need to use cargo/rustc/patchelf to build a musl-compatible version.
-RUN pip3 install orjson==3.6.6
 
 WORKDIR /scripts
 COPY py-mkopensource *.sh ./
