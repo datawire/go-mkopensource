@@ -119,11 +119,20 @@ func expectsNotice(licenses map[License]struct{}) bool {
 	return false
 }
 
-func DetectLicenses(packageName string, files map[string][]byte) (map[License]struct{}, error) {
-	if strings.HasPrefix(packageName, "github.com/datawire/telepresence2-proprietary/") {
+func DetectLicenses(packageName string, packageVersion string, files map[string][]byte) (map[License]struct{}, error) {
+
+	if isAmbassadorProprietarySoftware(packageName) {
 		// Ambassador's proprietary software has a proprietary license
 		softwareLicenses := map[License]struct{}{AmbassadorProprietary: {}}
 		return softwareLicenses, nil
+	}
+
+	if knownDependencies, isKnown := knownDependencies(packageName, packageVersion); isKnown {
+		licenses := map[License]struct{}{}
+		for _, license := range knownDependencies {
+			licenses[license] = struct{}{}
+		}
+		return licenses, nil
 	}
 
 	licenses := make(map[License][]string)

@@ -283,11 +283,19 @@ func Main(args *CLIArgs) error {
 	for pkgName := range pkgFiles {
 		pkgNames = append(pkgNames, pkgName)
 	}
+
+	pkgVersions := map[string]string{}
+	for _, pkg := range listPkgs {
+		if pkg.Module != nil {
+			pkgVersions[pkg.ImportPath] = pkg.Module.Version
+		}
+	}
+
 	sort.Strings(pkgNames)
 	pkgLicenses := make(map[string]map[detectlicense.License]struct{})
 	licErrs := []error(nil)
 	for _, pkgName := range pkgNames {
-		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgFiles[pkgName])
+		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgVersions[pkgName], pkgFiles[pkgName])
 		if err == nil && licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
 			err = fmt.Errorf("has an unacceptable license for use by Ambassador Labs (%s)",
 				licenseString(pkgLicenses[pkgName]))
