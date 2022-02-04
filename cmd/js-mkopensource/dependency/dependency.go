@@ -109,7 +109,7 @@ func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) (
 			"Dependecy URL: %s\n"+
 			"Licenses: %s\n"+
 			"License text:\n%#v\n", spdxId, nodeDependency.Name, nodeDependency.Version,
-			nodeDependency.URL, nodeDependency.Licenses, nodeDependency.LicenseText)
+			nodeDependency.Repository, nodeDependency.Licenses, nodeDependency.LicenseText)
 	}
 
 	sort.Strings(allLicenses)
