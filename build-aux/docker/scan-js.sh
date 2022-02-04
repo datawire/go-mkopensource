@@ -39,7 +39,7 @@ done
     echo >&2 "Getting licenses for ${file}"
     jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${file}"
   done
-) | sort | uniq >"${JS_LICENSES}"
+) >"${JS_LICENSES}"
 
 # Generate dependency information
 (

@@ -35,7 +35,7 @@ JSON_DEPS="/temp/py_dependencies.json"
 find . -name "${DEPENDENCIES}" -exec cat '{}' \; | /scripts/py-mkopensource --output-type=json > "${JSON_DEPS}"
 
 # Generate license information
-jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${JSON_DEPS}" | sed -e 's/\[\([^]]*\)]()/\1/' >"${PY_LICENSES}"
+jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${JSON_DEPS}" >"${PY_LICENSES}"
 
 # Generate dependency information
 jq -r '.dependencies[] | .name + "|" + .version + "|" + (.licenses | flatten | join(", "))' "${JSON_DEPS}" > /tmp/deps.txt

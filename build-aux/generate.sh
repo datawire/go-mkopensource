@@ -70,7 +70,7 @@ fi
     if [ -f "${BUILD_TMP}/go_licenses.txt" ]; then cat "${BUILD_TMP}/go_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/py_licenses.txt" ]; then cat "${BUILD_TMP}/py_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/js_licenses.txt" ]; then cat "${BUILD_TMP}/js_licenses.txt"; fi
-  ) | sort | uniq
+  ) | sort | uniq | sed -e 's/\[\([^]]*\)]()/\1/'
 ) >"${BUILD_HOME}/LICENSES.md"
 
 # Generate OPENSOURCE.md
