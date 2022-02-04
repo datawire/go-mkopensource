@@ -33,21 +33,22 @@ blows up in your face, asking a human to verify the result.
 ## License scanning scripts
 
 Folder `/build-aux` contains scripts to scan licenses for Go, Python 
-and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and `DEPENDENCIES.md`
+and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and 
+`DEPENDENCIES.md`
 
 The following environment variables are used to configure the 
 application behaviour.
 
 * `BUILD_HOME` Required. Location of the root folder of the repo to 
   scan.
+
 * `BUILD_TMP`: Required. Folder to use for storing temporary files.
+
 * `APPLICATION`: Required. Name of the application being scanned. 
   It's used in the header of the license files.
-* `GO_VERSION` Required. Version of Go source code to use when scanning for Go 
-  licenses.  
-  Example:
 
-  `GO_VERSION=1.17.1`
+* `GO_BUILDER` Required. Image to use for generating Python
+  dependencies.
 
 * `PYTHON_PACKAGES`: Optional. List of requirement.txt files to scan.
   Paths should be relative to `BUILD_HOME`.      
@@ -55,7 +56,7 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
-* `PYTHON_BUILDER`: Required. Image to use for generatin Python 
+* `PYTHON_BUILDER`: Required. Image to use for generating Python 
   dependencies.
 
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
@@ -70,6 +71,9 @@ application behaviour.
   Example:
 
   `NODE_VERSION=10`
+
+* `SCRIPTS_HOME`: Required. Location where `go-mkopensource` repo is 
+  checked out, relative to  `BUILD_HOME`
 
 To update license information files, set the environment variables 
 described above and run `build-aux/generate.sh`
