@@ -55,15 +55,6 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
-* `PYTHON_VERSION`: Required when `PYTHON_PACKAGES` is defined. 
-  Version of Python to use when running python
-  dependency scan.  
-  Format of version number follows the same convention of Alpine's 
-  [APK package manager](https://wiki.alpinelinux.org/wiki/Package_management#Advanced_APK_Usage)   
-  Example:
-
-  `PYTHON_VERSION=~3.8.10`
-
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
   files to scan. Paths should be relative to `BUILD_HOME`.  
   Example:
