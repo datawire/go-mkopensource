@@ -55,6 +55,9 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
+* `PYTHON_BUILDER`: Required. Image to use for generatin Python 
+  dependencies.
+
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
   files to scan. Paths should be relative to `BUILD_HOME`.  
   Example:
