@@ -63,7 +63,7 @@ if [ -n "${NPM_PACKAGES}" ]; then
     js-deps-builder /scripts/scan-js.sh ;\
 fi
 
-# Generate LICENSES.md
+# Generate DEPENDENCY_LICENSES.md
 (
   echo -e "${APPLICATION} incorporates Free and Open Source software under the following licenses:\n"
   (
@@ -71,9 +71,9 @@ fi
     if [ -f "${BUILD_TMP}/py_licenses.txt" ]; then cat "${BUILD_TMP}/py_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/js_licenses.txt" ]; then cat "${BUILD_TMP}/js_licenses.txt"; fi
   ) | sort | uniq
-) >"${BUILD_HOME}/LICENSES.md"
+) >"${BUILD_HOME}/DEPENDENCY_LICENSES.md"
 
-# Generate OPENSOURCE.md
+# Generate DEPENDENCIES.md
 (
   if [ -f "${BUILD_TMP}/go_dependencies.txt" ]; then
     cat "${BUILD_TMP}/go_dependencies.txt"
@@ -89,4 +89,4 @@ fi
     cat "${BUILD_TMP}/js_dependencies.txt"
     echo -e "\n"
   fi
-) >"${BUILD_HOME}/OPENSOURCE.md"
+) >"${BUILD_HOME}/DEPENDENCIES.md"

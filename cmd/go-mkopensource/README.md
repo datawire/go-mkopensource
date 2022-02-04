@@ -19,7 +19,7 @@ go build .
 TL;DR: run one of
 
 ```shell
-go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt --output-type=markdown >OPENSOURCE.md
+go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=txt --output-type=markdown >DEPENDENCIES.md
 go-mkopensource --gotar=/path/to/go1.17.2.src.tar.gz --package=mod --output-format=tar --output-name=mything >mything.OPENSOURCE.tar.gz
 #               \________________  ________________/ \_____  ____/ \_________________________________  _______________________________/
 #                                \/                        \/                                        \/
@@ -66,7 +66,7 @@ There are two modes of operation:
 1. `--output-format=txt` which produces a short-ish textual report of
    all of the dependencies, their versions, and their licenses.
 2. `--output-format=tar` which produces a gzipped-tarball containing
-   both the `OPENSOURCE.md` file that `--output-format=txt` generates
+   both the `DEPENDENCIES.md` file that `--output-format=txt` generates
    (plus a footer reading "The appropriate license notices and source
    code are in correspondingly named directories."), and a directory
    for each dependency, containing any necessary license notices and

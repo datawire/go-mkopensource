@@ -33,7 +33,7 @@ blows up in your face, asking a human to verify the result.
 ## License scanning scripts
 
 Folder `/build-aux` contains scripts to scan licenses for Go, Python 
-and Node.Js. Script will generate both `LICENSES.md` and `OPENSOURCE.md`
+and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and `DEPENDENCIES.md`
 
 The following environment variables are used to configure the 
 application behaviour.

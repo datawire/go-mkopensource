@@ -1,4 +1,4 @@
-/OPENSOURCE.md
+/DEPENDENCIES.md
 /example.com/other/LICENSE
 /example.com/other/third_party/json/LICENSE
 /example.com/other/third_party/json/PATENTS
