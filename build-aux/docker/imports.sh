@@ -7,8 +7,8 @@ JS_DEPENDENCIES="/temp/js_dependencies.txt"
 PY_LICENSES="/temp/py_licenses.txt"
 PY_DEPENDENCIES="/temp/py_dependencies.txt"
 
-GO_DEPENDENCIES="${BUILD_TMP}/go_dependencies.txt"
-GO_LICENSES="${BUILD_TMP}/go_licenses.txt"
+GO_DEPENDENCIES="/temp/go_dependencies.txt"
+GO_LICENSES="/temp/go_licenses.txt"
 
 generate_opensource() {
   TMP_LICENSES=/tmp/licenses.txt
