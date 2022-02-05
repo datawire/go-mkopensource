@@ -10,10 +10,13 @@ BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 . "${BUILD_SCRIPTS}/docker/imports.sh"
 
 validate_required_variable APPLICATION
+validate_required_variable BUILD_HOME
 validate_required_variable BUILD_TMP
 
+######################################################################
+# Go dependencies
+######################################################################
 echo "Scanning Go dependency licenses"
-validate_required_variable BUILD_HOME
 validate_required_variable GO_BUILDER
 validate_required_variable SCRIPTS_HOME
 
@@ -31,6 +34,9 @@ DOCKER_BUILDKIT=1 docker build -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docke
   --output "${OUTPUT_DIR}" .
 popd >/dev/null
 
+######################################################################
+# Python dependencies
+######################################################################
 if [ -n "${PYTHON_PACKAGES}" ]; then
   echo "Scanning Python dependency licenses"
   validate_required_variable PYTHON_BUILDER
@@ -47,10 +53,13 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
   popd >/dev/null
 
   docker run --rm --env APPLICATION \
-    --volume "${BUILD_TMP}":/temp \
+    --volume "$(realpath ${BUILD_TMP})":/temp \
     py-deps-builder /scripts/scan-py.sh ;\
 fi
 
+######################################################################
+# Node.Js dependencies
+######################################################################
 if [ -n "${NPM_PACKAGES}" ]; then
   echo "Scanning Node.Js dependency licenses"
   validate_required_variable NODE_VERSION
@@ -67,7 +76,7 @@ if [ -n "${NPM_PACKAGES}" ]; then
   popd >/dev/null
 
   docker run --rm --env APPLICATION \
-    --volume "${BUILD_TMP}":/temp \
+    --volume "$(realpath ${BUILD_TMP})":/temp \
     js-deps-builder /scripts/scan-js.sh ;\
 fi
 
