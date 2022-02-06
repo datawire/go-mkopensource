@@ -8,6 +8,7 @@ RUN apk --no-cache add \
     bash \
     curl \
     gawk \
+    git \
     jq
 
 WORKDIR /data
