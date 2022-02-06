@@ -39,13 +39,16 @@ and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and
 The following environment variables are used to configure the 
 application behaviour.
 
+* `APPLICATION`: Required. Name of the application being scanned.
+  It's used in the header of the license files.
+
 * `BUILD_HOME` Required. Location of the root folder of the repo to 
   scan.
 
 * `BUILD_TMP`: Required. Folder to use for storing temporary files.
 
-* `APPLICATION`: Required. Name of the application being scanned. 
-  It's used in the header of the license files.
+* `GIT_TOKEN` Required. Git token with permissions to pull 
+  repositories
 
 * `GO_BUILDER` Required. Image to use for generating Python
   dependencies.

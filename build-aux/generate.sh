@@ -19,6 +19,7 @@ validate_required_variable BUILD_TMP
 echo "Scanning Go dependency licenses"
 validate_required_variable GO_BUILDER
 validate_required_variable SCRIPTS_HOME
+validate_required_variable GIT_TOKEN
 
 pushd "${BUILD_HOME}/${SCRIPTS_HOME}/cmd/go-mkopensource" >/dev/null
 GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/" .
@@ -28,6 +29,7 @@ pushd "${BUILD_HOME}" >/dev/null
 OUTPUT_DIR="${BUILD_HOME}/${SCRIPTS_HOME}/../output"
 mkdir -p "${OUTPUT_DIR}"
 DOCKER_BUILDKIT=1 docker build -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/go_builder.dockerfile" \
+  --build-arg GIT_TOKEN="${GIT_TOKEN}" \
   --build-arg GO_BUILDER="${GO_BUILDER}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
   -t "go-deps-builder" --target license_output \

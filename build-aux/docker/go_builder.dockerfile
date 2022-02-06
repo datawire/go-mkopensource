@@ -23,6 +23,9 @@ ARG SCRIPTS_HOME
 RUN ln -s $(realpath "${SCRIPTS_HOME}/build-aux/docker/") /scripts
 RUN chmod +x /scripts/*.sh /scripts/go-mkopensource
 
+ARG GIT_TOKEN
+RUN git config --global url."https://$GIT_TOKEN:@github.com/".insteadOf "https://github.com/"
+
 WORKDIR /app
 RUN /scripts/scan-go.sh
 
