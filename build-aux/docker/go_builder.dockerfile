@@ -4,6 +4,9 @@
 ARG GO_BUILDER="base-image-unknown"
 FROM ${GO_BUILDER} as go_dependency_scanner
 
+ARG APPLICATION_TYPE
+ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
+
 RUN apk --no-cache add \
     bash \
     curl \

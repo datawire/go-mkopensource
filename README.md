@@ -42,6 +42,11 @@ application behaviour.
 * `APPLICATION`: Required. Name of the application being scanned.
   It's used in the header of the license files.
 
+* `APPLICATION_TYPE`: Required. Where will the application being 
+  scanned run.    
+  `internal` is used for anything running on Ambassador Labs servers, 
+  and `external` for anything that's deployed to customer machines. 
+
 * `BUILD_HOME` Required. Location of the root folder of the repo to 
   scan.
 
