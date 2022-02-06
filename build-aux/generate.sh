@@ -56,7 +56,7 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
 
   docker run --rm --env APPLICATION \
     --volume "$(realpath ${BUILD_TMP})":/temp \
-    py-deps-builder /scripts/scan-py.sh ;\
+    py-deps-builder /scripts/scan-py.sh
 fi
 
 ######################################################################
@@ -79,7 +79,7 @@ if [ -n "${NPM_PACKAGES}" ]; then
 
   docker run --rm --env APPLICATION \
     --volume "$(realpath ${BUILD_TMP})":/temp \
-    js-deps-builder /scripts/scan-js.sh ;\
+    js-deps-builder /scripts/scan-js.sh
 fi
 
 # Generate DEPENDENCY_LICENSES.md
