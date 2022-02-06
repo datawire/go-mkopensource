@@ -55,7 +55,7 @@ application behaviour.
 * `GIT_TOKEN` Required. Git token with permissions to pull 
   repositories
 
-* `GO_BUILDER` Required. Image to use for generating Python
+* `GO_IMAGE` Required. Image to use for generating Go
   dependencies.
 
 * `PYTHON_PACKAGES`: Optional. List of requirement.txt files to scan.
