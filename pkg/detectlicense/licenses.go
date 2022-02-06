@@ -33,7 +33,8 @@ var (
 		URL: "https://spdx.org/licenses/0BSD.html", AllowedUse: Unrestricted}
 	Apache2 = License{Name: "Apache License 2.0", NoticeFile: true,
 		URL: "https://opensource.org/licenses/Apache-2.0", AllowedUse: Unrestricted}
-	AFL21        = License{Name: "Academic Free License v2.1", URL: "https://spdx.org/licenses/AFL-2.1.html", AllowedUse: Forbidden}
+	AFL21 = License{Name: "Academic Free License v2.1", URL: "https://spdx.org/licenses/AFL-2.1.html",
+		AllowedUse: Unrestricted}
 	AGPL1Only    = License{Name: "Affero General Public License v1.0 only", AllowedUse: Forbidden}
 	AGPL1OrLater = License{Name: "Affero General Public License v1.0 or later", AllowedUse: Forbidden}
 	AGPL3Only    = License{Name: "GNU Affero General Public License v3.0 only", AllowedUse: Forbidden}
@@ -49,11 +50,12 @@ var (
 	CcBy40 = License{Name: "Creative Commons Attribution 4.0 International",
 		URL: "https://spdx.org/licenses/CC-BY-4.0.html", AllowedUse: OnAmbassadorServers}
 	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International",
-		StrongCopyleft: true, URL: "https://spdx.org/licenses/CC-BY-SA-4.0.html", AllowedUse: OnAmbassadorServers}
+		StrongCopyleft: true, URL: "https://spdx.org/licenses/CC-BY-SA-4.0.html",
+		AllowedUse: OnAmbassadorServers}
 	Cc010 = License{Name: "Creative Commons Zero v1.0 Universal",
-		URL: "https://spdx.org/licenses/CC0-1.0.html", AllowedUse: Forbidden}
+		URL: "https://spdx.org/licenses/CC0-1.0.html", AllowedUse: Unrestricted}
 	EPL10 = License{Name: "Eclipse Public License 1.0", URL: "https://spdx.org/licenses/EPL-1.0.html",
-		AllowedUse: Forbidden}
+		AllowedUse: Unrestricted}
 	GPL1Only = License{Name: "GNU General Public License v1.0 only",
 		URL: "https://spdx.org/licenses/GPL-1.0-only.html", AllowedUse: OnAmbassadorServers}
 	GPL1OrLater = License{Name: "GNU General Public License v1.0 or later",
@@ -84,10 +86,10 @@ var (
 		WeakCopyleft: true, URL: "https://spdx.org/licenses/MPL-1.1.html", AllowedUse: Unrestricted}
 	MPL2 = License{Name: "Mozilla Public License 2.0", NoticeFile: true,
 		WeakCopyleft: true, URL: "https://opensource.org/licenses/MPL-2.0", AllowedUse: Unrestricted}
-	ODCBy10 = License{Name: "Open Data Commons Attribution License v1.0", URL: "https://spdx.org/licenses/ODC-By-1.0.html",
-		AllowedUse: Forbidden}
+	ODCBy10 = License{Name: "Open Data Commons Attribution License v1.0",
+		URL: "https://spdx.org/licenses/ODC-By-1.0.html", AllowedUse: Unrestricted}
 	OFL11 = License{Name: "SIL Open Font License 1.1", URL: "https://spdx.org/licenses/OFL-1.1.html",
-		AllowedUse: Forbidden}
+		AllowedUse: Unrestricted}
 	Python20 = License{Name: "Python License 2.0", URL: "https://spdx.org/licenses/Python-2.0.html",
 		AllowedUse: Unrestricted}
 	PSF = License{Name: "Python Software Foundation license", URL: "https://spdx.org/licenses/PSF-2.0.html",
@@ -96,9 +98,9 @@ var (
 	Unicode2015  = License{Name: "Unicode License Agreement for Data Files and Software (2015)",
 		URL: "https://spdx.org/licenses/Unicode-DFS-2015.html", AllowedUse: Unrestricted}
 	Unlicense = License{Name: "The Unlicense",
-		URL: "https://spdx.org/licenses/Unlicense.html", AllowedUse: Forbidden}
+		URL: "https://spdx.org/licenses/Unlicense.html", AllowedUse: Unrestricted}
 	WTFPL = License{Name: "Do What The F*ck You Want To Public License",
-		URL: "https://spdx.org/licenses/WTFPL.html", AllowedUse: Forbidden}
+		URL: "https://spdx.org/licenses/WTFPL.html", AllowedUse: Unrestricted}
 )
 
 // https://spdx.org/licenses/
