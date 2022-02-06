@@ -25,7 +25,7 @@ type nodeDependency struct {
 	LicenseText    string `json:"licenseText"`
 }
 
-func GetDependencyInformation(r io.Reader) (dependencyInfo dependencies.DependencyInfo, err error) {
+func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.LicenseRestriction) (dependencyInfo dependencies.DependencyInfo, err error) {
 	nodeDependencies := &NodeDependencies{}
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -51,12 +51,13 @@ func GetDependencyInformation(r io.Reader) (dependencyInfo dependencies.Dependen
 		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, *dependency)
 	}
 
-	err = dependencyInfo.UpdateLicenseList()
-	if err != nil {
-		return
+	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
+		return dependencyInfo, fmt.Errorf("License validation failed: %v\n", err)
 	}
 
-	return
+	err = dependencyInfo.UpdateLicenseList()
+
+	return dependencyInfo, err
 }
 
 func getDependencyDetails(nodeDependency nodeDependency, dependencyId string) (*dependencies.Dependency, error) {
