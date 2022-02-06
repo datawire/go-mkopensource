@@ -198,7 +198,7 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 	testCases := []struct {
 		Name            string
 		dependencies    dependencies.DependencyInfo
-		allowedLicenses detectlicense.AllowedLicenseUse
+		allowedLicenses detectlicense.LicenseRestriction
 	}{
 		{
 			"Empty dependency list is always allowed",
@@ -208,7 +208,7 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 		{
 			"Unrestricted licenses are OK on Ambassador Labs servers",
 			unrestrictedLicensesOnly,
-			detectlicense.OnAmbassadorServers,
+			detectlicense.AmbassadorServers,
 		},
 		{
 			"Unrestricted licenses are OK everywhere",
@@ -218,12 +218,12 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 		{
 			"Restricted licenses are OK on Ambassador Labs servers",
 			licensesForAmbassadorServersOnly,
-			detectlicense.OnAmbassadorServers,
+			detectlicense.AmbassadorServers,
 		},
 		{
 			"Mix of licenses without forbidden is allowed on Ambassador Labs servers",
 			mixOfLicensesWithoutForbidden,
-			detectlicense.OnAmbassadorServers,
+			detectlicense.AmbassadorServers,
 		},
 	}
 
@@ -239,7 +239,7 @@ func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 	testCases := []struct {
 		Name            string
 		dependencies    dependencies.DependencyInfo
-		allowedLicenses detectlicense.AllowedLicenseUse
+		allowedLicenses detectlicense.LicenseRestriction
 	}{
 		{
 			"It's not possible to allow the use of forbidden licenses by mistake",
@@ -249,7 +249,7 @@ func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 		{
 			"Forbidden licenses are not allowed on Ambassador Labs servers",
 			forbiddenLicensesOnly,
-			detectlicense.OnAmbassadorServers,
+			detectlicense.AmbassadorServers,
 		},
 		{
 			"Forbidden licenses are not allowed on customer servers",

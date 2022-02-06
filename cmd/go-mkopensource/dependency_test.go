@@ -25,7 +25,7 @@ func TestGenerateDependencyListWhenLicenseIsAllowed(t *testing.T) {
 	_, err := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
 	require.NoError(t, err)
 
-	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, OnAmbassadorServers)
+	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
 	require.NoError(t, err)
 }
 
@@ -35,6 +35,6 @@ func TestGenerateDependencyListWhenLicenseIsForbidden(t *testing.T) {
 	_, err := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
 	require.Error(t, err)
 
-	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, OnAmbassadorServers)
+	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
 	require.Error(t, err)
 }
