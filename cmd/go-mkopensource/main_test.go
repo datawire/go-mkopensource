@@ -18,46 +18,53 @@ import (
 
 func TestSuccessfulMarkdownOutput(t *testing.T) {
 	testCases := []struct {
-		testName       string
-		testData       string
-		packagesFlag   string
-		outputTypeFlag string
-		expectedOutput string
+		testName        string
+		testData        string
+		packagesFlag    string
+		outputTypeFlag  string
+		applicationType string
 	}{
 		{
-			testName:       "01-intern-new - markdown output",
-			testData:       "testdata/01-intern-new",
-			packagesFlag:   "mod",
-			outputTypeFlag: "markdown",
-			expectedOutput: "expected_markdown_output.txt",
+			testName:        "01-intern-new - markdown output",
+			testData:        "testdata/01-intern-new",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "markdown",
+			applicationType: "external",
 		},
 		{
-			testName:       "02-replace - markdown output",
-			testData:       "testdata/02-replace",
-			packagesFlag:   "mod",
-			outputTypeFlag: "markdown",
-			expectedOutput: "expected_markdown_output.txt",
+			testName:        "02-replace - markdown output",
+			testData:        "testdata/02-replace",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "markdown",
+			applicationType: "external",
 		},
 		{
-			testName:       "04-nodeps - markdown output",
-			testData:       "testdata/04-nodeps",
-			packagesFlag:   "mod",
-			outputTypeFlag: "markdown",
-			expectedOutput: "expected_markdown_output.txt",
+			testName:        "04-nodeps - markdown output",
+			testData:        "testdata/04-nodeps",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "markdown",
+			applicationType: "external",
 		},
 		{
-			testName:       "05-subpatent - markdown output",
-			testData:       "testdata/05-subpatent",
-			packagesFlag:   "mod",
-			outputTypeFlag: "markdown",
-			expectedOutput: "expected_markdown_output.txt",
+			testName:        "05-subpatent - markdown output",
+			testData:        "testdata/05-subpatent",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "markdown",
+			applicationType: "external",
 		},
 		{
-			testName:       "06-multiple-licenses - markdown output",
-			testData:       "testdata/06-multiple-licenses",
-			packagesFlag:   "mod",
-			outputTypeFlag: "markdown",
-			expectedOutput: "expected_markdown_output.txt",
+			testName:        "One dependency with multiple licenses",
+			testData:        "testdata/06-multiple-licenses",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "markdown",
+			applicationType: "external",
+		},
+		{
+			testName:        "GPL license is allowed for internal use",
+			testData:        "testdata/08-allowed-for-internal-use-only",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "internal",
 		},
 	}
 
@@ -77,10 +84,11 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 			}()
 
 			actErr := main.Main(&main.CLIArgs{
-				OutputFormat:  "txt",
-				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       testCase.packagesFlag,
-				OutputType:    testCase.outputTypeFlag,
+				OutputFormat:    "txt",
+				GoTarFilename:   filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:         testCase.packagesFlag,
+				OutputType:      testCase.outputTypeFlag,
+				ApplicationType: testCase.applicationType,
 			})
 
 			_ = w.Close()
@@ -90,7 +98,7 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 			programOutput, readErr := io.ReadAll(r)
 			require.NoError(t, readErr)
 
-			expectedOutput := getFileContents(t, testCase.expectedOutput)
+			expectedOutput := getFileContents(t, "expected_markdown_output.txt")
 
 			assert.Equal(t, string(expectedOutput), string(programOutput))
 		})
@@ -99,46 +107,53 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 
 func TestSuccessfulJsonOutput(t *testing.T) {
 	testCases := []struct {
-		testName       string
-		testData       string
-		packagesFlag   string
-		outputTypeFlag string
-		expectedOutput string
+		testName        string
+		testData        string
+		packagesFlag    string
+		outputTypeFlag  string
+		applicationType string
 	}{
 		{
-			testName:       "01-intern-new - json output",
-			testData:       "testdata/01-intern-new",
-			packagesFlag:   "mod",
-			outputTypeFlag: "json",
-			expectedOutput: "expected_json_output.json",
+			testName:        "01-intern-new",
+			testData:        "testdata/01-intern-new",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "external",
 		},
 		{
-			testName:       "02-replace - json output",
-			testData:       "testdata/02-replace",
-			packagesFlag:   "mod",
-			outputTypeFlag: "json",
-			expectedOutput: "expected_json_output.json",
+			testName:        "02-replace",
+			testData:        "testdata/02-replace",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "external",
 		},
 		{
-			testName:       "04-nodeps - json output",
-			testData:       "testdata/04-nodeps",
-			packagesFlag:   "mod",
-			outputTypeFlag: "json",
-			expectedOutput: "expected_json_output.json",
+			testName:        "04-nodeps",
+			testData:        "testdata/04-nodeps",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "external",
 		},
 		{
-			testName:       "05-subpatent - json output",
-			testData:       "testdata/05-subpatent",
-			packagesFlag:   "mod",
-			outputTypeFlag: "json",
-			expectedOutput: "expected_json_output.json",
+			testName:        "05-subpatent",
+			testData:        "testdata/05-subpatent",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "external",
 		},
 		{
-			testName:       "06-multiple-licenses - json output",
-			testData:       "testdata/06-multiple-licenses",
-			packagesFlag:   "mod",
-			outputTypeFlag: "json",
-			expectedOutput: "expected_json_output.json",
+			testName:        "One dependency with multiple licenses",
+			testData:        "testdata/06-multiple-licenses",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "external",
+		},
+		{
+			testName:        "GPL license is allowed for internal use",
+			testData:        "testdata/08-allowed-for-internal-use-only",
+			packagesFlag:    "mod",
+			outputTypeFlag:  "json",
+			applicationType: "internal",
 		},
 	}
 
@@ -158,10 +173,11 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 			}()
 
 			actErr := main.Main(&main.CLIArgs{
-				OutputFormat:  "txt",
-				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       testCase.packagesFlag,
-				OutputType:    testCase.outputTypeFlag,
+				OutputFormat:    "txt",
+				GoTarFilename:   filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:         testCase.packagesFlag,
+				OutputType:      testCase.outputTypeFlag,
+				ApplicationType: testCase.applicationType,
 			})
 
 			_ = w.Close()
@@ -169,7 +185,7 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 			require.NoError(t, actErr)
 
 			jsonOutput := getDependencyInfoFromReader(t, r)
-			expectedJson := getDependencyInfoFromFile(t, testCase.expectedOutput)
+			expectedJson := getDependencyInfoFromFile(t, "expected_json_output.json")
 
 			assert.Equal(t, expectedJson, jsonOutput)
 		})
