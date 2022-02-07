@@ -63,23 +63,22 @@ fi
 ######################################################################
 if [ -n "${NPM_PACKAGES}" ]; then
   echo "Scanning Node.Js dependency licenses"
-  validate_required_variable NODE_VERSION
+  validate_required_variable NODE_IMAGE
 
   archive_dependencies "${BUILD_SCRIPTS}/docker/npm_dependencies.tar" "${NPM_PACKAGES}"
 
-  pushd "${BUILD_SCRIPTS}/../cmd/js-mkopensource" >/dev/null
-  GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_SCRIPTS}/docker" .
-  popd >/dev/null
-
-  pushd "${BUILD_SCRIPTS}/docker" >/dev/null
-  docker build -f js_builder.dockerfile \
-    --build-arg NODE_VERSION="${NODE_VERSION}" \
+  pushd "${BUILD_HOME}" >/dev/null
+  docker build \
+    -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/js_builder.dockerfile" \
+    --build-arg NODE_IMAGE="${NODE_IMAGE}" \
     --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
     -t "js-deps-builder" \
     --target npm_dependency_scanner .
   popd >/dev/null
 
-  docker run --rm --env APPLICATION \
+  docker run --rm \
+    --env APPLICATION \
+    --env USER_ID=${UID} \
     --volume "$(realpath ${BUILD_TMP})":/temp \
     js-deps-builder /scripts/scan-js.sh
 fi
