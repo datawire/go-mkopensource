@@ -64,7 +64,7 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
-* `PYTHON_BUILDER`: Required. Image to use for generating Python 
+* `PYTHON_IMAGE`: Required. Image to use for generating Python 
   dependencies.
 
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
