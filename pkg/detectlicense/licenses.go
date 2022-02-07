@@ -75,7 +75,13 @@ func expectsNotice(licenses map[License]struct{}) bool {
 }
 
 func DetectLicenses(packageName string, files map[string][]byte) (map[License]struct{}, error) {
-	if strings.HasPrefix(packageName, "github.com/datawire/telepresence2-proprietary/") {
+	const SmartAgentRepo = "github.com/datawire/telepresence2-proprietary/"
+	const AmbassadorCloudRepo = "github.com/datawire/saas_app/"
+	const TelepresencePro = "github.com/datawire/telepresence-pro/"
+
+	if strings.HasPrefix(packageName, SmartAgentRepo) ||
+		strings.HasPrefix(packageName, AmbassadorCloudRepo) ||
+		strings.HasPrefix(packageName, TelepresencePro) {
 		// Ambassador's proprietary software has a proprietary license
 		softwareLicenses := map[License]struct{}{AmbassadorProprietary: {}}
 		return softwareLicenses, nil
