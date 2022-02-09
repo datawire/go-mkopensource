@@ -62,7 +62,7 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.StringVar(&args.ApplicationType, "application-type", externalApplication,
 		fmt.Sprintf("Where will the application run. One of: %s, %s\n"+
 			"Internal applications are run on Ambassador servers.\n"+
-			"External applications run on client-controlled infrastructure", internalApplication, externalApplication))
+			"External applications run on customer machines", internalApplication, externalApplication))
 
 	if err := argparser.Parse(os.Args[1:]); err != nil {
 		return nil, err
