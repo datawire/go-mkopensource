@@ -255,8 +255,7 @@ func markdownOutput(w io.Writer, distribNames []string, distribs map[string]text
 }
 
 func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHeader) (dependencies.DependencyInfo, error) {
-	allLicenses := map[License]struct{}{}
-	jsonOutput := dependencies.NewDependencyInfo()
+	dependencyInfo := dependencies.NewDependencyInfo()
 
 	var errs derror.MultiError
 	for _, versionedName := range distribNames {
@@ -273,7 +272,6 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 		licenseList := make([]string, 0, len(licenses))
 		for license := range licenses {
 			licenseList = append(licenseList, license.Name)
-			allLicenses[license] = struct{}{}
 		}
 		sort.Strings(licenseList)
 
@@ -282,12 +280,12 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 			Version:  distribVersion,
 			Licenses: licenseList,
 		}
-		jsonOutput.Dependencies = append(jsonOutput.Dependencies, dependencyDetails)
+		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, dependencyDetails)
 	}
 
 	if len(errs) > 0 {
 		err := errs
-		return jsonOutput, errors.Errorf(`%v
+		return dependencyInfo, errors.Errorf(`%v
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you
@@ -298,11 +296,9 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 			err)
 	}
 
-	for license := range allLicenses {
-		jsonOutput.Licenses[license.Name] = license.URL
-	}
+	err := dependencyInfo.UpdateLicenseList()
 
-	return jsonOutput, nil
+	return dependencyInfo, err
 }
 
 func main() {
