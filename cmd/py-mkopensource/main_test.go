@@ -11,19 +11,22 @@ import (
 
 func TestMarkdownOutput(t *testing.T) {
 	testCases := []struct {
-		testName       string
-		dependencies   string
-		expectedOutput string
+		testName        string
+		dependencies    string
+		expectedOutput  string
+		applicationType ApplicationType
 	}{
 		{
 			"Different dependencies are processed correctly",
 			"./testdata/successful-generation/dependency_list.txt",
 			"./testdata/successful-generation/expected_markdown.json",
+			internalApplication,
 		},
 		{
 			"Same dependency twice with different version",
 			"./testdata/two-versions-of-a-dependency/dependency_list.txt",
 			"./testdata/two-versions-of-a-dependency/expected_markdown.json",
+			internalApplication,
 		},
 	}
 
@@ -38,7 +41,7 @@ func TestMarkdownOutput(t *testing.T) {
 			require.NoError(t, pipeErr)
 
 			// Act
-			err = Main(markdownOutputType, externalApplication, pipDependencies, w)
+			err = Main(markdownOutputType, testCase.applicationType, pipDependencies, w)
 			require.NoError(t, err)
 			_ = w.Close()
 

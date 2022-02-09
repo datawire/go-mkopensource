@@ -165,14 +165,19 @@ func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w
 	}
 	sort.Strings(distribNames)
 
+	licenseRestriction := getLicenseRestriction(applicationType)
+	dependencyInfo, err := getDependencies(distribNames, distribs, licenseRestriction)
+	if err != nil {
+		return err
+	}
+
 	switch outputType {
 	case jsonOutputType:
-		licenseRestriction := getLicenseRestriction(applicationType)
-		if err := jsonOutput(w, distribNames, distribs, licenseRestriction); err != nil {
+		if err := jsonOutput(w, dependencyInfo); err != nil {
 			return err
 		}
 	default:
-		if err := markdownOutput(w, distribNames, distribs); err != nil {
+		if err := markdownOutput(w, dependencyInfo); err != nil {
 			return err
 		}
 	}
@@ -180,16 +185,10 @@ func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w
 	return nil
 }
 
-func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader,
-	licenseRestriction LicenseRestriction) error {
-	dependencyInfo, err := getDependencies(distribNames, distribs, licenseRestriction)
-	if err != nil {
-		return err
-	}
-
+func jsonOutput(w io.Writer, dependencyInfo dependencies.DependencyInfo) error {
 	jsonString, marshalErr := json.Marshal(dependencyInfo)
 	if marshalErr != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", marshalErr)
 		os.Exit(int(MarshallJsonError))
 	}
 
@@ -203,44 +202,19 @@ func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textprot
 	return nil
 }
 
-func markdownOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader) error {
+func markdownOutput(w io.Writer, dependencyInfo dependencies.DependencyInfo) error {
 	table := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
 	_, _ = io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
 	_, _ = io.WriteString(table, "  \t----\t-------\t----------\n")
-	var errs derror.MultiError
-	for _, versionedName := range distribNames {
-		distribName := strings.Split(versionedName, "@")[0]
-		distrib := distribs[versionedName]
-		distribVersion := distrib.Get("Version")
-
-		licenses := parseLicenses(distribName, distribVersion, distrib.Get("License"))
-		if licenses == nil {
-			errs = append(errs, fmt.Errorf("distrib %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
-			continue
-		}
-		licenseList := make([]string, 0, len(licenses))
-		for license := range licenses {
-			licenseList = append(licenseList, license.Name)
-		}
-		sort.Strings(licenseList)
-		distribLicense := strings.Join(licenseList, ", ")
+	for _, dependency := range dependencyInfo.Dependencies {
+		distribName := dependency.Name
+		distribVersion := dependency.Version
+		distribLicense := strings.Join(dependency.Licenses, ", ")
 
 		if _, err := fmt.Fprintf(table, "\t%s\t%s\t%s\n", distribName, distribVersion, distribLicense); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Could not write Markdown output: %v\n", err)
 			os.Exit(int(WriteError))
 		}
-	}
-	if len(errs) > 0 {
-		err := errs
-		return errors.Errorf(`%v
-    This probably means that you added or upgraded a dependency, and the
-    automated opensource-license-checker can't confidently detect what
-    the license is.  (This is a good thing, because it is reminding you
-    to check the license of libraries before using them.)
-
-    You need to update the "github.com/datawire/ambassador/v2/cmd/py-mkopensource/main.go"
-    file to correctly detect the license.`,
-			err)
 	}
 
 	if _, err := fmt.Fprintf(w, "The Emissary-ingress Python code makes use of the following Free and Open Source\nlibraries:\n\n"); err != nil {
