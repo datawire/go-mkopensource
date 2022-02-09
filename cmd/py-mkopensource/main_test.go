@@ -54,19 +54,22 @@ func TestMarkdownOutput(t *testing.T) {
 
 func TestJsonOutput(t *testing.T) {
 	testCases := []struct {
-		testName       string
-		dependencies   string
-		expectedOutput string
+		testName        string
+		dependencies    string
+		expectedOutput  string
+		applicationType ApplicationType
 	}{
 		{
 			"Different dependencies are processed correctly",
 			"./testdata/successful-generation/dependency_list.txt",
 			"./testdata/successful-generation/expected_json.json",
+			internalApplication,
 		},
 		{
 			"Same dependency twice with different version",
 			"./testdata/two-versions-of-a-dependency/dependency_list.txt",
 			"./testdata/two-versions-of-a-dependency/expected_json.json",
+			internalApplication,
 		},
 	}
 
@@ -81,7 +84,7 @@ func TestJsonOutput(t *testing.T) {
 			require.NoError(t, pipeErr)
 
 			// Act
-			err = Main(jsonOutputType, externalApplication, pipDependencies, w)
+			err = Main(jsonOutputType, testCase.applicationType, pipDependencies, w)
 			require.NoError(t, err)
 			_ = w.Close()
 

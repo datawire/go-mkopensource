@@ -167,7 +167,8 @@ func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w
 
 	switch outputType {
 	case jsonOutputType:
-		if err := jsonOutput(w, distribNames, distribs); err != nil {
+		licenseRestriction := getLicenseRestriction(applicationType)
+		if err := jsonOutput(w, distribNames, distribs, licenseRestriction); err != nil {
 			return err
 		}
 	default:
@@ -179,8 +180,9 @@ func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w
 	return nil
 }
 
-func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader) error {
-	dependencyInfo, err := getDependencies(distribNames, distribs)
+func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader,
+	licenseRestriction LicenseRestriction) error {
+	dependencyInfo, err := getDependencies(distribNames, distribs, licenseRestriction)
 	if err != nil {
 		return err
 	}
@@ -254,7 +256,8 @@ func markdownOutput(w io.Writer, distribNames []string, distribs map[string]text
 	return nil
 }
 
-func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHeader) (dependencies.DependencyInfo, error) {
+func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHeader,
+	licenseRestriction LicenseRestriction) (dependencies.DependencyInfo, error) {
 	dependencyInfo := dependencies.NewDependencyInfo()
 
 	var errs derror.MultiError
@@ -296,6 +299,10 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 			err)
 	}
 
+	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
+		return dependencyInfo, fmt.Errorf("License validation failed: %v\n", err)
+	}
+
 	err := dependencyInfo.UpdateLicenseList()
 
 	return dependencyInfo, err
@@ -312,4 +319,15 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(int(DependencyGenerationError))
 	}
+}
+
+func getLicenseRestriction(applicationType ApplicationType) LicenseRestriction {
+	var LicenseRestriction LicenseRestriction
+	switch applicationType {
+	case internalApplication:
+		LicenseRestriction = AmbassadorServers
+	default:
+		LicenseRestriction = Unrestricted
+	}
+	return LicenseRestriction
 }
