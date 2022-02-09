@@ -144,7 +144,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 	return nil
 }
 
-func Main(outputType OutputType, r io.Reader, w io.Writer) error {
+func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w io.Writer) error {
 	distribs := make(map[string]textproto.MIMEHeader)
 
 	input := textproto.NewReader(bufio.NewReader(r))
@@ -312,7 +312,7 @@ func main() {
 		os.Exit(int(InvalidArgumentsError))
 	}
 
-	if err := Main(cliArgs.outputType, os.Stdin, os.Stdout); err != nil {
+	if err := Main(*cliArgs.outputType, *cliArgs.applicationType, os.Stdin, os.Stdout); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(int(DependencyGenerationError))
 	}

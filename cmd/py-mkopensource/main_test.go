@@ -38,7 +38,7 @@ func TestMarkdownOutput(t *testing.T) {
 			require.NoError(t, pipeErr)
 
 			// Act
-			err = Main(markdownOutputType, pipDependencies, w)
+			err = Main(markdownOutputType, externalApplication, pipDependencies, w)
 			require.NoError(t, err)
 			_ = w.Close()
 
@@ -81,7 +81,7 @@ func TestJsonOutput(t *testing.T) {
 			require.NoError(t, pipeErr)
 
 			// Act
-			err = Main(jsonOutputType, pipDependencies, w)
+			err = Main(jsonOutputType, externalApplication, pipDependencies, w)
 			require.NoError(t, err)
 			_ = w.Close()
 
