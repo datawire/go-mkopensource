@@ -19,13 +19,19 @@ func TestMarkdownOutput(t *testing.T) {
 		{
 			"Different dependencies are processed correctly",
 			"./testdata/successful-generation/dependency_list.txt",
-			"./testdata/successful-generation/expected_markdown.json",
+			"./testdata/successful-generation/expected_markdown.txt",
 			internalApplication,
 		},
 		{
 			"Same dependency twice with different version",
 			"./testdata/two-versions-of-a-dependency/dependency_list.txt",
-			"./testdata/two-versions-of-a-dependency/expected_markdown.json",
+			"./testdata/two-versions-of-a-dependency/expected_markdown.txt",
+			internalApplication,
+		},
+		{
+			"GPL licenses are allowed for internal use",
+			"./testdata/gpl-license/dependency_list.txt",
+			"./testdata/gpl-license/expected_markdown.txt",
 			internalApplication,
 		},
 	}
@@ -33,7 +39,7 @@ func TestMarkdownOutput(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
 			//Arrange
-			pipDependencies, err := os.Open("./testdata/successful-generation/dependency_list.txt")
+			pipDependencies, err := os.Open(testCase.dependencies)
 			require.NoError(t, err)
 			defer func() { _ = pipDependencies.Close() }()
 
@@ -49,7 +55,7 @@ func TestMarkdownOutput(t *testing.T) {
 			programOutput, readErr := io.ReadAll(r)
 			require.NoError(t, readErr)
 
-			expectedOutput := getFileContents(t, "./testdata/successful-generation/expected_markdown.txt")
+			expectedOutput := getFileContents(t, testCase.expectedOutput)
 			require.Equal(t, string(expectedOutput), string(programOutput))
 		})
 	}
@@ -74,6 +80,12 @@ func TestJsonOutput(t *testing.T) {
 			"./testdata/two-versions-of-a-dependency/expected_json.json",
 			internalApplication,
 		},
+		{
+			"GPL licenses are allowed for internal use",
+			"./testdata/gpl-license/dependency_list.txt",
+			"./testdata/gpl-license/expected_json.json",
+			internalApplication,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -95,6 +107,77 @@ func TestJsonOutput(t *testing.T) {
 			programOutput := getDependencyInfoFromReader(t, r)
 			expectedOutput := getDependencyInfoFromFile(t, testCase.expectedOutput)
 			require.Equal(t, expectedOutput, programOutput)
+		})
+	}
+}
+
+func TestForbiddenLicenses(t *testing.T) {
+	testCases := []struct {
+		testName             string
+		dependencies         string
+		outputType           OutputType
+		applicationType      ApplicationType
+		expectedErrorMessage string
+	}{
+		{
+			"GPL licenses are forbidden for external use - Markdown format",
+			"./testdata/gpl-license/dependency_list.txt",
+			markdownOutputType,
+			externalApplication,
+			"should not be used since it should not run on customer servers",
+		},
+		{
+			"GPL licenses are forbidden for external use - JSON format",
+			"./testdata/gpl-license/dependency_list.txt",
+			jsonOutputType,
+			externalApplication,
+			"should not be used since it should not run on customer servers",
+		},
+		{
+			"AGPL licenses are forbidden for internal use - Markdown format",
+			"./testdata/agpl-license/dependency_list.txt",
+			markdownOutputType,
+			internalApplication,
+			"is forbidden",
+		},
+		{
+			"AGPL licenses are forbidden for internal use - JSON format",
+			"./testdata/agpl-license/dependency_list.txt",
+			jsonOutputType,
+			internalApplication,
+			"is forbidden",
+		},
+		{
+			"AGPL licenses are forbidden for external use - Markdown format",
+			"./testdata/agpl-license/dependency_list.txt",
+			markdownOutputType,
+			externalApplication,
+			"is forbidden",
+		},
+		{
+			"AGPL licenses are forbidden for external use - JSON format",
+			"./testdata/agpl-license/dependency_list.txt",
+			jsonOutputType,
+			externalApplication,
+			"is forbidden",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.testName, func(t *testing.T) {
+			//Arrange
+			pipDependencies, err := os.Open(testCase.dependencies)
+			require.NoError(t, err)
+			defer func() { _ = pipDependencies.Close() }()
+
+			_, w, pipeErr := os.Pipe()
+			require.NoError(t, pipeErr)
+
+			// Act
+			err = Main(markdownOutputType, testCase.applicationType, pipDependencies, w)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), testCase.expectedErrorMessage)
+			_ = w.Close()
 		})
 	}
 }

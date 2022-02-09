@@ -102,6 +102,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 	}
 
 	static, ok := map[string][]License{
+		"AGPL-3.0-or-later":           {AGPL3OrLater},
 		"ASL 2":                       {Apache2},
 		"Apache":                      {Apache2},
 		"Apache 2":                    {Apache2},
