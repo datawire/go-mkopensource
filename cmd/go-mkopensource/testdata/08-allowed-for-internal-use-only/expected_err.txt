@@ -1,1 +1,2 @@
-License validation failed: license 'GNU General Public License v1.0 or later' should not be used since it should not run on customer servers
+License validation failed: Dependency 'example.com/gpl' uses license 'GNU General Public License v1.0 or later' which is not allowed on applications that run on customer machines.
+Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 for more details.

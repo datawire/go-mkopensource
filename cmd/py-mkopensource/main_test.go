@@ -124,14 +124,14 @@ func TestForbiddenLicenses(t *testing.T) {
 			"./testdata/gpl-license/dependency_list.txt",
 			markdownOutputType,
 			externalApplication,
-			"should not be used since it should not run on customer servers",
+			"Dependency 'docutils' uses license 'GNU General Public License v3.0 or later' which is not allowed on applications that run on customer machines.",
 		},
 		{
 			"GPL licenses are forbidden for external use - JSON format",
 			"./testdata/gpl-license/dependency_list.txt",
 			jsonOutputType,
 			externalApplication,
-			"should not be used since it should not run on customer servers",
+			"Dependency 'docutils' uses license 'GNU General Public License v3.0 or later' which is not allowed on applications that run on customer machines.",
 		},
 		{
 			"AGPL licenses are forbidden for internal use - Markdown format",
