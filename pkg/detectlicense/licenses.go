@@ -93,7 +93,7 @@ var (
 		Restriction: Unrestricted}
 	PSF = License{Name: "Python Software Foundation license", URL: "https://spdx.org/licenses/PSF-2.0.html",
 		Restriction: Unrestricted}
-	PublicDomain = License{Name: "Public domain"}
+	PublicDomain = License{Name: "Public domain", Restriction: Unrestricted}
 	Unicode2015  = License{Name: "Unicode License Agreement for Data Files and Software (2015)",
 		URL: "https://spdx.org/licenses/Unicode-DFS-2015.html", Restriction: Unrestricted}
 	Unlicense = License{Name: "The Unlicense",
