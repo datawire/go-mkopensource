@@ -17,6 +17,9 @@ RUN cp scan-py.sh imports.sh python_dependencies.tar /out/
 
 FROM ${PYTHON_IMAGE} as python_dependency_scanner
 
+ARG APPLICATION_TYPE
+ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
+
 RUN apk --no-cache add \
     bash \
     gawk \
