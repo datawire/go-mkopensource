@@ -89,6 +89,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"docutils", "0.17.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"docutils", "0.18.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"orjson", "3.3.1", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+		{"orjson", "3.6.0", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
 		{"orjson", "3.6.6", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
 		{"packaging", "20.4", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
 		{"packaging", "20.9", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
