@@ -44,7 +44,7 @@ generate-dependency-info:
 			exit 1; \
 		fi; \
 		\
-		export APPLICATION="Ambassador Cloud"; \
+		export APPLICATION="go-mkopensource"; \
 		export APPLICATION_TYPE="internal"; \
 		export BUILD_HOME='.'; \
 		export BUILD_TMP="$(LICENSE_TMP_DIR)/output"; \
