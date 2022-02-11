@@ -18,7 +18,7 @@ jobs:
         with:
           go-version: '~${{ matrix.go_version }}'
       - run: go test -race ./...
-      - run: make generate
+      - run: make generate-dependency-info
   lint:
     runs-on: ubuntu-latest
     steps:
