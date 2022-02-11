@@ -9,7 +9,9 @@ import (
 //nolint:gochecknoglobals // Can't be a constant
 var licensesByName = map[string]License{
 	AmbassadorProprietary.Name: AmbassadorProprietary,
+	ZeroBSD.Name:               ZeroBSD,
 	Apache2.Name:               Apache2,
+	AFL21.Name:                 AFL21,
 	AGPL1Only.Name:             AGPL1Only,
 	AGPL1OrLater.Name:          AGPL1OrLater,
 	AGPL3Only.Name:             AGPL3Only,
@@ -17,7 +19,11 @@ var licensesByName = map[string]License{
 	BSD1.Name:                  BSD1,
 	BSD2.Name:                  BSD2,
 	BSD3.Name:                  BSD3,
+	Cc010.Name:                 Cc010,
+	CcBy30.Name:                CcBy30,
+	CcBy40.Name:                CcBy40,
 	CcBySa40.Name:              CcBySa40,
+	EPL10.Name:                 EPL10,
 	GPL1Only.Name:              GPL1Only,
 	GPL1OrLater.Name:           GPL1OrLater,
 	GPL2Only.Name:              GPL2Only,
@@ -32,10 +38,17 @@ var licensesByName = map[string]License{
 	LGPL3Only.Name:             LGPL3Only,
 	LGPL3OrLater.Name:          LGPL3OrLater,
 	MIT.Name:                   MIT,
+	MPL11.Name:                 MPL11,
 	MPL2.Name:                  MPL2,
+	ODCBy10.Name:               ODCBy10,
+	OFL11.Name:                 OFL11,
 	PSF.Name:                   PSF,
+	Python20.Name:              Python20,
 	PublicDomain.Name:          PublicDomain,
-	Unicode2015.Name:           Unicode2015}
+	Unicode2015.Name:           Unicode2015,
+	Unlicense.Name:             Unlicense,
+	WTFPL.Name:                 WTFPL,
+}
 
 type DependencyInfo struct {
 	Dependencies []Dependency      `json:"dependencies"`

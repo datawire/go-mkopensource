@@ -1,0 +1,1 @@
+License validation failed: license 'GNU General Public License v1.0 or later' should not be used since it should not run on customer servers

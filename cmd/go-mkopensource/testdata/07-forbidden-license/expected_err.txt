@@ -1,0 +1,1 @@
+License validation failed: license 'GNU Affero General Public License v3.0 or later' is forbidden

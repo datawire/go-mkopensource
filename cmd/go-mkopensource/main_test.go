@@ -192,6 +192,16 @@ func TestErrorScenarios(t *testing.T) {
 			packagesFlag:   "mod",
 			outputTypeFlag: "full",
 		},
+		{
+			testData:       "testdata/07-forbidden-license",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
+		{
+			testData:       "testdata/08-allowed-for-internal-use-only",
+			packagesFlag:   "mod",
+			outputTypeFlag: "full",
+		},
 	}
 
 	workingDir := getWorkingDir(t)
@@ -207,16 +217,17 @@ func TestErrorScenarios(t *testing.T) {
 			expectedError := getFileContents(t, "expected_err.txt")
 
 			actErr := main.Main(&main.CLIArgs{
-				OutputFormat:  "txt",
-				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       testCase.packagesFlag,
-				OutputType:    testCase.outputTypeFlag,
+				OutputFormat:    "txt",
+				GoTarFilename:   filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:         testCase.packagesFlag,
+				OutputType:      testCase.outputTypeFlag,
+				ApplicationType: "external",
 			})
 
 			if assert.Error(t, actErr) {
 				// Use this instead of assert.EqualError so that we diff
 				// output, which is helpful for long strings.
-				assert.Equal(t, strings.TrimSpace(string(expectedError)), actErr.Error())
+				assert.Equal(t, strings.TrimSpace(string(expectedError)), strings.TrimSpace(actErr.Error()))
 			}
 		})
 	}
@@ -274,7 +285,7 @@ func TestTarOutput(t *testing.T) {
 				if assert.Error(t, actErr) {
 					// Use this instead of assert.EqualError so that we diff
 					// output, which is helpful for long strings.
-					assert.Equal(t, strings.TrimSpace(string(expectedError)), actErr.Error())
+					assert.Equal(t, strings.TrimSpace(string(expectedError)), strings.TrimSpace(actErr.Error()))
 				}
 			}
 		})
