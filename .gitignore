@@ -2,6 +2,7 @@
 cmd/go-mkopensource/go-mkopensource
 cmd/py-mkopensource/py-mkopensource
 cmd/js-mkopensource/js-mkopensource
+licenses.tmp
 
 # `go mod vendor`
 vendor/
