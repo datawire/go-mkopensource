@@ -18,7 +18,7 @@ jobs:
         with:
           go-version: '~${{ matrix.go_version }}'
       - run: go test -race ./...
-      - run: make generate-dependency-info
+      - run: GIT_TOKEN=${GITHUB_TOKEN} make generate-dependency-info
   lint:
     runs-on: ubuntu-latest
     steps:
