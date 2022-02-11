@@ -1,4 +1,4 @@
-/OPENSOURCE.md
+/DEPENDENCIES.md
 /github.com/davecgh/go-spew/LICENSE
 /github.com/josharian/intern/LICENSE.md
 /github.com/pmezard/go-difflib/LICENSE

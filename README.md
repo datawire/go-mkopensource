@@ -29,3 +29,53 @@ blows up in your face, asking a human to verify the result.
 
 [go-license-detector]: https://github.com/go-enry/go-license-detector
 [licensee]: https://github.com/licensee/licensee
+
+## License scanning scripts
+
+Folder `/build-aux` contains scripts to scan licenses for Go, Python 
+and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and `DEPENDENCIES.md`
+
+The following environment variables are used to configure the 
+application behaviour.
+
+* `BUILD_HOME` Required. Location of the root folder of the repo to 
+  scan.
+* `BUILD_TMP`: Required. Folder to use for storing temporary files.
+* `APPLICATION`: Required. Name of the application being scanned. 
+  It's used in the header of the license files.
+* `GO_VERSION` Required. Version of Go source code to use when scanning for Go 
+  licenses.  
+  Example:
+
+  `GO_VERSION=1.17.1`
+
+* `PYTHON_PACKAGES`: Optional. List of requirement.txt files to scan.
+  Paths should be relative to `BUILD_HOME`.      
+  Example:
+
+  `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
+
+* `PYTHON_VERSION`: Required when `PYTHON_PACKAGES` is defined. 
+  Version of Python to use when running python
+  dependency scan.  
+  Format of version number follows the same convention of Alpine's 
+  [APK package manager](https://wiki.alpinelinux.org/wiki/Package_management#Advanced_APK_Usage)   
+  Example:
+
+  `PYTHON_VERSION=~3.8.10`
+
+* `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
+  files to scan. Paths should be relative to `BUILD_HOME`.  
+  Example:
+
+  `export NPM_PACKAGES="./tools/sandbox/grpc_web/package.json ./tools/sandbox/grpc_web/package-lock.json"`
+
+* `NODE_VERSION`: Required when `NPM_PACKAGES` is defined. Version 
+  of Node.JS to use when running npm dependency scan. Only valid
+  version numbers (X.Y.Z) are allowed.  
+  Example:
+
+  `NODE_VERSION=10`
+
+To update license information files, set the environment variables 
+described above and run `build-aux/generate.sh`

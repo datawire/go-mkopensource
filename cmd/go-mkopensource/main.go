@@ -370,7 +370,7 @@ func Main(args *CLIArgs) error {
 		}
 
 		tarFiles := make(map[string][]byte)
-		tarFiles["OPENSOURCE.md"] = readme.Bytes()
+		tarFiles["DEPENDENCIES.md"] = readme.Bytes()
 		for pkgName := range pkgFiles {
 			ambassadorProprietary := isAmbassadorProprietary(pkgLicenses[pkgName])
 			switch {

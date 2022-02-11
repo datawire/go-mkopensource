@@ -33,8 +33,9 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		// of the BSD license is it?).  We pin the exact versions so
 		// that a human has to go make sure that the license didn't
 		// change when upgrading.
-		{"CacheControl", "0.12.6", "UNKNOWN"}:          {Apache2},
 		{"Babel", "2.8.0", "BSD"}:                      {BSD3},
+		{"CacheControl", "0.12.6", "UNKNOWN"}:          {Apache2},
+		{"CacheControl", "0.12.10", "UNKNOWN"}:         {Apache2},
 		{"Click", "7.0", "BSD"}:                        {BSD3},
 		{"Flask", "1.0.2", "BSD"}:                      {BSD3},
 		{"GitPython", "3.1.8", "UNKNOWN"}:              {BSD3},
@@ -44,6 +45,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"Sphinx", "3.2.1", "BSD"}:                     {BSD2, BSD3, MIT},
 		{"chardet", "3.0.4", "LGPL"}:                   {LGPL21OrLater},
 		{"colorama", "0.4.3", "BSD"}:                   {BSD3},
+		{"colorama", "0.4.4", "BSD"}:                   {BSD3},
 		{"decorator", "4.4.2", "new BSD License"}:      {BSD2},
 		{"gitdb", "4.0.5", "BSD License"}:              {BSD3},
 		{"idna", "2.6", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
@@ -58,6 +60,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"jsonschema", "3.2.0", "UNKNOWN"}:             {MIT},
 		{"lockfile", "0.12.2", "UNKNOWN"}:              {MIT},
 		{"oauthlib", "3.1.0", "BSD"}:                   {BSD3},
+		{"pep517", "0.12.0", "UNKNOWN"}:                {MIT},
 		{"pep517", "0.8.2", "UNKNOWN"}:                 {MIT},
 		{"pip-tools", "5.3.1", "BSD"}:                  {BSD3},
 		{"ptyprocess", "0.6.0", "UNKNOWN"}:             {ISC},
@@ -70,6 +73,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"semantic-version", "2.6.0", "BSD"}:           {BSD2},
 		{"semantic-version", "2.8.5", "BSD"}:           {BSD2},
 		{"smmap", "3.0.4", "BSD"}:                      {BSD3},
+		{"tomli", "1.2.2", "UNKNOWN"}:                  {MIT},
 		{"webencodings", "0.5.1", "BSD"}:               {BSD3},
 		{"websocket-client", "0.57.0", "BSD"}:          {BSD3},
 		{"zipp", "3.6.0", "UNKNOWN"}:                   {MIT},
@@ -80,7 +84,9 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"docutils", "0.17.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"docutils", "0.18.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"orjson", "3.3.1", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+		{"orjson", "3.6.6", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
 		{"packaging", "20.4", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
+		{"packaging", "20.9", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
 	}[tuple{name, version, license}]
 	if ok {
 		ret := make(map[License]struct{}, len(override))
