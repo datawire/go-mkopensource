@@ -124,11 +124,9 @@ infrastructure.
 ## Using as a library
 
 The [`github.com/datawire/go-mkopensource/pkg/detectlicense`][detectlicense]
-package is good at detecting the licenses in a file, and may be reused
-(for example, by [Emissary's `py-mkopensource`][py-mkopensource]).
+package is good at detecting the licenses in a file
 
 [detectlicense]: https://pkg.go.dev/github.com/datawire/go-mkopensource/pkg/detectlicense
-[py-mkopensource]: https://github.com/emissary-ingress/emissary/blob/master/tools/src/py-mkopensource/main.go
 
 ## Design
 

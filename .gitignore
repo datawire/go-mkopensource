@@ -1,5 +1,6 @@
 # Build output
 go-mkopensource
+py-mkopensource
 
 # `go mod vendor`
 vendor/

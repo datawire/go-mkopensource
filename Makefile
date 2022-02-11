@@ -2,6 +2,7 @@ build: go-mkopensource
 .PHONY: build
 
 go-mkopensource: FORCE
+	cd cmd/go-mkopensource; \
 	go build .
 
 check:
