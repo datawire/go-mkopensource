@@ -9,33 +9,59 @@ import (
 	"strings"
 )
 
+const (
+	licenseApproval   string = "license-approval"
+	licenseDetection  string = "license-detection"
+	internalUsageOnly string = "intended-usage"
+	licenseForbidden  string = "license-forbidden"
+)
+
 func categorizeError(errStr string) string {
 	switch {
 	case strings.Contains(errStr, "something hokey is going on"):
-		return "license-approval"
-	case strings.Contains(errStr, "unacceptable license"):
-		return "license-approval"
+		return licenseApproval
+	case strings.Contains(errStr, "is forbidden"):
+		return licenseForbidden
+	case strings.Contains(errStr, "should not be used since application will run on customer servers"):
+		return internalUsageOnly
 	default:
-		return "license-detection"
+		return licenseDetection
 	}
 }
 
 var errCategoryExplanations = map[string]string{
 
-	"license-approval": `This probably means that you added or upgraded a dependency, and the
+	licenseApproval: `This probably means that you added or upgraded a dependency, and the
 		automated opensource-license-checker objects to what it sees.  This may because of a
 		bug in the checker (github.com/datawire/go-mkopensource) that you need to go fix, or
 		it may be because of an actual license issue that prevents you from being allowed to
 		use a package, and you need to find an alternative.`,
 
-	"license-detection": `This probably means that you added or upgraded a dependency, and the
+	licenseDetection: `This probably means that you added or upgraded a dependency, and the
 		automated opensource-license-checker can't confidently detect what the license is.
 		(This is a good thing, because it is reminding you to check the license of libraries
 		before using them.)
 
-		You need to update the
-		"github.com/datawire/go-mkopensource/pkg/detectlicense/licenses.go" file to
-		correctly detect the license.`,
+		Some possible causes for  this issue are:
+
+		- Dependency is proprietary Ambassador Labs software: Update function 
+		  IsAmbassadorProprietarySoftware() to correctly identify the 
+		  dependency
+
+		- License information can't be identified: Add an entry to 
+          knownDependencies().`,
+
+	internalUsageOnly: `This means that a dependency uses a license that is not allowed for use
+		on customer servers. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
+        for more details.
+
+        To solve this error, replace the dependency with another that uses an acceptable license`,
+
+	licenseForbidden: `This means that a dependency uses a license that is not allowed for use
+		in Ambassador Labs software. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
+        for more details.
+
+        To solve this error, replace the dependency with another that uses an acceptable license`,
 }
 
 func ExplainErrors(errs []error) error {
@@ -57,13 +83,13 @@ func ExplainErrors(errs []error) error {
 		explanation := errCategoryExplanations[cat]
 		errStrs := buckets[cat]
 		if len(errs) == 1 {
-			fmt.Fprintf(msg, "1 %s error:\n", cat)
+			_, _ = fmt.Fprintf(msg, "1 %s error:\n", cat)
 		} else {
-			fmt.Fprintf(msg, "%d %s errors:\n", len(errStrs), cat)
+			_, _ = fmt.Fprintf(msg, "%d %s errors:\n", len(errStrs), cat)
 			sort.Strings(errStrs)
 		}
 		for i, errStr := range errStrs {
-			fmt.Fprintf(msg, " %d. %s\n", i+1, errStr)
+			_, _ = fmt.Fprintf(msg, " %d. %s\n", i+1, errStr)
 			if errStr == `package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)` {
 				explanation += `
 
@@ -73,7 +99,7 @@ func ExplainErrors(errs []error) error {
 					resolve this.`
 			}
 		}
-		fmt.Fprintln(msg, wordwrap(4, 72, explanation))
+		_, _ = fmt.Fprintln(msg, wordwrap(4, 72, explanation))
 	}
 	return errors.New(strings.TrimRight(msg.String(), "\n"))
 }

@@ -1,24 +1,29 @@
-3 license-approval errors:
+2 license-approval errors:
  1. package "example.com/apache-patent/a": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
  2. package "example.com/apache-patent/b": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
- 3. package "example.com/cc-sa": has an unacceptable license for use by Ambassador Labs (Creative Commons Attribution Share Alike 4.0 International)
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker objects to what it sees.  This
     may because of a bug in the checker
     (github.com/datawire/go-mkopensource) that you need to go fix, or it
     may be because of an actual license issue that prevents you from
     being allowed to use a package, and you need to find an alternative.
-2 license-detection errors:
- 1. package "example.com/gpl": unknown SPDX identifier "GPL-3.0-or-later-with-some-non-standard-exception"
- 2. package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)
+3 license-detection errors:
+ 1. package "example.com/cc-sa": has an unacceptable license for use by Ambassador Labs (Creative Commons Attribution Share Alike 4.0 International)
+ 2. package "example.com/gpl": unknown SPDX identifier "GPL-3.0-or-later-with-some-non-standard-exception"
+ 3. package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you
     to check the license of libraries before using them.)
 
-    You need to update the
-    "github.com/datawire/go-mkopensource/pkg/detectlicense/licenses.go"
-    file to correctly detect the license.
+    Some possible causes for this issue are:
+
+    - Dependency is proprietary Ambassador Labs software: Update
+    function IsAmbassadorProprietarySoftware() to correctly identify
+    the dependency
+
+    - License information can't be identified: Add an entry to
+    knownDependencies().
 
     For github.com/josharian/intern in particular, this probably means
     that you are depending on an old version; upgrading to intern

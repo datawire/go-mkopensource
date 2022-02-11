@@ -5,9 +5,14 @@
     the license is.  (This is a good thing, because it is reminding you
     to check the license of libraries before using them.)
 
-    You need to update the
-    "github.com/datawire/go-mkopensource/pkg/detectlicense/licenses.go"
-    file to correctly detect the license.
+    Some possible causes for this issue are:
+
+    - Dependency is proprietary Ambassador Labs software: Update
+    function IsAmbassadorProprietarySoftware() to correctly identify the
+    dependency
+
+    - License information can't be identified: Add an entry to
+    knownDependencies().
 
     For github.com/josharian/intern in particular, this probably means
     that you are depending on an old version; upgrading to intern
