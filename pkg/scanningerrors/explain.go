@@ -94,7 +94,7 @@ func ExplainErrors(errs []error) error {
 		}
 		for i, errStr := range errStrs {
 			_, _ = fmt.Fprintf(msg, " %d. %s\n", i+1, errStr)
-			if errStr == `package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)` {
+			if errStr == `Go package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)` {
 				explanation += `
 
 					For github.com/josharian/intern in particular, this probably

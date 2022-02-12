@@ -1,5 +1,5 @@
 1 license-detection error:
- 1. License validation failed: Dependency 'example.com/gpl' uses license 'GNU General Public License v1.0 or later' which is not allowed on applications that run on customer machines.
+ 1. License validation failed for Go: Dependency 'example.com/gpl' uses license 'GNU General Public License v1.0 or later' which is not allowed on applications that run on customer machines.
 
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what

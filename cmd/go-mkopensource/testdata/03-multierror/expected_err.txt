@@ -1,6 +1,6 @@
 2 license-approval errors:
- 1. package "example.com/apache-patent/a": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
- 2. package "example.com/apache-patent/b": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
+ 1. Go package "example.com/apache-patent/a": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
+ 2. Go package "example.com/apache-patent/b": the Apache license contains a patent-grant, but there's a separate PATENTS file; something hokey is going on
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker objects to what it sees.  This
     may because of a bug in the checker
@@ -8,8 +8,8 @@
     may be because of an actual license issue that prevents you from
     being allowed to use a package, and you need to find an alternative.
 2 license-detection errors:
- 1. package "example.com/gpl": unknown SPDX identifier "GPL-3.0-or-later-with-some-non-standard-exception"
- 2. package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)
+ 1. Go package "example.com/gpl": unknown SPDX identifier "GPL-3.0-or-later-with-some-non-standard-exception"
+ 2. Go package "github.com/josharian/intern": could not identify a license for all sources (had no global LICENSE file)
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you

@@ -35,11 +35,11 @@ func GenerateDependencyList(modNames []string, modLicenses map[string]map[detect
 	}
 
 	if err := dependencyList.CheckLicenses(licenseRestriction); err != nil {
-		return dependencyList, fmt.Errorf("License validation failed: %v\n", err)
+		return dependencyList, fmt.Errorf("License validation failed for Go: %v\n", err)
 	}
 
 	if err := dependencyList.UpdateLicenseList(); err != nil {
-		return dependencyList, fmt.Errorf("Could not generate list of license URLs: %v\n", err)
+		return dependencyList, fmt.Errorf("Could not generate list of license URLs for Go: %v\n", err)
 	}
 
 	return dependencyList, nil

@@ -280,7 +280,7 @@ func Main(args *CLIArgs) error {
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgVersions[pkgName], pkgFiles[pkgName])
 		if err != nil {
-			err = fmt.Errorf(`package %q: %w`, pkgName, err)
+			err = fmt.Errorf(`Go package %q: %w`, pkgName, err)
 			licErrs = append(licErrs, err)
 		}
 	}
