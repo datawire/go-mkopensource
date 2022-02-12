@@ -117,11 +117,11 @@ func main() {
 		if err == pflag.ErrHelp {
 			os.Exit(int(NoError))
 		}
-		fmt.Fprintf(os.Stderr, "%s: %v\nTry '%s --help' for more information.\n", os.Args[0], err, os.Args[0])
+		_, _ = fmt.Fprintf(os.Stderr, "%s: %v\nTry '%s --help' for more information.\n", os.Args[0], err, os.Args[0])
 		os.Exit(int(InvalidArgumentsError))
 	}
 	if err := Main(args); err != nil {
-		fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
+		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
 		os.Exit(int(DependencyGenerationError))
 	}
 }
@@ -131,12 +131,12 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 	if err != nil {
 		return "", nil, err
 	}
-	defer goTarFile.Close()
+	defer func() { _ = goTarFile.Close() }()
 	goTarUncompressed, err := gzip.NewReader(goTarFile)
 	if err != nil {
 		return "", nil, err
 	}
-	defer goTarUncompressed.Close()
+	defer func() { _ = goTarUncompressed.Close() }()
 	goTar := tar.NewReader(goTarUncompressed)
 	for {
 		header, err := goTar.Next()
@@ -182,24 +182,6 @@ func licenseIsWeakCopyleft(licenses map[detectlicense.License]struct{}) bool {
 		}
 	}
 	return false
-}
-
-func licenseIsStrongCopyleft(licenses map[detectlicense.License]struct{}) bool {
-	for license := range licenses {
-		if license.StrongCopyleft {
-			return true
-		}
-	}
-	return false
-}
-
-func licenseString(licenseSet map[detectlicense.License]struct{}) string {
-	licenseList := make([]string, 0, len(licenseSet))
-	for license := range licenseSet {
-		licenseList = append(licenseList, license.Name)
-	}
-	sort.Strings(licenseList)
-	return strings.Join(licenseList, ", ")
 }
 
 func Main(args *CLIArgs) error {
@@ -296,10 +278,6 @@ func Main(args *CLIArgs) error {
 	licErrs := []error(nil)
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgVersions[pkgName], pkgFiles[pkgName])
-		if err == nil && licenseIsStrongCopyleft(pkgLicenses[pkgName]) {
-			err = fmt.Errorf("has an unacceptable license for use by Ambassador Labs (%s)",
-				licenseString(pkgLicenses[pkgName]))
-		}
 		if err != nil {
 			err = fmt.Errorf(`package %q: %w`, pkgName, err)
 			licErrs = append(licErrs, err)
@@ -364,7 +342,7 @@ func Main(args *CLIArgs) error {
 	case "txt":
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
 		if generationErr != nil {
-			return generationErr
+			return ExplainErrors([]error{generationErr})
 		}
 
 		if _, err := readme.WriteTo(os.Stdout); err != nil {
@@ -374,7 +352,7 @@ func Main(args *CLIArgs) error {
 		// Build a listing of all files to go in to the tarball
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
 		if generationErr != nil {
-			return generationErr
+			return ExplainErrors([]error{generationErr})
 		}
 
 		tarFiles := make(map[string][]byte)
@@ -401,11 +379,11 @@ func Main(args *CLIArgs) error {
 
 		// Write output
 		outputFile := os.Stdout
-		defer outputFile.Close()
+		defer func() { _ = outputFile.Close() }()
 		outputCompressed := gzip.NewWriter(outputFile)
-		defer outputCompressed.Close()
+		defer func() { _ = outputCompressed.Close() }()
 		outputTar := tar.NewWriter(outputCompressed)
-		defer outputTar.Close()
+		defer func() { _ = outputTar.Close() }()
 
 		filenames := make([]string, 0, len(tarFiles))
 		for filename := range tarFiles {
@@ -510,8 +488,8 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 	}
 
 	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
-	io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
-	io.WriteString(table, "  \t----\t-------\t----------\n")
+	_, _ = io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
+	_, _ = io.WriteString(table, "  \t----\t-------\t----------\n")
 
 	for _, dependency := range dependencyList.Dependencies {
 		depLicenses := strings.Join(dependency.Licenses, ", ")
@@ -519,9 +497,9 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 			panic(fmt.Errorf("this should not happen: empty license string for %q", dependency.Name))
 		}
 
-		fmt.Fprintf(table, "\t%s\t%s\t%s\n", dependency.Name, dependency.Version, depLicenses)
+		_, _ = fmt.Fprintf(table, "\t%s\t%s\t%s\n", dependency.Name, dependency.Version, depLicenses)
 	}
-	table.Flush()
+	_ = table.Flush()
 	return nil
 }
 

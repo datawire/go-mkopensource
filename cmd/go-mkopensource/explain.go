@@ -49,7 +49,9 @@ var errCategoryExplanations = map[string]string{
 		  dependency
 
 		- License information can't be identified: Add an entry to 
-          knownDependencies().`,
+          hardcodedGoDependencies, hardcodedPythonDependencies 
+          or hardcodedJsDependencies depending on the dependency that
+          was not identified.`,
 
 	internalUsageOnly: `This means that a dependency uses a license that is not allowed for use
 		on customer servers. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 

@@ -18,12 +18,11 @@ const (
 )
 
 type License struct {
-	Name           string
-	NoticeFile     bool               // are NOTICE files "a thing" for this license?
-	WeakCopyleft   bool               // requires that library to be open-source
-	StrongCopyleft bool               // requires the resulting program to be open-source
-	URL            string             // Location of the license description
-	Restriction    LicenseRestriction // Where is this license allowed
+	Name         string
+	NoticeFile   bool               // are NOTICE files "a thing" for this license?
+	WeakCopyleft bool               // requires that library to be open-source
+	URL          string             // Location of the license description
+	Restriction  LicenseRestriction // Where is this license allowed
 }
 
 //nolint:gochecknoglobals // Would be 'const'.
@@ -50,7 +49,7 @@ var (
 	CcBy40 = License{Name: "Creative Commons Attribution 4.0 International",
 		URL: "https://spdx.org/licenses/CC-BY-4.0.html", Restriction: AmbassadorServers}
 	CcBySa40 = License{Name: "Creative Commons Attribution Share Alike 4.0 International",
-		StrongCopyleft: true, URL: "https://spdx.org/licenses/CC-BY-SA-4.0.html", Restriction: AmbassadorServers}
+		URL: "https://spdx.org/licenses/CC-BY-SA-4.0.html", Restriction: AmbassadorServers}
 	Cc010 = License{Name: "Creative Commons Zero v1.0 Universal",
 		URL: "https://spdx.org/licenses/CC0-1.0.html", Restriction: Unrestricted}
 	EPL10 = License{Name: "Eclipse Public License 1.0", URL: "https://spdx.org/licenses/EPL-1.0.html",
@@ -63,7 +62,7 @@ var (
 		URL: "https://spdx.org/licenses/GPL-2.0-only.html", Restriction: AmbassadorServers}
 	GPL2OrLater = License{Name: "GNU General Public License v2.0 or later",
 		URL: "https://spdx.org/licenses/GPL-2.0-or-later.html", Restriction: AmbassadorServers}
-	GPL3Only = License{Name: "GNU General Public License v3.0 only", StrongCopyleft: true,
+	GPL3Only = License{Name: "GNU General Public License v3.0 only",
 		URL: "https://spdx.org/licenses/GPL-3.0.html", Restriction: AmbassadorServers}
 	GPL3OrLater = License{Name: "GNU General Public License v3.0 or later",
 		URL: "https://spdx.org/licenses/GPL-3.0-or-later.html", Restriction: AmbassadorServers}

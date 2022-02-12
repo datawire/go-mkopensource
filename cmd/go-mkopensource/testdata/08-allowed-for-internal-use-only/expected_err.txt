@@ -1,2 +1,18 @@
-License validation failed: Dependency 'example.com/gpl' uses license 'GNU General Public License v1.0 or later' which is not allowed on applications that run on customer machines.
-Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 for more details.
+1 license-detection error:
+ 1. License validation failed: Dependency 'example.com/gpl' uses license 'GNU General Public License v1.0 or later' which is not allowed on applications that run on customer machines.
+
+    This probably means that you added or upgraded a dependency, and the
+    automated opensource-license-checker can't confidently detect what
+    the license is.  (This is a good thing, because it is reminding you
+    to check the license of libraries before using them.)
+
+    Some possible causes for this issue are:
+
+    - Dependency is proprietary Ambassador Labs software: Update
+    function IsAmbassadorProprietarySoftware() to correctly identify the
+    dependency
+
+    - License information can't be identified: Add an entry to
+    hardcodedGoDependencies, hardcodedPythonDependencies or
+    hardcodedJsDependencies depending on the dependency that was not
+    identified.

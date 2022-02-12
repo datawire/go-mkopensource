@@ -12,7 +12,9 @@
     dependency
 
     - License information can't be identified: Add an entry to
-    knownDependencies().
+    hardcodedGoDependencies, hardcodedPythonDependencies or
+    hardcodedJsDependencies depending on the dependency that was not
+    identified.
 
     For github.com/josharian/intern in particular, this probably means
     that you are depending on an old version; upgrading to intern
