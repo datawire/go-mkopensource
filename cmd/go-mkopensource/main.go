@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"io"
 	"os"
 	"os/exec"
@@ -284,7 +285,7 @@ func Main(args *CLIArgs) error {
 		}
 	}
 	if len(licErrs) > 0 {
-		return ExplainErrors(licErrs)
+		return scanningerrors.ExplainErrors(licErrs)
 	}
 
 	// Group packages by module & collect module info
@@ -342,7 +343,7 @@ func Main(args *CLIArgs) error {
 	case "txt":
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
 		if generationErr != nil {
-			return ExplainErrors([]error{generationErr})
+			return scanningerrors.ExplainErrors([]error{generationErr})
 		}
 
 		if _, err := readme.WriteTo(os.Stdout); err != nil {
@@ -352,7 +353,7 @@ func Main(args *CLIArgs) error {
 		// Build a listing of all files to go in to the tarball
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
 		if generationErr != nil {
-			return ExplainErrors([]error{generationErr})
+			return scanningerrors.ExplainErrors([]error{generationErr})
 		}
 
 		tarFiles := make(map[string][]byte)
@@ -444,7 +445,7 @@ func generateOutput(packages string, outputFormat string, outputType string, lic
 
 	if outputFormat == "tar" {
 		output.WriteString("\n")
-		output.WriteString(wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
+		output.WriteString(scanningerrors.Wordwrap(0, 75, "The appropriate license notices and source code are in correspondingly named directories.") + "\n")
 	}
 	return output, nil
 }
@@ -456,27 +457,27 @@ func markdownHeader(packages string, mainMods map[string]struct{}, readme *bytes
 			modnames = append(modnames, modname)
 		}
 		if len(mainMods) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])) + "\n")
+			readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go module %q incorporates the following Free and Open Source software:", modnames[0])) + "\n")
 		} else {
 			sort.Strings(modnames)
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
+			readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go modules %q incorporate the following Free and Open Source software:", modnames)) + "\n")
 		}
 		return
 	}
 
 	if len(mainLibPkgs) == 0 {
 		if len(mainCmdPkgs) == 1 {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
+			readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The program %q incorporates the following Free and Open Source software:", path.Base(mainCmdPkgs[0]))) + "\n")
 		} else {
-			readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", packages)) + "\n")
+			readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The programs %q incorporate the following Free and Open Source software:", packages)) + "\n")
 		}
 		return
 	}
 
 	if len(mainLibPkgs) == 1 {
-		readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
+		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
 	} else {
-		readme.WriteString(wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
+		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
 	}
 }
 

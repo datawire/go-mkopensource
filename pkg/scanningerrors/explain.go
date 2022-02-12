@@ -1,6 +1,6 @@
 // -*- fill-column: 100 -*-
 
-package main
+package scanningerrors
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	licenseApproval   string = "license-approval"
+	licenseIssue      string = "license-approval"
 	licenseDetection  string = "license-detection"
 	internalUsageOnly string = "intended-usage"
 	licenseForbidden  string = "license-forbidden"
@@ -19,7 +19,9 @@ const (
 func categorizeError(errStr string) string {
 	switch {
 	case strings.Contains(errStr, "something hokey is going on"):
-		return licenseApproval
+		return licenseIssue
+	case strings.Contains(errStr, "is missing a license identifier"):
+		return licenseDetection
 	case strings.Contains(errStr, "is forbidden"):
 		return licenseForbidden
 	case strings.Contains(errStr, "should not be used since application will run on customer servers"):
@@ -31,7 +33,7 @@ func categorizeError(errStr string) string {
 
 var errCategoryExplanations = map[string]string{
 
-	licenseApproval: `This probably means that you added or upgraded a dependency, and the
+	licenseIssue: `This probably means that you added or upgraded a dependency, and the
 		automated opensource-license-checker objects to what it sees.  This may because of a
 		bug in the checker (github.com/datawire/go-mkopensource) that you need to go fix, or
 		it may be because of an actual license issue that prevents you from being allowed to
@@ -101,7 +103,7 @@ func ExplainErrors(errs []error) error {
 					resolve this.`
 			}
 		}
-		_, _ = fmt.Fprintln(msg, wordwrap(4, 72, explanation))
+		_, _ = fmt.Fprintln(msg, Wordwrap(4, 72, explanation))
 	}
 	return errors.New(strings.TrimRight(msg.String(), "\n"))
 }

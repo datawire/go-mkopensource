@@ -1,4 +1,4 @@
-package main
+package scanningerrors
 
 import (
 	"testing"
@@ -64,7 +64,7 @@ func TestWordWrap(t *testing.T) {
 	for tcName, tcData := range testcases {
 		tcData := tcData
 		t.Run(tcName, func(t *testing.T) {
-			actualOutput := wordwrap(
+			actualOutput := Wordwrap(
 				tcData.InputIndent,
 				tcData.InputWidth,
 				tcData.InputString)
