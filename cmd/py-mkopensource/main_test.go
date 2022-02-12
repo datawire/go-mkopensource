@@ -111,7 +111,7 @@ func TestJsonOutput(t *testing.T) {
 	}
 }
 
-func TestForbiddenLicenses(t *testing.T) {
+func TestLicenseErrors(t *testing.T) {
 	testCases := []struct {
 		testName             string
 		dependencies         string
@@ -160,6 +160,13 @@ func TestForbiddenLicenses(t *testing.T) {
 			jsonOutputType,
 			externalApplication,
 			"is forbidden",
+		},
+		{
+			"Unknown licenses are identified correctly",
+			"./testdata/unknown-license/dependency_list.txt",
+			jsonOutputType,
+			externalApplication,
+			"Python package \"CacheControl\" \"1.99.6\": Could not parse license-string \"UNKNOWN\"",
 		},
 	}
 

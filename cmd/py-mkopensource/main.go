@@ -4,14 +4,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"io"
 	"net/textproto"
 	"os"
 	"sort"
 	"strings"
 	"text/tabwriter"
-
-	"github.com/pkg/errors"
 
 	"github.com/datawire/dlib/derror"
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
@@ -24,6 +23,7 @@ type tuple struct {
 	License string
 }
 
+//nolint:gochecknoglobals // Would be 'const'.
 var hardcodedPythonDependencies = map[tuple][]License{
 	// These are packages that don't have sufficient metadata to get
 	// the license normally.  Either the license isn't specified in
@@ -250,7 +250,7 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 
 		licenses := parseLicenses(distribName, distribVersion, distrib.Get("License"))
 		if licenses == nil {
-			errs = append(errs, fmt.Errorf("distrib %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
+			errs = append(errs, fmt.Errorf("Python package %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
 			continue
 		}
 		licenseList := make([]string, 0, len(licenses))
@@ -268,25 +268,19 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 	}
 
 	if len(errs) > 0 {
-		err := errs
-		return dependencyInfo, errors.Errorf(`%v
-    This probably means that you added or upgraded a dependency, and the
-    automated opensource-license-checker can't confidently detect what
-    the license is.  (This is a good thing, because it is reminding you
-    to check the license of libraries before using them.)
-
-    You need to update the "github.com/datawire/ambassador/v2/cmd/py-mkopensource/main.go"
-    file to correctly detect the license.`,
-			err)
+		return dependencyInfo, scanningerrors.ExplainErrors(errs)
 	}
 
 	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
-		return dependencyInfo, fmt.Errorf("License validation failed: %v\n", err)
+		formattedError := fmt.Errorf("License validation failed for python: %v\n", err)
+		return dependencyInfo, scanningerrors.ExplainErrors([]error{formattedError})
 	}
 
-	err := dependencyInfo.UpdateLicenseList()
+	if err := dependencyInfo.UpdateLicenseList(); err != nil {
+		return dependencyInfo, fmt.Errorf("Could not generate list of license URLs for Python: %v\n", err)
+	}
 
-	return dependencyInfo, err
+	return dependencyInfo, nil
 }
 
 func main() {
