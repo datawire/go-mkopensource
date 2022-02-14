@@ -291,7 +291,7 @@ func main() {
 	}
 
 	if err := Main(*cliArgs.outputType, *cliArgs.applicationType, os.Stdin, os.Stdout); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(int(DependencyGenerationError))
 	}
 }
