@@ -248,22 +248,27 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 		distrib := distribs[versionedName]
 		distribVersion := distrib.Get("Version")
 
+		dependencyDetails := dependencies.Dependency{
+			Name:    distribName,
+			Version: distribVersion,
+		}
+
 		licenses := parseLicenses(distribName, distribVersion, distrib.Get("License"))
 		if licenses == nil {
-			errs = append(errs, fmt.Errorf("Python package %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
+			errs = append(errs, fmt.Errorf("distrib %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
 			continue
 		}
+
 		licenseList := make([]string, 0, len(licenses))
 		for license := range licenses {
 			licenseList = append(licenseList, license.Name)
+			if err := dependencies.CheckLicenseRestrictions(dependencyDetails, license.Name, licenseRestriction); err != nil {
+				errs = append(errs, err)
+			}
 		}
 		sort.Strings(licenseList)
 
-		dependencyDetails := dependencies.Dependency{
-			Name:     distribName,
-			Version:  distribVersion,
-			Licenses: licenseList,
-		}
+		dependencyDetails.Licenses = licenseList
 		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, dependencyDetails)
 	}
 
@@ -271,13 +276,8 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 		return dependencyInfo, scanningerrors.ExplainErrors(errs)
 	}
 
-	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
-		formattedError := fmt.Errorf("License validation failed for python: %v\n", err)
-		return dependencyInfo, scanningerrors.ExplainErrors([]error{formattedError})
-	}
-
 	if err := dependencyInfo.UpdateLicenseList(); err != nil {
-		return dependencyInfo, fmt.Errorf("Could not generate list of license URLs for Python: %v\n", err)
+		return dependencyInfo, fmt.Errorf("Could not generate list of license URLs: %v\n", err)
 	}
 
 	return dependencyInfo, nil
@@ -291,7 +291,7 @@ func main() {
 	}
 
 	if err := Main(*cliArgs.outputType, *cliArgs.applicationType, os.Stdin, os.Stdout); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
 		os.Exit(int(DependencyGenerationError))
 	}
 }
