@@ -138,14 +138,14 @@ func TestLicenseErrors(t *testing.T) {
 			"./testdata/agpl-license/dependency_list.txt",
 			markdownOutputType,
 			internalApplication,
-			"is forbidden",
+			"Dependency 'infomap@2.0.2' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden",
 		},
 		{
 			"AGPL licenses are forbidden for internal use - JSON format",
 			"./testdata/agpl-license/dependency_list.txt",
 			jsonOutputType,
 			internalApplication,
-			"is forbidden",
+			"Dependency 'infomap@2.0.2' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden",
 		},
 		{
 			"AGPL licenses are forbidden for external use - Markdown format",
