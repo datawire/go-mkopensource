@@ -55,17 +55,15 @@ var errCategoryExplanations = map[string]string{
           or hardcodedJsDependencies depending on the dependency that
           was not identified.`,
 
-	internalUsageOnly: `This means that a dependency uses a license that is not allowed for use
-		on customer machines. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
-        for more details.
+	internalUsageOnly: `To solve this error, replace the dependency with another that uses an acceptable license.
 
-        To solve this error, replace the dependency with another that uses an acceptable license.`,
+        Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
+        for more details.`,
 
-	licenseForbidden: `This means that a dependency uses a license that is not allowed for use
-		in Ambassador Labs software. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
-        for more details.
+	licenseForbidden: `To solve this error, replace the dependency with another that uses an acceptable license.
 
-        To solve this error, replace the dependency with another that uses an acceptable license.`,
+        Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
+        for more details.`,
 }
 
 func ExplainErrors(errs []error) error {
