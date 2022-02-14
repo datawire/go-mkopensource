@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"io"
 	"os"
@@ -339,9 +340,14 @@ func Main(args *CLIArgs) error {
 	// Generate the readme file.
 	licenseRestriction := getLicenseRestriction(args.ApplicationType)
 
+	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, licenseRestriction)
+	if generationErr != nil {
+		return scanningerrors.ExplainErrors([]error{generationErr})
+	}
+
 	switch args.OutputFormat {
 	case "txt":
-		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, mainMods, mainLibPkgs, mainCmdPkgs, dependencyList)
 		if generationErr != nil {
 			return scanningerrors.ExplainErrors([]error{generationErr})
 		}
@@ -351,7 +357,7 @@ func Main(args *CLIArgs) error {
 		}
 	case "tar":
 		// Build a listing of all files to go in to the tarball
-		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, licenseRestriction, mainMods, mainLibPkgs, mainCmdPkgs, modNames, modLicenses, modInfos, goVersion)
+		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, mainMods, mainLibPkgs, mainCmdPkgs, dependencyList)
 		if generationErr != nil {
 			return scanningerrors.ExplainErrors([]error{generationErr})
 		}
@@ -422,22 +428,19 @@ func getLicenseRestriction(applicationType string) detectlicense.LicenseRestrict
 	return LicenseRestriction
 }
 
-func generateOutput(packages string, outputFormat string, outputType string, licenseRestriction detectlicense.LicenseRestriction,
-	mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, modNames []string,
-	modLicenses map[string]map[detectlicense.License]struct{}, modInfos map[string]*golist.Module,
-	goVersion string) (*bytes.Buffer, error) {
+func generateOutput(packages string, outputFormat string, outputType string, mainMods map[string]struct{}, mainLibPkgs []string, mainCmdPkgs []string, dependencyList dependencies.DependencyInfo) (*bytes.Buffer, error) {
 	output := new(bytes.Buffer)
-
 	switch outputType {
 	case jsonOutputType:
-		err := jsonOutput(output, modNames, modLicenses, modInfos, goVersion, licenseRestriction)
+		err := jsonOutput(output, dependencyList)
 		if err != nil {
 			return nil, err
 		}
 	default:
 		markdownHeader(packages, mainMods, output, mainLibPkgs, mainCmdPkgs)
 		output.WriteString("\n")
-		err := markdownOutput(output, modNames, modLicenses, modInfos, goVersion, licenseRestriction)
+
+		err := markdownOutput(output, dependencyList)
 		if err != nil {
 			return nil, err
 		}
@@ -481,13 +484,7 @@ func markdownHeader(packages string, mainMods map[string]struct{}, readme *bytes
 	}
 }
 
-func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{},
-	modInfos map[string]*golist.Module, goVersion string, licenseRestriction detectlicense.LicenseRestriction) error {
-	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, licenseRestriction)
-	if generationErr != nil {
-		return generationErr
-	}
-
+func markdownOutput(readme *bytes.Buffer, dependencyList dependencies.DependencyInfo) error {
 	table := tabwriter.NewWriter(readme, 0, 8, 2, ' ', 0)
 	_, _ = io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
 	_, _ = io.WriteString(table, "  \t----\t-------\t----------\n")
@@ -504,13 +501,7 @@ func markdownOutput(readme *bytes.Buffer, modNames []string, modLicenses map[str
 	return nil
 }
 
-func jsonOutput(readme *bytes.Buffer, modNames []string, modLicenses map[string]map[detectlicense.License]struct{},
-	modInfos map[string]*golist.Module, goVersion string, licenseRestriction detectlicense.LicenseRestriction) error {
-	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, licenseRestriction)
-	if generationErr != nil {
-		return generationErr
-	}
-
+func jsonOutput(readme *bytes.Buffer, dependencyList dependencies.DependencyInfo) error {
 	jsonString, marshallErr := json.Marshal(dependencyList)
 	if marshallErr != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", marshallErr)
