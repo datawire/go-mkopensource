@@ -122,7 +122,7 @@ func main() {
 		os.Exit(int(InvalidArgumentsError))
 	}
 	if err := Main(args); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(int(DependencyGenerationError))
 	}
 }

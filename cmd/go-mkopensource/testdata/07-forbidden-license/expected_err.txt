@@ -1,5 +1,5 @@
 1 license-forbidden error:
- 1. License validation failed for Go: Dependency 'example.com/agpl' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden.
+ 1. License validation failed for Go: Dependency 'example.com/agpl@(modified)' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden.
 
     This means that a dependency uses a license that is not allowed for
     use in Ambassador Labs software. Refer to

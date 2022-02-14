@@ -120,12 +120,13 @@ func (d *DependencyInfo) CheckLicenses(licenseRestriction LicenseRestriction) er
 			}
 
 			if license.Restriction == Forbidden {
-				return fmt.Errorf("Dependency '%s' uses license '%s' which is forbidden.", dependency.Name, license.Name)
+				return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is forbidden.", dependency.Name,
+					dependency.Version, license.Name)
 			}
 
 			if license.Restriction < licenseRestriction {
-				return fmt.Errorf("Dependency '%s' uses license '%s' which is not allowed on applications that run on customer machines.",
-					dependency.Name, license.Name)
+				return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is not allowed on applications that run on customer machines.",
+					dependency.Name, dependency.Version, license.Name)
 			}
 		}
 	}
