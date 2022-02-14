@@ -24,7 +24,7 @@ func categorizeError(errStr string) string {
 		return licenseDetection
 	case strings.Contains(errStr, "is forbidden"):
 		return licenseForbidden
-	case strings.Contains(errStr, "should not be used since application will run on customer servers"):
+	case strings.Contains(errStr, "which is not allowed on applications"):
 		return internalUsageOnly
 	default:
 		return licenseDetection
@@ -56,16 +56,16 @@ var errCategoryExplanations = map[string]string{
           was not identified.`,
 
 	internalUsageOnly: `This means that a dependency uses a license that is not allowed for use
-		on customer servers. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
+		on customer machines. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
         for more details.
 
-        To solve this error, replace the dependency with another that uses an acceptable license`,
+        To solve this error, replace the dependency with another that uses an acceptable license.`,
 
 	licenseForbidden: `This means that a dependency uses a license that is not allowed for use
 		in Ambassador Labs software. Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 
         for more details.
 
-        To solve this error, replace the dependency with another that uses an acceptable license`,
+        To solve this error, replace the dependency with another that uses an acceptable license.`,
 }
 
 func ExplainErrors(errs []error) error {

@@ -7,4 +7,4 @@
     for more details.
 
     To solve this error, replace the dependency with another that uses
-    an acceptable license
+    an acceptable license.

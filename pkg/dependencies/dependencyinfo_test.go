@@ -252,12 +252,12 @@ func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 			detectlicense.AmbassadorServers,
 		},
 		{
-			"Forbidden licenses are not allowed on customer servers",
+			"Forbidden licenses are not allowed on customer machines",
 			forbiddenLicensesOnly,
 			detectlicense.Unrestricted,
 		},
 		{
-			"Restricted licenses are not OK on customer servers",
+			"Restricted licenses are not OK on customer machines",
 			licensesForAmbassadorServersOnly,
 			detectlicense.Unrestricted,
 		},
@@ -267,7 +267,7 @@ func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 			detectlicense.Unrestricted,
 		},
 		{
-			"Mix of licenses without forbidden is rejected on customer servers",
+			"Mix of licenses without forbidden is rejected on customer machines",
 			mixOfLicensesWithoutForbidden,
 			detectlicense.Unrestricted,
 		},
