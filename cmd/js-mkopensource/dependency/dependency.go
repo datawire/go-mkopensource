@@ -43,6 +43,7 @@ func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.Lice
 	dependencyInfo = dependencies.NewDependencyInfo()
 	licErrs := []error{}
 
+loop:
 	for _, dependencyId := range sortedDependencies {
 		nodeDependency := (*nodeDependencies)[dependencyId]
 
@@ -55,6 +56,7 @@ func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.Lice
 		for _, license := range dependency.Licenses {
 			if licenseErr := dependencies.CheckLicenseRestrictions(*dependency, license, licenseRestriction); licenseErr != nil {
 				licErrs = append(licErrs, licenseErr)
+				continue loop
 			}
 		}
 
