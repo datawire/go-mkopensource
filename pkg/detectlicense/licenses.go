@@ -347,7 +347,7 @@ specific language governing permissions and limitations under the License.      
 	xzPublicDomain = `Licensing of github.com/xi2/xz
 ==============================
 
-    This Go package is a modified version of
+    This package is a modified version of
 
         XZ Embedded  <http://tukaani.org/xz/embedded.html>
 

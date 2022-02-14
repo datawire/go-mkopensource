@@ -41,7 +41,7 @@ path.  For example, `--gotar=$HOME/Downloads/go1.17.2.tar.gz`.
 
 ### Target to describe
 
-The `--package=` flag tells `go-mkopensource` which Go packages it
+The `--package=` flag tells `go-mkopensource` which packages it
 should produce a report for.  You can either
 
 - pass it a string that you would pass to `go list` like `./...` or

@@ -123,7 +123,7 @@ func main() {
 		os.Exit(int(InvalidArgumentsError))
 	}
 	if err := Main(args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
 		os.Exit(int(DependencyGenerationError))
 	}
 }
@@ -281,12 +281,9 @@ func Main(args *CLIArgs) error {
 	for _, pkgName := range pkgNames {
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgVersions[pkgName], pkgFiles[pkgName])
 		if err != nil {
-			err = fmt.Errorf(`Go package %q: %w`, pkgName, err)
+			err = fmt.Errorf(`Package %q: %w`, pkgName, err)
 			licErrs = append(licErrs, err)
 		}
-	}
-	if len(licErrs) > 0 {
-		return scanningerrors.ExplainErrors(licErrs)
 	}
 
 	// Group packages by module & collect module info
@@ -340,16 +337,17 @@ func Main(args *CLIArgs) error {
 	// Generate the readme file.
 	licenseRestriction := getLicenseRestriction(args.ApplicationType)
 
-	dependencyList, generationErr := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, licenseRestriction)
-	if generationErr != nil {
-		return scanningerrors.ExplainErrors([]error{generationErr})
+	dependencyList, licenseErrors := GenerateDependencyList(modNames, modLicenses, modInfos, goVersion, licenseRestriction)
+	licErrs = append(licErrs, licenseErrors...)
+	if len(licErrs) > 0 {
+		return scanningerrors.ExplainErrors(licErrs)
 	}
 
 	switch args.OutputFormat {
 	case "txt":
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, args.OutputType, mainMods, mainLibPkgs, mainCmdPkgs, dependencyList)
 		if generationErr != nil {
-			return scanningerrors.ExplainErrors([]error{generationErr})
+			return generationErr
 		}
 
 		if _, err := readme.WriteTo(os.Stdout); err != nil {
@@ -359,7 +357,7 @@ func Main(args *CLIArgs) error {
 		// Build a listing of all files to go in to the tarball
 		readme, generationErr := generateOutput(args.Package, args.OutputFormat, markdownOutputType, mainMods, mainLibPkgs, mainCmdPkgs, dependencyList)
 		if generationErr != nil {
-			return scanningerrors.ExplainErrors([]error{generationErr})
+			return generationErr
 		}
 
 		tarFiles := make(map[string][]byte)
@@ -478,9 +476,9 @@ func markdownHeader(packages string, mainMods map[string]struct{}, readme *bytes
 	}
 
 	if len(mainLibPkgs) == 1 {
-		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
+		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Package %q incorporates the following Free and Open Source software:", mainLibPkgs[0])) + "\n")
 	} else {
-		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Go packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
+		readme.WriteString(scanningerrors.Wordwrap(0, 75, fmt.Sprintf("The Packages %q incorporate the following Free and Open Source software:", packages)) + "\n")
 	}
 }
 
