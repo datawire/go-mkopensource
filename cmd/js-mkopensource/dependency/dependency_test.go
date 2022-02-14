@@ -4,6 +4,7 @@ import (
 	"github.com/datawire/go-mkopensource/cmd/js-mkopensource/dependency"
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
 	"os"
@@ -97,6 +98,8 @@ func TestErrorScenarios(t *testing.T) {
 
 			// Assert
 			require.Error(t, err)
+			expectedError := getFileContents(t, path.Join(testCase.input, "expected_err.txt"))
+			assert.Equal(t, string(expectedError), err.Error())
 		})
 	}
 }
@@ -119,4 +122,12 @@ func getDependencyInfoFromFile(t *testing.T, path string) *dependencies.Dependen
 	require.NoError(t, unmarshalErr)
 
 	return dependencyInfo
+}
+
+func getFileContents(t *testing.T, path string) []byte {
+	expErr, err := os.ReadFile(path)
+	if err != nil {
+		require.NoError(t, err)
+	}
+	return expErr
 }

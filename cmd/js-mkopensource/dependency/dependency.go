@@ -42,6 +42,7 @@ func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.Lice
 
 	dependencyInfo = dependencies.NewDependencyInfo()
 	licErrs := []error{}
+
 	for _, dependencyId := range sortedDependencies {
 		nodeDependency := (*nodeDependencies)[dependencyId]
 
@@ -51,16 +52,17 @@ func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.Lice
 			continue
 		}
 
+		for _, license := range dependency.Licenses {
+			if licenseErr := dependencies.CheckLicenseRestrictions(*dependency, license, licenseRestriction); licenseErr != nil {
+				licErrs = append(licErrs, licenseErr)
+			}
+		}
+
 		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, *dependency)
 	}
 
 	if len(licErrs) > 0 {
 		return dependencyInfo, scanningerrors.ExplainErrors(licErrs)
-	}
-
-	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
-		formattedError := fmt.Errorf("License validation failed for JavaScript: %v\n", err)
-		return dependencyInfo, scanningerrors.ExplainErrors([]error{formattedError})
 	}
 
 	if err := dependencyInfo.UpdateLicenseList(); err != nil {
@@ -90,7 +92,7 @@ func getDependencyDetails(nodeDependency nodeDependency, dependencyId string) (*
 
 func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) ([]string, error) {
 	if nodeDependency.Licenses == "" {
-		return nil, fmt.Errorf("JavaScript dependency '%s@%s' is missing a license identifier.", nodeDependency.Name, nodeDependency.Version)
+		return nil, fmt.Errorf("Dependency '%s@%s' is missing a license identifier.", nodeDependency.Name, nodeDependency.Version)
 	}
 	parenthesisRe, err := regexp.Compile(`^\(|\)$`)
 	if err != nil {
@@ -118,7 +120,7 @@ func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) (
 			break
 		}
 
-		return nil, fmt.Errorf("JavaScript dependency '%s@%s' has an unknown SPDX Identifier '%s'.",
+		return nil, fmt.Errorf("Dependency '%s@%s' has an unknown SPDX Identifier '%s'.",
 			nodeDependency.Name, nodeDependency.Version, spdxId)
 	}
 
