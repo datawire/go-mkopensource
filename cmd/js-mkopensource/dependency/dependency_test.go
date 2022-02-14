@@ -80,6 +80,10 @@ func TestErrorScenarios(t *testing.T) {
 			"GPL license is not allowed in distributed software",
 			"./testdata/dependency-with-gpl-license",
 		},
+		{
+			"AGPL license is forbidden",
+			"./testdata/dependency-with-agpl-license",
+		},
 	}
 
 	for _, testCase := range testCases {

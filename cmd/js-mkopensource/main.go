@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/datawire/go-mkopensource/cmd/js-mkopensource/dependency"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
-	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"github.com/spf13/pflag"
 	"os"
 )
@@ -37,8 +36,7 @@ func main() {
 
 	dependencyInfo, err := dependency.GetDependencyInformation(os.Stdin, licenseRestriction)
 	if err != nil {
-		err = scanningerrors.ExplainErrors([]error{err})
-		_, _ = fmt.Fprintf(os.Stderr, "error generating dependency information: %v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(int(DependencyGenerationError))
 	}
 
