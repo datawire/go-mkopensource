@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 
 JS_LICENSES="/temp/js_licenses.txt"
 JS_DEPENDENCIES="/temp/js_dependencies.txt"
