@@ -20,7 +20,7 @@ scan_go_package() {
 
   DEPENDENCY_INFO="${BUILD_TMP}/go_dependencies.json"
    ${BUILD_SCRIPTS}/go-mkopensource --output-format=txt --package=mod --output-type=json --gotar="${GO_TAR}" > "${DEPENDENCY_INFO}"
-  jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${DEPENDENCY_INFO}" | sort >"${GO_LICENSES}"
+  jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${DEPENDENCY_INFO}" >"${GO_LICENSES}"
 }
 
 

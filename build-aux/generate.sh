@@ -27,7 +27,7 @@ fi
 
 if [ -n "${PYTHON_PACKAGES}" ]; then
   echo "Scanning Python dependency licenses"
-  validate_required_variable PYTHON_VERSION
+  validate_required_variable PYTHON_BUILDER
 
   archive_dependencies "${BUILD_SCRIPTS}/docker/python_dependencies.tar" "${PYTHON_PACKAGES}"
 
@@ -36,7 +36,7 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
   popd >/dev/null
 
   pushd "${BUILD_SCRIPTS}/docker" >/dev/null
-  docker build -f py_builder.dockerfile --build-arg PYTHON_VERSION="${PYTHON_VERSION}" -t "py-deps-builder" --target python_dependency_scanner .
+  docker build -f py_builder.dockerfile --build-arg PYTHON_BUILDER="${PYTHON_BUILDER}" -t "py-deps-builder" --target python_dependency_scanner .
   popd >/dev/null
 
   docker run --rm --env APPLICATION \
@@ -70,7 +70,7 @@ fi
     if [ -f "${BUILD_TMP}/go_licenses.txt" ]; then cat "${BUILD_TMP}/go_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/py_licenses.txt" ]; then cat "${BUILD_TMP}/py_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/js_licenses.txt" ]; then cat "${BUILD_TMP}/js_licenses.txt"; fi
-  ) | sort | uniq
+  ) | sort | uniq | sed -e 's/\[\([^]]*\)]()/\1/'
 ) >"${BUILD_HOME}/DEPENDENCY_LICENSES.md"
 
 # Generate DEPENDENCIES.md

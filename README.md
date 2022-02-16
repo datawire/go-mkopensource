@@ -24,7 +24,7 @@ are not used is that they are meant to be _informative_, they provide
 
 `go-mkopensource` isn't meant to just be _informative_, it is meant to
 be used for _compliance_, if it has any reason at all to be even a
-little skeptical of a result, rather than returnit its best guess, it
+little skeptical of a result, rather than returning its best guess, it
 blows up in your face, asking a human to verify the result.
 
 [go-license-detector]: https://github.com/go-enry/go-license-detector
@@ -55,14 +55,8 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
-* `PYTHON_VERSION`: Required when `PYTHON_PACKAGES` is defined. 
-  Version of Python to use when running python
-  dependency scan.  
-  Format of version number follows the same convention of Alpine's 
-  [APK package manager](https://wiki.alpinelinux.org/wiki/Package_management#Advanced_APK_Usage)   
-  Example:
-
-  `PYTHON_VERSION=~3.8.10`
+* `PYTHON_BUILDER`: Required. Image to use for generating Python 
+  dependencies.
 
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
   files to scan. Paths should be relative to `BUILD_HOME`.  
