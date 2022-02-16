@@ -55,7 +55,7 @@ application behaviour.
 * `GIT_TOKEN` Required. Git token with permissions to pull 
   repositories
 
-* `GO_BUILDER` Required. Image to use for generating Python
+* `GO_IMAGE` Required. Image to use for generating Go
   dependencies.
 
 * `PYTHON_PACKAGES`: Optional. List of requirement.txt files to scan.
@@ -64,7 +64,7 @@ application behaviour.
 
   `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
 
-* `PYTHON_BUILDER`: Required. Image to use for generating Python 
+* `PYTHON_IMAGE`: Required. Image to use for generating Python 
   dependencies.
 
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
@@ -73,12 +73,12 @@ application behaviour.
 
   `export NPM_PACKAGES="./tools/sandbox/grpc_web/package.json ./tools/sandbox/grpc_web/package-lock.json"`
 
-* `NODE_VERSION`: Required when `NPM_PACKAGES` is defined. Version 
+* `NODE_IMAGE`: Required when `NPM_PACKAGES` is defined. Version 
   of Node.JS to use when running npm dependency scan. Only valid
   version numbers (X.Y.Z) are allowed.  
   Example:
 
-  `NODE_VERSION=10`
+  `NODE_IMAGE=node:14.13.1-alpine`
 
 * `SCRIPTS_HOME`: Required. Location where `go-mkopensource` repo is 
   checked out, relative to  `BUILD_HOME`

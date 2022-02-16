@@ -1,6 +1,8 @@
-#!/bin/env bash
+#!/bin/bash
 set -e
 set -o pipefail
+
+export DOCKER_BUILDKIT=1
 
 archive_dependencies() {
   tar -vf "$1" -c $2
@@ -18,19 +20,16 @@ validate_required_variable BUILD_TMP
 # Go dependencies
 ######################################################################
 echo "Scanning Go dependency licenses"
-validate_required_variable GO_BUILDER
+validate_required_variable GO_IMAGE
 validate_required_variable SCRIPTS_HOME
 validate_required_variable GIT_TOKEN
 
-pushd "${BUILD_HOME}/${SCRIPTS_HOME}/cmd/go-mkopensource" >/dev/null
-GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/" .
-popd >/dev/null
-
 pushd "${BUILD_HOME}" >/dev/null
-DOCKER_BUILDKIT=1 docker build -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/go_builder.dockerfile" \
+docker build \
+  -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/go_builder.dockerfile" \
   --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
   --build-arg GIT_TOKEN="${GIT_TOKEN}" \
-  --build-arg GO_BUILDER="${GO_BUILDER}" \
+  --build-arg GO_IMAGE="${GO_IMAGE}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
   -t "go-deps-builder" --target license_output \
   --output "${BUILD_TMP}" .
@@ -41,16 +40,16 @@ popd >/dev/null
 ######################################################################
 if [ -n "${PYTHON_PACKAGES}" ]; then
   echo "Scanning Python dependency licenses"
-  validate_required_variable PYTHON_BUILDER
+  validate_required_variable PYTHON_IMAGE
 
   archive_dependencies "${BUILD_SCRIPTS}/docker/python_dependencies.tar" "${PYTHON_PACKAGES}"
 
-  pushd "${BUILD_SCRIPTS}/../cmd/py-mkopensource" >/dev/null
-  GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_SCRIPTS}/docker" .
-  popd >/dev/null
-
-  pushd "${BUILD_SCRIPTS}/docker" >/dev/null
-  docker build -f py_builder.dockerfile --build-arg PYTHON_BUILDER="${PYTHON_BUILDER}" -t "py-deps-builder" \
+  pushd "${BUILD_HOME}" >/dev/null
+  docker build \
+    -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/py_builder.dockerfile" \
+    --build-arg PYTHON_IMAGE="${PYTHON_IMAGE}" \
+    --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
+    -t "py-deps-builder" \
     --target python_dependency_scanner .
   popd >/dev/null
 
@@ -64,23 +63,23 @@ fi
 ######################################################################
 if [ -n "${NPM_PACKAGES}" ]; then
   echo "Scanning Node.Js dependency licenses"
-  validate_required_variable NODE_VERSION
+  validate_required_variable NODE_IMAGE
 
   archive_dependencies "${BUILD_SCRIPTS}/docker/npm_dependencies.tar" "${NPM_PACKAGES}"
 
-  pushd "${BUILD_SCRIPTS}/../cmd/js-mkopensource" >/dev/null
-  GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_SCRIPTS}/docker" .
-  popd >/dev/null
-
-  pushd "${BUILD_SCRIPTS}/docker" >/dev/null
-  docker build -f js_builder.dockerfile \
-    --build-arg NODE_VERSION="${NODE_VERSION}" \
+  pushd "${BUILD_HOME}" >/dev/null
+  docker build \
+    -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/js_builder.dockerfile" \
+    --build-arg NODE_IMAGE="${NODE_IMAGE}" \
     --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
+    --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
     -t "js-deps-builder" \
     --target npm_dependency_scanner .
   popd >/dev/null
 
-  docker run --rm --env APPLICATION \
+  docker run --rm \
+    --env APPLICATION \
+    --env USER_ID=${UID} \
     --volume "$(realpath ${BUILD_TMP})":/temp \
     js-deps-builder /scripts/scan-js.sh
 fi

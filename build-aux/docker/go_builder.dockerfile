@@ -1,8 +1,21 @@
 ########################################
 # Go dependency scanner
 ########################################
-ARG GO_BUILDER="base-image-unknown"
-FROM ${GO_BUILDER} as go_dependency_scanner
+ARG GO_IMAGE="base-image-unknown"
+FROM golang:1.17-alpine3.15 as builder
+
+WORKDIR /src
+COPY . ./
+
+ARG SCRIPTS_HOME
+WORKDIR /src/${SCRIPTS_HOME}/cmd/go-mkopensource
+
+RUN mkdir /out
+RUN GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o /out/ .
+WORKDIR /src/${SCRIPTS_HOME}/build-aux/docker/
+RUN cp scan-go.sh imports.sh /out/
+
+FROM ${GO_IMAGE} as go_dependency_scanner
 
 ARG APPLICATION_TYPE
 ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
@@ -22,9 +35,9 @@ RUN set -ex; GO_VERSION=$(go version | sed -E 's/.*go([1-9\.]*).*/\1/') && \
 WORKDIR /app
 COPY . ./
 
-ARG SCRIPTS_HOME
-RUN ln -s $(realpath "${SCRIPTS_HOME}/build-aux/docker/") /scripts
-RUN chmod +x /scripts/*.sh /scripts/go-mkopensource
+WORKDIR /scripts
+COPY --from=builder /out/* ./
+RUN chmod +x *.sh go-mkopensource
 
 ARG GIT_TOKEN
 RUN git config --global url."https://$GIT_TOKEN:@github.com/".insteadOf "https://github.com/"

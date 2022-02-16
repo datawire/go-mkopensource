@@ -6,7 +6,11 @@ import (
 )
 
 func isAmbassadorProprietarySoftware(packageName string) bool {
-	return strings.HasPrefix(packageName, "github.com/datawire/telepresence2-proprietary/")
+	const SmartAgentRepo = "github.com/datawire/telepresence2-proprietary/"
+	const AmbassadorCloudRepo = "github.com/datawire/saas_app/"
+	const TelepresencePro = "github.com/datawire/telepresence-pro/"
+
+	return strings.HasPrefix(packageName, SmartAgentRepo) || strings.HasPrefix(packageName, AmbassadorCloudRepo) || strings.HasPrefix(packageName, TelepresencePro)
 }
 
 // knownDependencies will return a list of licenses for any dependency that has been
