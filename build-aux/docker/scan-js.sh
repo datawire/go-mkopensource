@@ -7,7 +7,7 @@ set -o pipefail
 scan_npm_package() {
   echo >&2 "Getting NPM dependencies for $1"
   SOURCE=$1
-  pushd $(dirname "${SOURCE}") > /dev/null
+  pushd $(dirname "${SOURCE}") >/dev/null
 
   PKG_NAME=$(jq -r '.name + "@" + .version' package.json)
   if [ -z "${PKG_NAME}" ]; then
@@ -18,11 +18,13 @@ scan_npm_package() {
   echo >&2 "Analyzing package ${PKG_NAME}"
   npm >&2 install
 
-  license-checker --excludePackages "${PKG_NAME}" \
-    --customPath "/scripts/customLicenseFormat.json" --json |
-    /scripts/js-mkopensource --output-type=json >"$2"
+  PACKAGE_DEPS="/temp/${PKG_NAME}-licenses.json"
+  license-checker --excludePackages "${PKG_NAME}" --customPath "/scripts/customLicenseFormat.json" \
+    --json >"${PACKAGE_DEPS}"
 
-  popd > /dev/null
+  /scripts/js-mkopensource --output-type=json < <(cat "${PACKAGE_DEPS}") >"$2"
+
+  popd >/dev/null
 }
 
 cd /app
