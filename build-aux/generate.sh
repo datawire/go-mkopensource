@@ -48,6 +48,7 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
   docker build \
     -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/py_builder.dockerfile" \
     --build-arg PYTHON_IMAGE="${PYTHON_IMAGE}" \
+    --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
     --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
     -t "py-deps-builder" \
     --target python_dependency_scanner .

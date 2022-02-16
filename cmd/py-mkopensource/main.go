@@ -89,6 +89,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		{"docutils", "0.17.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"docutils", "0.18.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
 		{"orjson", "3.3.1", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+		{"orjson", "3.6.0", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
 		{"orjson", "3.6.6", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
 		{"packaging", "20.4", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
 		{"packaging", "20.9", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
@@ -102,10 +103,12 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 	}
 
 	static, ok := map[string][]License{
+		"AGPL-3.0-or-later":           {AGPL3OrLater},
 		"ASL 2":                       {Apache2},
 		"Apache":                      {Apache2},
 		"Apache 2":                    {Apache2},
 		"Apache 2.0":                  {Apache2},
+		"Apache-2.0":                  {Apache2},
 		"Apache-2.0 license":          {Apache2},
 		"Apache License":              {Apache2},
 		"Apache License 2.0":          {Apache2},
@@ -114,8 +117,10 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 		"Apache Software License":     {Apache2},
 		"Apache Software License 2.0": {Apache2},
 
+		"BSD-2-Clause": {BSD2},
+
 		"3-Clause BSD License": {BSD3},
-		"BSD-2-Clause":         {BSD2},
+		"BSD 3 Clause":         {BSD3},
 		"BSD-3-Clause":         {BSD3},
 
 		"ISC license": {ISC},
@@ -144,7 +149,7 @@ func parseLicenses(name, version, license string) map[License]struct{} {
 	return nil
 }
 
-func Main(outputType OutputType, r io.Reader, w io.Writer) error {
+func Main(outputType OutputType, applicationType ApplicationType, r io.Reader, w io.Writer) error {
 	distribs := make(map[string]textproto.MIMEHeader)
 
 	input := textproto.NewReader(bufio.NewReader(r))
@@ -165,13 +170,19 @@ func Main(outputType OutputType, r io.Reader, w io.Writer) error {
 	}
 	sort.Strings(distribNames)
 
+	licenseRestriction := getLicenseRestriction(applicationType)
+	dependencyInfo, err := getDependencies(distribNames, distribs, licenseRestriction)
+	if err != nil {
+		return err
+	}
+
 	switch outputType {
 	case jsonOutputType:
-		if err := jsonOutput(w, distribNames, distribs); err != nil {
+		if err := jsonOutput(w, dependencyInfo); err != nil {
 			return err
 		}
 	default:
-		if err := markdownOutput(w, distribNames, distribs); err != nil {
+		if err := markdownOutput(w, dependencyInfo); err != nil {
 			return err
 		}
 	}
@@ -179,15 +190,10 @@ func Main(outputType OutputType, r io.Reader, w io.Writer) error {
 	return nil
 }
 
-func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader) error {
-	dependencyInfo, err := getDependencies(distribNames, distribs)
-	if err != nil {
-		return err
-	}
-
+func jsonOutput(w io.Writer, dependencyInfo dependencies.DependencyInfo) error {
 	jsonString, marshalErr := json.Marshal(dependencyInfo)
 	if marshalErr != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Could not generate JSON output: %v\n", marshalErr)
 		os.Exit(int(MarshallJsonError))
 	}
 
@@ -201,44 +207,19 @@ func jsonOutput(w io.Writer, distribNames []string, distribs map[string]textprot
 	return nil
 }
 
-func markdownOutput(w io.Writer, distribNames []string, distribs map[string]textproto.MIMEHeader) error {
+func markdownOutput(w io.Writer, dependencyInfo dependencies.DependencyInfo) error {
 	table := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
 	_, _ = io.WriteString(table, "  \tName\tVersion\tLicense(s)\n")
 	_, _ = io.WriteString(table, "  \t----\t-------\t----------\n")
-	var errs derror.MultiError
-	for _, versionedName := range distribNames {
-		distribName := strings.Split(versionedName, "@")[0]
-		distrib := distribs[versionedName]
-		distribVersion := distrib.Get("Version")
-
-		licenses := parseLicenses(distribName, distribVersion, distrib.Get("License"))
-		if licenses == nil {
-			errs = append(errs, fmt.Errorf("distrib %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
-			continue
-		}
-		licenseList := make([]string, 0, len(licenses))
-		for license := range licenses {
-			licenseList = append(licenseList, license.Name)
-		}
-		sort.Strings(licenseList)
-		distribLicense := strings.Join(licenseList, ", ")
+	for _, dependency := range dependencyInfo.Dependencies {
+		distribName := dependency.Name
+		distribVersion := dependency.Version
+		distribLicense := strings.Join(dependency.Licenses, ", ")
 
 		if _, err := fmt.Fprintf(table, "\t%s\t%s\t%s\n", distribName, distribVersion, distribLicense); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Could not write Markdown output: %v\n", err)
 			os.Exit(int(WriteError))
 		}
-	}
-	if len(errs) > 0 {
-		err := errs
-		return errors.Errorf(`%v
-    This probably means that you added or upgraded a dependency, and the
-    automated opensource-license-checker can't confidently detect what
-    the license is.  (This is a good thing, because it is reminding you
-    to check the license of libraries before using them.)
-
-    You need to update the "github.com/datawire/ambassador/v2/cmd/py-mkopensource/main.go"
-    file to correctly detect the license.`,
-			err)
 	}
 
 	if _, err := fmt.Fprintf(w, "The Emissary-ingress Python code makes use of the following Free and Open Source\nlibraries:\n\n"); err != nil {
@@ -254,9 +235,9 @@ func markdownOutput(w io.Writer, distribNames []string, distribs map[string]text
 	return nil
 }
 
-func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHeader) (dependencies.DependencyInfo, error) {
-	allLicenses := map[License]struct{}{}
-	jsonOutput := dependencies.NewDependencyInfo()
+func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHeader,
+	licenseRestriction LicenseRestriction) (dependencies.DependencyInfo, error) {
+	dependencyInfo := dependencies.NewDependencyInfo()
 
 	var errs derror.MultiError
 	for _, versionedName := range distribNames {
@@ -273,7 +254,6 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 		licenseList := make([]string, 0, len(licenses))
 		for license := range licenses {
 			licenseList = append(licenseList, license.Name)
-			allLicenses[license] = struct{}{}
 		}
 		sort.Strings(licenseList)
 
@@ -282,12 +262,12 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 			Version:  distribVersion,
 			Licenses: licenseList,
 		}
-		jsonOutput.Dependencies = append(jsonOutput.Dependencies, dependencyDetails)
+		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, dependencyDetails)
 	}
 
 	if len(errs) > 0 {
 		err := errs
-		return jsonOutput, errors.Errorf(`%v
+		return dependencyInfo, errors.Errorf(`%v
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you
@@ -298,11 +278,13 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 			err)
 	}
 
-	for license := range allLicenses {
-		jsonOutput.Licenses[license.Name] = license.URL
+	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
+		return dependencyInfo, fmt.Errorf("License validation failed: %v\n", err)
 	}
 
-	return jsonOutput, nil
+	err := dependencyInfo.UpdateLicenseList()
+
+	return dependencyInfo, err
 }
 
 func main() {
@@ -312,8 +294,19 @@ func main() {
 		os.Exit(int(InvalidArgumentsError))
 	}
 
-	if err := Main(cliArgs.outputType, os.Stdin, os.Stdout); err != nil {
+	if err := Main(*cliArgs.outputType, *cliArgs.applicationType, os.Stdin, os.Stdout); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(int(DependencyGenerationError))
 	}
+}
+
+func getLicenseRestriction(applicationType ApplicationType) LicenseRestriction {
+	var LicenseRestriction LicenseRestriction
+	switch applicationType {
+	case internalApplication:
+		LicenseRestriction = AmbassadorServers
+	default:
+		LicenseRestriction = Unrestricted
+	}
+	return LicenseRestriction
 }

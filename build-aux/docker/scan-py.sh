@@ -32,7 +32,8 @@ done
 
 # Get dependencies
 JSON_DEPS="/temp/py_dependencies.json"
-find . -name "${DEPENDENCIES}" -exec cat '{}' \; | /scripts/py-mkopensource --output-type=json > "${JSON_DEPS}"
+find . -name "${DEPENDENCIES}" -exec cat '{}' \; | /scripts/py-mkopensource --output-type=json \
+  --application-type="${APPLICATION_TYPE}" > "${JSON_DEPS}"
 
 # Generate license information
 jq -r '.licenseInfo | to_entries | .[] | "* [" + .key + "](" + .value + ")"' "${JSON_DEPS}" >"${PY_LICENSES}"
