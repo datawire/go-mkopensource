@@ -4,6 +4,8 @@ set -o pipefail
 
 . /scripts/imports.sh
 
+validate_required_variable USER_ID
+
 scan_npm_package() {
   echo >&2 "Getting NPM dependencies for $1"
   SOURCE=$1
@@ -52,3 +54,4 @@ done
 ) | sort | uniq >/tmp/deps.txt
 
 generate_opensource /tmp/deps.txt Node.Js "${JS_DEPENDENCIES}"
+chown "${USER_ID}" -R /temp
