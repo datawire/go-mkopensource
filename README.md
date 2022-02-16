@@ -24,7 +24,7 @@ are not used is that they are meant to be _informative_, they provide
 
 `go-mkopensource` isn't meant to just be _informative_, it is meant to
 be used for _compliance_, if it has any reason at all to be even a
-little skeptical of a result, rather than returnit its best guess, it
+little skeptical of a result, rather than returning its best guess, it
 blows up in your face, asking a human to verify the result.
 
 [go-license-detector]: https://github.com/go-enry/go-license-detector
