@@ -26,14 +26,12 @@ GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o "${BUILD_HOME}/${SCRIPTS_HOME}/
 popd >/dev/null
 
 pushd "${BUILD_HOME}" >/dev/null
-OUTPUT_DIR="${BUILD_HOME}/${SCRIPTS_HOME}/../output"
-mkdir -p "${OUTPUT_DIR}"
 DOCKER_BUILDKIT=1 docker build -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/go_builder.dockerfile" \
   --build-arg GIT_TOKEN="${GIT_TOKEN}" \
   --build-arg GO_BUILDER="${GO_BUILDER}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
   -t "go-deps-builder" --target license_output \
-  --output "${OUTPUT_DIR}" .
+  --output "${BUILD_TMP}" .
 popd >/dev/null
 
 ######################################################################
@@ -56,7 +54,7 @@ if [ -n "${PYTHON_PACKAGES}" ]; then
 
   docker run --rm --env APPLICATION \
     --volume "$(realpath ${BUILD_TMP})":/temp \
-    py-deps-builder /scripts/scan-py.sh ;\
+    py-deps-builder /scripts/scan-py.sh
 fi
 
 ######################################################################
@@ -79,7 +77,7 @@ if [ -n "${NPM_PACKAGES}" ]; then
 
   docker run --rm --env APPLICATION \
     --volume "$(realpath ${BUILD_TMP})":/temp \
-    js-deps-builder /scripts/scan-js.sh ;\
+    js-deps-builder /scripts/scan-js.sh
 fi
 
 # Generate DEPENDENCY_LICENSES.md
