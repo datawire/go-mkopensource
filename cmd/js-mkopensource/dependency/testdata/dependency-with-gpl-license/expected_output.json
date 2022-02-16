@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+    {
+      "name": "atob",
+      "version": "2.1.2",
+      "licenses": [
+        "GNU General Public License v1.0 only"
+      ]
+    }
+  ],
+  "licenseInfo": {
+    "GNU General Public License v1.0 only": "https://spdx.org/licenses/GPL-1.0-only.html"
+  }
+}

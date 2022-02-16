@@ -22,7 +22,7 @@ scan_npm_package() {
   license-checker --excludePackages "${PKG_NAME}" --customPath "/scripts/customLicenseFormat.json" \
     --json >"${PACKAGE_DEPS}"
 
-  /scripts/js-mkopensource --output-type=json < <(cat "${PACKAGE_DEPS}") >"$2"
+  /scripts/js-mkopensource --application-type=${APPLICATION_TYPE} < <(cat "${PACKAGE_DEPS}") >"$2"
 
   popd >/dev/null
 }

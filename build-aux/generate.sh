@@ -10,6 +10,7 @@ BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 . "${BUILD_SCRIPTS}/docker/imports.sh"
 
 validate_required_variable APPLICATION
+validate_required_variable APPLICATION_TYPE
 validate_required_variable BUILD_HOME
 validate_required_variable BUILD_TMP
 
@@ -27,6 +28,7 @@ popd >/dev/null
 
 pushd "${BUILD_HOME}" >/dev/null
 DOCKER_BUILDKIT=1 docker build -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/go_builder.dockerfile" \
+  --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
   --build-arg GIT_TOKEN="${GIT_TOKEN}" \
   --build-arg GO_BUILDER="${GO_BUILDER}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
@@ -71,7 +73,10 @@ if [ -n "${NPM_PACKAGES}" ]; then
   popd >/dev/null
 
   pushd "${BUILD_SCRIPTS}/docker" >/dev/null
-  docker build -f js_builder.dockerfile --build-arg NODE_VERSION="${NODE_VERSION}" -t "js-deps-builder" \
+  docker build -f js_builder.dockerfile \
+    --build-arg NODE_VERSION="${NODE_VERSION}" \
+    --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
+    -t "js-deps-builder" \
     --target npm_dependency_scanner .
   popd >/dev/null
 
