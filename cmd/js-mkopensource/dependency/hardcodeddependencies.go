@@ -10,6 +10,7 @@ var hardcodedJsDependencies = map[string][]string{
 	"flexboxgrid@6.3.1":            {Apache2.Name},
 	"indexof@0.0.1":                {MIT.Name},
 	"intro.js@4.1.0":               {AGPL3OrLater.Name},
+	"json-schema@0.2.3":            {AFL21.Name},
 	"node-forge@0.10.0":            {BSD3.Name},
 	"pako@1.0.10":                  {MIT.Name},
 	"regenerator-transform@0.10.1": {BSD2.Name},
