@@ -1,0 +1,19 @@
+{
+  "json-schema@0.2.3": {
+    "licenses": [
+      "AFLv2.1",
+      "CC-BY-3.0"
+    ],
+    "repository": "https://github.com/kriszyp/json-schema",
+    "publisher": "Kris Zyp",
+    "name": "json-schema",
+    "version": "0.2.3",
+    "description": "JSON Schema validation and specifications",
+    "licenseFile": "/app/ui/node_modules/json-schema/README.md",
+    "licenseText": "JSON Schema is a repository for the JSON Schema specification, reference schemas and a CommonJS implementation of JSON Schema (not the only JavaScript implementation of JSON Schema, JSV is another excellent JavaScript validator).\r\n\r\nCode is licensed under the AFL or BSD license as part of the Persevere \r\nproject which is administered under the Dojo foundation,\r\nand all contributions require a Dojo CLA.",
+    "licenseModified": "",
+    "url": "",
+    "path": "/app/ui/node_modules/json-schema"
+  }
+}
+

@@ -37,6 +37,10 @@ func TestSuccessfulGeneration(t *testing.T) {
 			"GPL license is allowed in internal software",
 			"./testdata/dependency-with-gpl-license",
 		},
+		{
+			"License field can be string or array",
+			"./testdata/license-field-as-an-array",
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -72,6 +76,10 @@ func TestErrorScenarios(t *testing.T) {
 		{
 			"Missing license",
 			"./testdata/missing-license",
+		},
+		{
+			"Empty license field",
+			"./testdata/empty-license",
 		},
 		{
 			"Hardcode dependency with different version is rejected",
