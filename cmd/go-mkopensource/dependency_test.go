@@ -22,19 +22,19 @@ var (
 func TestGenerateDependencyListWhenLicenseIsAllowed(t *testing.T) {
 	licenses := map[string]map[License]struct{}{modNames[0]: {BSD1: {}}}
 
-	_, err := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
-	require.NoError(t, err)
+	_, errors := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
+	require.Empty(t, errors)
 
-	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
-	require.NoError(t, err)
+	_, errors = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
+	require.Empty(t, errors)
 }
 
 func TestGenerateDependencyListWhenLicenseIsForbidden(t *testing.T) {
 	licenses := map[string]map[License]struct{}{modNames[0]: {AGPL1Only: {}}}
 
-	_, err := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
-	require.Error(t, err)
+	_, errors := main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, Unrestricted)
+	require.NotEmptyf(t, errors, "Expected at least one error but got none")
 
-	_, err = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
-	require.Error(t, err)
+	_, errors = main.GenerateDependencyList(modNames, licenses, modInfos, goVersion, AmbassadorServers)
+	require.NotEmptyf(t, errors, "Expected at least one error but got none")
 }

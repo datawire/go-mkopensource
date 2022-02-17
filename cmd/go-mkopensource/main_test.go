@@ -166,26 +166,31 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 
 func TestErrorScenarios(t *testing.T) {
 	testCases := []struct {
+		testName       string
 		testData       string
 		packagesFlag   string
 		outputTypeFlag string
 	}{
 		{
+			testName:       "testdata/00-intern-old",
 			testData:       "testdata/00-intern-old",
 			packagesFlag:   "mod",
 			outputTypeFlag: "full",
 		},
 		{
+			testName:       "Multiple errors",
 			testData:       "testdata/03-multierror",
 			packagesFlag:   "mod",
 			outputTypeFlag: "full",
 		},
 		{
+			testName:       "Forbidden license",
 			testData:       "testdata/07-forbidden-license",
 			packagesFlag:   "mod",
 			outputTypeFlag: "full",
 		},
 		{
+			testName:       "License not allowed on distributed applications",
 			testData:       "testdata/08-allowed-for-internal-use-only",
 			packagesFlag:   "mod",
 			outputTypeFlag: "full",
@@ -195,7 +200,7 @@ func TestErrorScenarios(t *testing.T) {
 	workingDir := getWorkingDir(t)
 
 	for _, testCase := range testCases {
-		t.Run(testCase.testData, func(t *testing.T) {
+		t.Run(testCase.testName, func(t *testing.T) {
 			defer func() {
 				require.NoError(t, os.Chdir(workingDir))
 			}()

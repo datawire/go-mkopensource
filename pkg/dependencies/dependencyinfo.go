@@ -114,23 +114,29 @@ func (d *DependencyInfo) CheckLicenses(licenseRestriction LicenseRestriction) er
 
 	for _, dependency := range d.Dependencies {
 		for _, licenseName := range dependency.Licenses {
-			license, err := getLicenseFromName(licenseName)
+			err := CheckLicenseRestrictions(dependency, licenseName, licenseRestriction)
 			if err != nil {
 				return err
 			}
-
-			if license.Restriction == Forbidden {
-				return fmt.Errorf("Dependency '%s' uses license '%s' which is forbidden.\n"+
-					"Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 "+
-					"for more details.", dependency.Name, license.Name)
-			}
-
-			if license.Restriction < licenseRestriction {
-				return fmt.Errorf("Dependency '%s' uses license '%s' which is not allowed on applications that run on customer machines.\n"+
-					"Refer to https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157#1cd50aeeafa7456bba24c761c0a2d173 "+
-					"for more details.", dependency.Name, license.Name)
-			}
 		}
+	}
+	return nil
+}
+
+func CheckLicenseRestrictions(dependency Dependency, licenseName string, licenseRestriction LicenseRestriction) error {
+	license, err := getLicenseFromName(licenseName)
+	if err != nil {
+		return err
+	}
+
+	if license.Restriction == Forbidden {
+		return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is forbidden.", dependency.Name,
+			dependency.Version, license.Name)
+	}
+
+	if license.Restriction < licenseRestriction {
+		return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is not allowed on applications that run on customer machines.",
+			dependency.Name, dependency.Version, license.Name)
 	}
 	return nil
 }
