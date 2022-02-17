@@ -4,14 +4,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"io"
 	"net/textproto"
 	"os"
 	"sort"
 	"strings"
 	"text/tabwriter"
-
-	"github.com/pkg/errors"
 
 	"github.com/datawire/dlib/derror"
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
@@ -24,76 +23,79 @@ type tuple struct {
 	License string
 }
 
-func parseLicenses(name, version, license string) map[License]struct{} {
-	override, ok := map[tuple][]License{
-		// These are packages that don't have sufficient metadata to get
-		// the license normally.  Either the license isn't specified in
-		// the metadata, or the license string that is specified is
-		// ambiguous (for example: "BSD" is too ambiguous, which variant
-		// of the BSD license is it?).  We pin the exact versions so
-		// that a human has to go make sure that the license didn't
-		// change when upgrading.
-		{"Babel", "2.8.0", "BSD"}:                      {BSD3},
-		{"CacheControl", "0.12.6", "UNKNOWN"}:          {Apache2},
-		{"CacheControl", "0.12.10", "UNKNOWN"}:         {Apache2},
-		{"Click", "7.0", "BSD"}:                        {BSD3},
-		{"Flask", "1.0.2", "BSD"}:                      {BSD3},
-		{"GitPython", "3.1.8", "UNKNOWN"}:              {BSD3},
-		{"GitPython", "3.1.11", "UNKNOWN"}:             {BSD3},
-		{"Jinja2", "2.10.1", "BSD"}:                    {BSD3},
-		{"Pygments", "2.7.1", "BSD License"}:           {BSD2},
-		{"Sphinx", "3.2.1", "BSD"}:                     {BSD2, BSD3, MIT},
-		{"chardet", "3.0.4", "LGPL"}:                   {LGPL21OrLater},
-		{"colorama", "0.4.3", "BSD"}:                   {BSD3},
-		{"colorama", "0.4.4", "BSD"}:                   {BSD3},
-		{"decorator", "4.4.2", "new BSD License"}:      {BSD2},
-		{"gitdb", "4.0.5", "BSD License"}:              {BSD3},
-		{"idna", "2.6", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
-		{"idna", "2.7", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
-		{"idna", "2.8", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
-		{"idna", "2.9", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
-		{"importlib-resources", "5.4.0", "UNKNOWN"}:    {Apache2},
-		{"itsdangerous", "1.1.0", "BSD"}:               {BSD3},
-		{"jsonpatch", "1.30", "Modified BSD License"}:  {BSD3},
-		{"jsonpatch", "1.32", "Modified BSD License"}:  {BSD3},
-		{"jsonpointer", "2.0", "Modified BSD License"}: {BSD3},
-		{"jsonpointer", "2.2", "Modified BSD License"}: {BSD3},
-		{"jsonschema", "3.2.0", "UNKNOWN"}:             {MIT},
-		{"lockfile", "0.12.2", "UNKNOWN"}:              {MIT},
-		{"oauthlib", "3.1.0", "BSD"}:                   {BSD3},
-		{"oauthlib", "3.2.0", "BSD"}:                   {BSD3},
-		{"pep517", "0.12.0", "UNKNOWN"}:                {MIT},
-		{"pep517", "0.8.2", "UNKNOWN"}:                 {MIT},
-		{"pip-tools", "5.3.1", "BSD"}:                  {BSD3},
-		{"ptyprocess", "0.6.0", "UNKNOWN"}:             {ISC},
-		{"pyasn1", "0.4.8", "BSD"}:                     {BSD2},
-		{"pycparser", "2.20", "BSD"}:                   {BSD3},
-		{"python-dateutil", "2.8.1", "Dual License"}:   {BSD3, Apache2},
-		{"python-dateutil", "2.8.2", "Dual License"}:   {BSD3, Apache2},
-		{"python-json-logger", "2.0.1", "BSD"}:         {BSD2},
-		{"python-json-logger", "2.0.2", "BSD"}:         {BSD2},
-		{"scout.py", "0.3.0", "UNKNOWN"}:               {AmbassadorProprietary},
-		{"rsa", "4.8", "Apache-2.0"}:                   {Apache2},
-		{"semantic-version", "2.6.0", "BSD"}:           {BSD2},
-		{"semantic-version", "2.8.5", "BSD"}:           {BSD2},
-		{"smmap", "3.0.4", "BSD"}:                      {BSD3},
-		{"tomli", "1.2.2", "UNKNOWN"}:                  {MIT},
-		{"webencodings", "0.5.1", "BSD"}:               {BSD3},
-		{"websocket-client", "0.57.0", "BSD"}:          {BSD3},
-		{"websocket-client", "1.2.3", "Apache-2.0"}:    {Apache2},
-		{"zipp", "3.6.0", "UNKNOWN"}:                   {MIT},
+//nolint:gochecknoglobals // Would be 'const'.
+var hardcodedPythonDependencies = map[tuple][]License{
+	// These are packages that don't have sufficient metadata to get
+	// the license normally.  Either the license isn't specified in
+	// the metadata, or the license string that is specified is
+	// ambiguous (for example: "BSD" is too ambiguous, which variant
+	// of the BSD license is it?).  We pin the exact versions so
+	// that a human has to go make sure that the license didn't
+	// change when upgrading.
+	{"Babel", "2.8.0", "BSD"}:                      {BSD3},
+	{"CacheControl", "0.12.6", "UNKNOWN"}:          {Apache2},
+	{"CacheControl", "0.12.10", "UNKNOWN"}:         {Apache2},
+	{"Click", "7.0", "BSD"}:                        {BSD3},
+	{"Flask", "1.0.2", "BSD"}:                      {BSD3},
+	{"GitPython", "3.1.8", "UNKNOWN"}:              {BSD3},
+	{"GitPython", "3.1.11", "UNKNOWN"}:             {BSD3},
+	{"Jinja2", "2.10.1", "BSD"}:                    {BSD3},
+	{"Pygments", "2.7.1", "BSD License"}:           {BSD2},
+	{"Sphinx", "3.2.1", "BSD"}:                     {BSD2, BSD3, MIT},
+	{"chardet", "3.0.4", "LGPL"}:                   {LGPL21OrLater},
+	{"colorama", "0.4.3", "BSD"}:                   {BSD3},
+	{"colorama", "0.4.4", "BSD"}:                   {BSD3},
+	{"decorator", "4.4.2", "new BSD License"}:      {BSD2},
+	{"gitdb", "4.0.5", "BSD License"}:              {BSD3},
+	{"idna", "2.6", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
+	{"idna", "2.7", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
+	{"idna", "2.8", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
+	{"idna", "2.9", "BSD-like"}:                    {BSD3, PSF, Unicode2015},
+	{"importlib-resources", "5.4.0", "UNKNOWN"}:    {Apache2},
+	{"itsdangerous", "1.1.0", "BSD"}:               {BSD3},
+	{"jsonpatch", "1.30", "Modified BSD License"}:  {BSD3},
+	{"jsonpatch", "1.32", "Modified BSD License"}:  {BSD3},
+	{"jsonpointer", "2.0", "Modified BSD License"}: {BSD3},
+	{"jsonpointer", "2.2", "Modified BSD License"}: {BSD3},
+	{"jsonschema", "3.2.0", "UNKNOWN"}:             {MIT},
+	{"lockfile", "0.12.2", "UNKNOWN"}:              {MIT},
+	{"oauthlib", "3.1.0", "BSD"}:                   {BSD3},
+	{"oauthlib", "3.2.0", "BSD"}:                   {BSD3},
+	{"pep517", "0.12.0", "UNKNOWN"}:                {MIT},
+	{"pep517", "0.8.2", "UNKNOWN"}:                 {MIT},
+	{"pip-tools", "5.3.1", "BSD"}:                  {BSD3},
+	{"ptyprocess", "0.6.0", "UNKNOWN"}:             {ISC},
+	{"pyasn1", "0.4.8", "BSD"}:                     {BSD2},
+	{"pycparser", "2.20", "BSD"}:                   {BSD3},
+	{"python-dateutil", "2.8.1", "Dual License"}:   {BSD3, Apache2},
+	{"python-dateutil", "2.8.2", "Dual License"}:   {BSD3, Apache2},
+	{"python-json-logger", "2.0.1", "BSD"}:         {BSD2},
+	{"python-json-logger", "2.0.2", "BSD"}:         {BSD2},
+	{"scout.py", "0.3.0", "UNKNOWN"}:               {AmbassadorProprietary},
+	{"rsa", "4.8", "Apache-2.0"}:                   {Apache2},
+	{"semantic-version", "2.6.0", "BSD"}:           {BSD2},
+	{"semantic-version", "2.8.5", "BSD"}:           {BSD2},
+	{"smmap", "3.0.4", "BSD"}:                      {BSD3},
+	{"tomli", "1.2.2", "UNKNOWN"}:                  {MIT},
+	{"webencodings", "0.5.1", "BSD"}:               {BSD3},
+	{"websocket-client", "0.57.0", "BSD"}:          {BSD3},
+	{"websocket-client", "1.2.3", "Apache-2.0"}:    {Apache2},
+	{"zipp", "3.6.0", "UNKNOWN"}:                   {MIT},
 
-		// These are packages with non-trivial strings to parse, and
-		// it's easier to just hard-code it.
-		{"docutils", "0.15.2", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
-		{"docutils", "0.17.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
-		{"docutils", "0.18.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
-		{"orjson", "3.3.1", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
-		{"orjson", "3.6.0", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
-		{"orjson", "3.6.6", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
-		{"packaging", "20.4", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
-		{"packaging", "20.9", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
-	}[tuple{name, version, license}]
+	// These are packages with non-trivial strings to parse, and
+	// it's easier to just hard-code it.
+	{"docutils", "0.15.2", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
+	{"docutils", "0.17.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
+	{"docutils", "0.18.1", "public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)"}: {PublicDomain, PSF, BSD2, GPL3OrLater},
+	{"orjson", "3.3.1", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+	{"orjson", "3.6.0", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+	{"orjson", "3.6.6", "Apache-2.0 OR MIT"}:                                               {Apache2, MIT},
+	{"packaging", "20.4", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
+	{"packaging", "20.9", "BSD-2-Clause or Apache-2.0"}:                                    {BSD2, Apache2},
+}
+
+func parseLicenses(name, version, license string) map[License]struct{} {
+	override, ok := hardcodedPythonDependencies[tuple{name, version, license}]
 	if ok {
 		ret := make(map[License]struct{}, len(override))
 		for _, l := range override {
@@ -246,45 +248,39 @@ func getDependencies(distribNames []string, distribs map[string]textproto.MIMEHe
 		distrib := distribs[versionedName]
 		distribVersion := distrib.Get("Version")
 
+		dependencyDetails := dependencies.Dependency{
+			Name:    distribName,
+			Version: distribVersion,
+		}
+
 		licenses := parseLicenses(distribName, distribVersion, distrib.Get("License"))
 		if licenses == nil {
 			errs = append(errs, fmt.Errorf("distrib %q %q: Could not parse license-string %q", distribName, distribVersion, distrib.Get("License")))
 			continue
 		}
+
 		licenseList := make([]string, 0, len(licenses))
 		for license := range licenses {
 			licenseList = append(licenseList, license.Name)
+			if err := dependencies.CheckLicenseRestrictions(dependencyDetails, license.Name, licenseRestriction); err != nil {
+				errs = append(errs, err)
+			}
 		}
 		sort.Strings(licenseList)
 
-		dependencyDetails := dependencies.Dependency{
-			Name:     distribName,
-			Version:  distribVersion,
-			Licenses: licenseList,
-		}
+		dependencyDetails.Licenses = licenseList
 		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, dependencyDetails)
 	}
 
 	if len(errs) > 0 {
-		err := errs
-		return dependencyInfo, errors.Errorf(`%v
-    This probably means that you added or upgraded a dependency, and the
-    automated opensource-license-checker can't confidently detect what
-    the license is.  (This is a good thing, because it is reminding you
-    to check the license of libraries before using them.)
-
-    You need to update the "github.com/datawire/ambassador/v2/cmd/py-mkopensource/main.go"
-    file to correctly detect the license.`,
-			err)
+		return dependencyInfo, scanningerrors.ExplainErrors(errs)
 	}
 
-	if err := dependencyInfo.CheckLicenses(licenseRestriction); err != nil {
-		return dependencyInfo, fmt.Errorf("License validation failed: %v\n", err)
+	if err := dependencyInfo.UpdateLicenseList(); err != nil {
+		return dependencyInfo, fmt.Errorf("Could not generate list of license URLs: %v\n", err)
 	}
 
-	err := dependencyInfo.UpdateLicenseList()
-
-	return dependencyInfo, err
+	return dependencyInfo, nil
 }
 
 func main() {
@@ -295,7 +291,7 @@ func main() {
 	}
 
 	if err := Main(*cliArgs.outputType, *cliArgs.applicationType, os.Stdin, os.Stdout); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
 		os.Exit(int(DependencyGenerationError))
 	}
 }

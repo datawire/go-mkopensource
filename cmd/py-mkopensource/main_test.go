@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"io"
 	"os"
+	"path"
 	"testing"
 )
 
@@ -56,7 +57,7 @@ func TestMarkdownOutput(t *testing.T) {
 			require.NoError(t, readErr)
 
 			expectedOutput := getFileContents(t, testCase.expectedOutput)
-			require.Equal(t, string(expectedOutput), string(programOutput))
+			require.Equal(t, expectedOutput, string(programOutput))
 		})
 	}
 }
@@ -111,7 +112,7 @@ func TestJsonOutput(t *testing.T) {
 	}
 }
 
-func TestForbiddenLicenses(t *testing.T) {
+func TestLicenseErrors(t *testing.T) {
 	testCases := []struct {
 		testName             string
 		dependencies         string
@@ -121,52 +122,59 @@ func TestForbiddenLicenses(t *testing.T) {
 	}{
 		{
 			"GPL licenses are forbidden for external use - Markdown format",
-			"./testdata/gpl-license/dependency_list.txt",
+			"./testdata/gpl-license",
 			markdownOutputType,
 			externalApplication,
 			"Dependency 'docutils@0.17.1' uses license 'GNU General Public License v3.0 or later' which is not allowed on applications that run on customer machines.",
 		},
 		{
 			"GPL licenses are forbidden for external use - JSON format",
-			"./testdata/gpl-license/dependency_list.txt",
+			"./testdata/gpl-license",
 			jsonOutputType,
 			externalApplication,
 			"Dependency 'docutils@0.17.1' uses license 'GNU General Public License v3.0 or later' which is not allowed on applications that run on customer machines.",
 		},
 		{
 			"AGPL licenses are forbidden for internal use - Markdown format",
-			"./testdata/agpl-license/dependency_list.txt",
+			"./testdata/agpl-license",
 			markdownOutputType,
 			internalApplication,
-			"is forbidden",
+			"Dependency 'infomap@2.0.2' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden",
 		},
 		{
 			"AGPL licenses are forbidden for internal use - JSON format",
-			"./testdata/agpl-license/dependency_list.txt",
+			"./testdata/agpl-license",
 			jsonOutputType,
 			internalApplication,
-			"is forbidden",
+			"Dependency 'infomap@2.0.2' uses license 'GNU Affero General Public License v3.0 or later' which is forbidden",
 		},
 		{
 			"AGPL licenses are forbidden for external use - Markdown format",
-			"./testdata/agpl-license/dependency_list.txt",
+			"./testdata/agpl-license",
 			markdownOutputType,
 			externalApplication,
 			"is forbidden",
 		},
 		{
 			"AGPL licenses are forbidden for external use - JSON format",
-			"./testdata/agpl-license/dependency_list.txt",
+			"./testdata/agpl-license",
 			jsonOutputType,
 			externalApplication,
 			"is forbidden",
+		},
+		{
+			"Unknown licenses are identified correctly",
+			"./testdata/unknown-license",
+			jsonOutputType,
+			externalApplication,
+			"Package\"CacheControl\" \"1.99.6\": Could not parse license-string \"UNKNOWN\"",
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
 			//Arrange
-			pipDependencies, err := os.Open(testCase.dependencies)
+			pipDependencies, err := os.Open(path.Join(testCase.dependencies, "dependency_list.txt"))
 			require.NoError(t, err)
 			defer func() { _ = pipDependencies.Close() }()
 
@@ -176,18 +184,19 @@ func TestForbiddenLicenses(t *testing.T) {
 			// Act
 			err = Main(markdownOutputType, testCase.applicationType, pipDependencies, w)
 			require.Error(t, err)
-			require.Contains(t, err.Error(), testCase.expectedErrorMessage)
+			expectedError := getFileContents(t, path.Join(testCase.dependencies, "expected_err.txt"))
+			require.Equal(t, expectedError, err.Error())
 			_ = w.Close()
 		})
 	}
 }
 
-func getFileContents(t *testing.T, path string) []byte {
+func getFileContents(t *testing.T, path string) string {
 	content, err := os.ReadFile(path)
 	if err != nil && err != io.EOF {
 		require.NoError(t, err)
 	}
-	return content
+	return string(content)
 }
 
 func getDependencyInfoFromFile(t *testing.T, path string) *dependencies.DependencyInfo {

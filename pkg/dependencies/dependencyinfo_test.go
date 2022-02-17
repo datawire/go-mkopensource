@@ -72,71 +72,6 @@ var (
 		},
 		Licenses: map[string]string{},
 	}
-
-	forbiddenLicensesOnly = dependencies.DependencyInfo{
-		Dependencies: []dependencies.Dependency{
-			{
-				Name:     "library1",
-				Version:  "1.0.2",
-				Licenses: []string{detectlicense.AGPL1Only.Name},
-			},
-		},
-		Licenses: map[string]string{},
-	}
-
-	unrestrictedLicensesOnly = dependencies.DependencyInfo{
-		Dependencies: []dependencies.Dependency{
-			{
-				Name:     "library1",
-				Version:  "1.0.2",
-				Licenses: []string{detectlicense.MIT.Name},
-			},
-		},
-		Licenses: map[string]string{},
-	}
-
-	licensesForAmbassadorServersOnly = dependencies.DependencyInfo{
-		Dependencies: []dependencies.Dependency{
-			{
-				Name:     "library1",
-				Version:  "1.0.2",
-				Licenses: []string{detectlicense.GPL3Only.Name},
-			},
-		},
-		Licenses: map[string]string{},
-	}
-
-	mixOfLicensesIncludingForbidden = dependencies.DependencyInfo{
-		Dependencies: []dependencies.Dependency{
-			{
-				Name:     "library1",
-				Version:  "1.0.2",
-				Licenses: []string{detectlicense.GPL3Only.Name},
-			},
-			{
-				Name:     "library2",
-				Version:  "3.1.3",
-				Licenses: []string{detectlicense.MIT.Name},
-			},
-			{
-				Name:     "library3",
-				Version:  "1.3.5",
-				Licenses: []string{detectlicense.AGPL1Only.Name},
-			},
-		},
-		Licenses: map[string]string{},
-	}
-
-	mixOfLicensesWithoutForbidden = dependencies.DependencyInfo{
-		Dependencies: []dependencies.Dependency{
-			{
-				Name:     "library1",
-				Version:  "1.0.2",
-				Licenses: []string{detectlicense.GPL3Only.Name, detectlicense.MIT.Name},
-			},
-		},
-		Licenses: map[string]string{},
-	}
 )
 
 func TestLicenseListIsCorrect(t *testing.T) {
@@ -196,40 +131,36 @@ func TestLicenseListIsCorrect(t *testing.T) {
 
 func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 	testCases := []struct {
-		Name            string
-		dependencies    dependencies.DependencyInfo
-		allowedLicenses detectlicense.LicenseRestriction
+		testName           string
+		licenseName        string
+		licenseRestriction detectlicense.LicenseRestriction
 	}{
 		{
-			"Empty dependency list is always allowed",
-			emptyDependencies,
-			detectlicense.Unrestricted,
-		},
-		{
 			"Unrestricted licenses are OK on Ambassador Labs servers",
-			unrestrictedLicensesOnly,
+			detectlicense.MIT.Name,
 			detectlicense.AmbassadorServers,
 		},
 		{
 			"Unrestricted licenses are OK everywhere",
-			unrestrictedLicensesOnly,
+			detectlicense.MIT.Name,
 			detectlicense.Unrestricted,
 		},
 		{
 			"Restricted licenses are OK on Ambassador Labs servers",
-			licensesForAmbassadorServersOnly,
-			detectlicense.AmbassadorServers,
-		},
-		{
-			"Mix of licenses without forbidden is allowed on Ambassador Labs servers",
-			mixOfLicensesWithoutForbidden,
+			detectlicense.GPL3Only.Name,
 			detectlicense.AmbassadorServers,
 		},
 	}
 
 	for _, testCase := range testCases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			err := testCase.dependencies.CheckLicenses(testCase.allowedLicenses)
+		t.Run(testCase.testName, func(t *testing.T) {
+			testDependency := dependencies.Dependency{
+				Name:    "library1",
+				Version: "1.0.2",
+			}
+
+			err := dependencies.CheckLicenseRestrictions(testDependency, testCase.licenseName, testCase.licenseRestriction)
+
 			require.NoError(t, err)
 		})
 	}
@@ -237,45 +168,41 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 
 func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 	testCases := []struct {
-		Name            string
-		dependencies    dependencies.DependencyInfo
-		allowedLicenses detectlicense.LicenseRestriction
+		testName           string
+		licenseName        string
+		licenseRestriction detectlicense.LicenseRestriction
 	}{
 		{
 			"It's not possible to allow the use of forbidden licenses by mistake",
-			unrestrictedLicensesOnly,
+			detectlicense.AGPL1Only.Name,
 			detectlicense.Forbidden,
 		},
 		{
 			"Forbidden licenses are not allowed on Ambassador Labs servers",
-			forbiddenLicensesOnly,
+			detectlicense.AGPL1Only.Name,
 			detectlicense.AmbassadorServers,
 		},
 		{
 			"Forbidden licenses are not allowed on customer machines",
-			forbiddenLicensesOnly,
+			detectlicense.AGPL1Only.Name,
 			detectlicense.Unrestricted,
 		},
 		{
 			"Restricted licenses are not OK on customer machines",
-			licensesForAmbassadorServersOnly,
-			detectlicense.Unrestricted,
-		},
-		{
-			"Mix of licenses including forbidden is rejected in Ambassador Labs servers",
-			mixOfLicensesIncludingForbidden,
-			detectlicense.Unrestricted,
-		},
-		{
-			"Mix of licenses without forbidden is rejected on customer machines",
-			mixOfLicensesWithoutForbidden,
+			detectlicense.GPL3Only.Name,
 			detectlicense.Unrestricted,
 		},
 	}
 
 	for _, testCase := range testCases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			err := testCase.dependencies.CheckLicenses(testCase.allowedLicenses)
+		t.Run(testCase.testName, func(t *testing.T) {
+			testDependency := dependencies.Dependency{
+				Name:    "library1",
+				Version: "1.0.2",
+			}
+
+			err := dependencies.CheckLicenseRestrictions(testDependency, testCase.licenseName, testCase.licenseRestriction)
+
 			require.Error(t, err)
 		})
 	}

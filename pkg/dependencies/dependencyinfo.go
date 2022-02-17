@@ -104,25 +104,6 @@ func getLicenseFromName(licenseName string) (License, error) {
 	return license, nil
 }
 
-// CheckLicenses checks that the licenses used by the dependencies are known and allowed to be used
-//in an application based on the buiness logic described here: https://www.notion.so/datawire/License-Management-5194ca50c9684ff4b301143806c92157.
-//This function must be called after parsing of the licenses has been done.
-func (d *DependencyInfo) CheckLicenses(licenseRestriction LicenseRestriction) error {
-	if licenseRestriction == Forbidden {
-		return fmt.Errorf("forbidden licenses should not be used")
-	}
-
-	for _, dependency := range d.Dependencies {
-		for _, licenseName := range dependency.Licenses {
-			err := CheckLicenseRestrictions(dependency, licenseName, licenseRestriction)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func CheckLicenseRestrictions(dependency Dependency, licenseName string, licenseRestriction LicenseRestriction) error {
 	license, err := getLicenseFromName(licenseName)
 	if err != nil {
