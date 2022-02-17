@@ -36,7 +36,7 @@ func main() {
 
 	dependencyInfo, err := dependency.GetDependencyInformation(os.Stdin, licenseRestriction)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error generating dependency information: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "%s: fatal: %v\n", os.Args[0], err)
 		os.Exit(int(DependencyGenerationError))
 	}
 

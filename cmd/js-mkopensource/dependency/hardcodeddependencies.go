@@ -3,7 +3,7 @@ package dependency
 import . "github.com/datawire/go-mkopensource/pkg/detectlicense"
 
 //nolint:gochecknoglobals // Would be 'const'.
-var hardcodedDependencies = map[string][]string{
+var hardcodedJsDependencies = map[string][]string{
 	"cyclist@0.2.2":                {MIT.Name},
 	"doctrine@1.5.0":               {BSD2.Name, Apache2.Name},
 	"emitter-component@1.1.1":      {MIT.Name},
