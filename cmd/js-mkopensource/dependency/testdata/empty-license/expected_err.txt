@@ -1,5 +1,5 @@
 1 license-detection error:
- 1. Dependency 'agent-base@6.0.2' has an invalid license field: <nil>
+ 1. Dependency 'agent-base@6.0.2' is missing a license identifier.
     This probably means that you added or upgraded a dependency, and the
     automated opensource-license-checker can't confidently detect what
     the license is.  (This is a good thing, because it is reminding you

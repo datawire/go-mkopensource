@@ -15,15 +15,36 @@ import (
 type NodeDependencies map[string]nodeDependency
 
 type nodeDependency struct {
-	Licenses       string `json:"licenses"`
-	Repository     string `json:"repository"`
-	DependencyPath string `json:"dependencyPath"`
-	Name           string `json:"name"`
-	Version        string `json:"version"`
-	Path           string `json:"path"`
-	URL            string `json:"url"`
-	LicenseFile    string `json:"licenseFile"`
-	LicenseText    string `json:"licenseText"`
+	Licenses       interface{} `json:"licenses"`
+	Repository     string      `json:"repository"`
+	DependencyPath string      `json:"dependencyPath"`
+	Name           string      `json:"name"`
+	Version        string      `json:"version"`
+	Path           string      `json:"path"`
+	URL            string      `json:"url"`
+	LicenseFile    string      `json:"licenseFile"`
+	LicenseText    string      `json:"licenseText"`
+}
+
+func (n *nodeDependency) licenses() (string, error) {
+	if licenses, ok := n.Licenses.(string); ok {
+		return licenses, nil
+	}
+
+	if licenseArray, ok := n.Licenses.([]interface{}); ok {
+		var licenses []string
+		for _, v := range licenseArray {
+			license, ok := v.(string)
+			if !ok {
+				return "", fmt.Errorf("Dependency '%s@%s' has an invalid license field: %#v", n.Name, n.Version, n.Licenses)
+			}
+			licenses = append(licenses, license)
+		}
+
+		return strings.Join(licenses, " AND "), nil
+	}
+
+	return "", fmt.Errorf("Dependency '%s@%s' has an invalid license field: %v", n.Name, n.Version, n.Licenses)
 }
 
 func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.LicenseRestriction) (dependencyInfo dependencies.DependencyInfo, err error) {
@@ -93,14 +114,20 @@ func getDependencyDetails(nodeDependency nodeDependency, dependencyId string) (*
 }
 
 func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) ([]string, error) {
-	if nodeDependency.Licenses == "" {
+	licenseString, err := nodeDependency.licenses()
+	if err != nil {
+		return nil, err
+	}
+
+	if licenseString == "" {
 		return nil, fmt.Errorf("Dependency '%s@%s' is missing a license identifier.", nodeDependency.Name, nodeDependency.Version)
 	}
+
 	parenthesisRe, err := regexp.Compile(`^\(|\)$`)
 	if err != nil {
 		return nil, err
 	}
-	licenseString := parenthesisRe.ReplaceAllString(nodeDependency.Licenses, "")
+	licenseString = parenthesisRe.ReplaceAllString(licenseString, "")
 
 	separatorRe, err := regexp.Compile(` OR | AND `)
 	if err != nil {

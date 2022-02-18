@@ -112,6 +112,7 @@ var (
 		"0BSD":              ZeroBSD,
 		"Apache-2.0":        Apache2,
 		"AFL-2.1":           AFL21,
+		"AFLv2.1":           AFL21,
 		"AGPL-1.0-only":     AGPL1Only,
 		"AGPL-1.0-or-later": AGPL1OrLater,
 		"AGPL-3.0-only":     AGPL3Only,

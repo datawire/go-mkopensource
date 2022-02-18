@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "json-schema",
+      "version": "0.2.3",
+      "licenses": [
+        "Academic Free License v2.1",
+        "Creative Commons Attribution 3.0 Unported"
+      ]
+    }
+  ],
+  "licenseInfo": {
+    "Academic Free License v2.1": "https://spdx.org/licenses/AFL-2.1.html",
+    "Creative Commons Attribution 3.0 Unported": "https://spdx.org/licenses/CC-BY-3.0.html"
+  }
+}
