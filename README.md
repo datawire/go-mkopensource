@@ -85,3 +85,44 @@ application behaviour.
 
 To update license information files, set the environment variables 
 described above and run `build-aux/generate.sh`
+
+## When scanning fails
+
+The scanner will sometimes fail to detect what kind of licenses a package is using because there's no real standard
+stipulating how such files must be organized, and what they must contain. When this happens, and when the failing
+package cannot be modified, the scanner must be updated to accommodate the failure. In essence, code must be added
+to make the scanner succeed.
+
+Fixing the scanner might take some time, because it's not always self-evident how to do that, or even if it should be
+done (the culprit package's owner might be persuaded to fix the problem on their side). Regardless of how the problem
+is fixed, it risks blocking progress in projects that use the scanner to produce valid `DEPENDENCIES.md` file.
+
+Blocking progress is never good, and for situations like this, the scanner offers an escape hatch. The `--unparsable-packages`
+option. The flag argument is a file name that maps package names to valid SPDX licenses.
+
+Example:
+The scanner complains about some package that cannot be parsed:
+
+```
+fatal: 2 license-detection errors:
+ 1. package "sigs.k8s.io/json": could not identify license in file "sigs.k8s.io/json/LICENSE"
+ 2. package "sigs.k8s.io/json/internal/golang/encoding/json": could not identify license in file "sigs.k8s.io/json/LICENSE"
+```
+
+A quick look at the package reveals that it uses an Apache License, but adds extra text at the top of the actual LICENSE
+file indicating that it also uses files from golang/encoding/json. We know that golang uses a 3-clause BSD license.  So we consult the [SPDX License List](https://spdx.org/licenses/) to get the canonical
+identifiers for the licenses, and add them to an `unparsable-packages.yaml` file to our build system
+with the following contents:
+
+```
+sigs.k8s.io/json:
+  - Apache-2.0
+sigs.k8s.io/json/internal/golang/encoding/json:
+  - BSD-3-Clause
+```
+
+We then use the flag `--unparsable-packages unparsable-packages.yaml` when running `go-mkopensource`.
+
+### Remember to always create a ticket!
+When a problem arise, remember to always create a ticket so that the problem can be fixed. This will help all users
+of the `go-mkopensource` tool and in many cases also make the owner of the failing component aware of the problem.
