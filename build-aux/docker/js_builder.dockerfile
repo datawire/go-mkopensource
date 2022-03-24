@@ -19,6 +19,7 @@ FROM ${NODE_IMAGE} as npm_dependency_scanner
 
 ARG APPLICATION_TYPE
 ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
+ENV EXCLUDED_PKG="${EXCLUDED_PKG}"
 
 RUN apk --no-cache add \
     bash \

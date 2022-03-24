@@ -20,8 +20,10 @@ scan_npm_package() {
   echo >&2 "Analyzing package ${PKG_NAME}"
   npm install -f >&2
 
+  echo >&2 "Packages excluded: "${EXCLUDED_PKG}""
+
   PACKAGE_DEPS="/temp/${PKG_NAME}-licenses.json"
-  license-checker --excludePackages "${PKG_NAME}" --customPath "/scripts/customLicenseFormat.json" \
+  license-checker --excludePackages "${PKG_NAME};${EXCLUDED_PKG}" --customPath "/scripts/customLicenseFormat.json" \
     --json >"${PACKAGE_DEPS}"
 
   /scripts/js-mkopensource --application-type=${APPLICATION_TYPE} < <(cat "${PACKAGE_DEPS}") >"$2"
