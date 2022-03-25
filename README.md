@@ -73,6 +73,14 @@ application behaviour.
 
   `export NPM_PACKAGES="./tools/sandbox/grpc_web/package.json ./tools/sandbox/grpc_web/package-lock.json"`
 
+* `EXCLUDED_PKG`: Optional. Semicolon separated list of npm packages names that we want to exclude for the validation.
+  *Important*: it will restrict the output to the packages (package@version) from being reported in DEPENDENCIES.md and DEPENDENCY_LICENSES.md,
+  before to use it, confirm if it is absolutely necessary.
+  
+  Example:
+
+  `export EXCLUDED_PKG="intro.js@5.0.0;internal-2"`
+
 * `NODE_IMAGE`: Required when `NPM_PACKAGES` is defined. Version 
   of Node.JS to use when running npm dependency scan. Only valid
   version numbers (X.Y.Z) are allowed.  

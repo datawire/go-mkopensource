@@ -80,6 +80,7 @@ if [ -n "${NPM_PACKAGES}" ]; then
 
   docker run --rm \
     --env APPLICATION \
+    --env EXCLUDED_PKG="${EXCLUDED_PKG}" \
     --env USER_ID=${UID} \
     --volume "$(realpath ${BUILD_TMP})":/temp \
     js-deps-builder /scripts/scan-js.sh
