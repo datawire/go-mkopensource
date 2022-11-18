@@ -15,4 +15,5 @@ var hardcodedJsDependencies = map[string][]string{
 	"pako@1.0.10":                  {MIT.Name},
 	"regenerator-transform@0.10.1": {BSD2.Name},
 	"regjsparser@0.1.5":            {BSD2.Name},
+	"node-forge@1.3.1":		{BSD3.Name},
 }
