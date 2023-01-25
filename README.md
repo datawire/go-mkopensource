@@ -131,6 +131,26 @@ sigs.k8s.io/json/internal/golang/encoding/json:
 
 We then use the flag `--unparsable-packages unparsable-packages.yaml` when running `go-mkopensource`.
 
+Example:
+In previous versions of this scanner, sometimes the scanner complains about missing dependencies when the scanner gets
+the list of all the packages in the file "vendor/modules.txt" using the command "go mod vendor" You can see that in the following output.
+```bash
+#26 18.21 go: downloading github.com/docker/go-metrics v0.0.0-20180209012529-399ea8c73916
+#26 18.24 go: downloading github.com/containerd/cgroups v0.0.0-20200531161412-0dbf7f05ba59
+#26 18.28 go: downloading github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
+#26 36.85 github.com/datawire/saas_app/internal/pkg/kubernetes imports
+#26 36.85 	k8s.io/client-go/rest imports
+#26 36.85 	k8s.io/apimachinery/pkg/util/clock: no required module provides package k8s.io/apimachinery/pkg/util/clock; to add it:
+#26 36.85 	go get k8s.io/apimachinery/pkg/util/clock
+#26 36.85 /scripts/go-mkopensource: fatal: ["go" "mod" "vendor"]: exit status 1
+#26 ERROR: executor failed running [/bin/sh -c /scripts/scan-go.sh]: exit code: 1
+```
+Now the scanner is smart enough to follow the indications of the "go mod vendor"  install the dependencies, and then 
+get the list of packages from the file ''vendor/modules.txt"
+
+Sometimes it isn't possible to install the dependecies sugested by the "go mod vendor" command. 
+The scanner will complain with the message "Error installing dependency". In this case the project will require human intervention to solve the problem.
+
 ### Remember to always create a ticket!
 When a problem arise, remember to always create a ticket so that the problem can be fixed. This will help all users
 of the `go-mkopensource` tool and in many cases also make the owner of the failing component aware of the problem.

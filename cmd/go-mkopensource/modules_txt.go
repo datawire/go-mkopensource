@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -23,8 +24,11 @@ func VendorList() ([]golist.Package, error) {
 	// - `cmd/go/internal/modcmd/vendor.go` for the code that writes modules.txt, and
 	// - `cmd/go/internal/modload/vendor.go` for the code that parses it.
 	cmd := exec.Command("go", "mod", "vendor")
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	if out, err := cmd.CombinedOutput(); err != nil {
+		errInstall := findAndGetDependencies(string(out))
+		if errInstall == nil {
+			return VendorList()
+		}
 		return nil, fmt.Errorf("%q: %w", []string{"go", "mod", "vendor"}, err)
 	}
 
@@ -98,4 +102,24 @@ func VendorList() ([]golist.Package, error) {
 	}
 
 	return pkgs, nil
+}
+
+func findAndGetDependencies(outputFromModVendor string) error {
+	lines := strings.Split(outputFromModVendor, "\n")
+	var dependenciesToInstall []string
+	for _, line := range lines {
+		if strings.Contains(line, "go get") {
+			dependenciesToInstall = append(dependenciesToInstall, line)
+		}
+	}
+	for _, dependency := range dependenciesToInstall {
+		command := strings.Split(strings.TrimSpace(dependency), " ")
+		cmd := exec.Command(command[0], command[1:]...)
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Printf("Error installing dependency %v", err)
+			return fmt.Errorf("%q: %w", []string{"go", "mod", "vendor"}, err)
+		}
+	}
+	return nil
 }
