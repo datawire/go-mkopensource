@@ -105,18 +105,15 @@ func VendorList() ([]golist.Package, error) {
 }
 
 func findAndGetDependencies(outputFromModVendor string) error {
-	log.Println(outputFromModVendor)
 	lines := strings.Split(outputFromModVendor, "\n")
 	var dependenciesToInstall []string
 	for _, line := range lines {
-		log.Println(line)
 		if strings.Contains(line, "go get") {
 			dependenciesToInstall = append(dependenciesToInstall, line)
 		}
 	}
 	for _, dependency := range dependenciesToInstall {
 		command := strings.Split(strings.TrimSpace(dependency), " ")
-		log.Printf("INSTALLING %s", strings.Join(command, ","))
 		cmd := exec.Command(command[0], command[1:]...)
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
