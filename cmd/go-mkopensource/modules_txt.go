@@ -112,6 +112,10 @@ func findAndGetDependencies(outputFromModVendor string) error {
 			dependenciesToInstall = append(dependenciesToInstall, line)
 		}
 	}
+	if len(dependenciesToInstall) <= 0 {
+		log.Println(outputFromModVendor)
+		return fmt.Errorf("none dependency required installation")
+	}
 	for _, dependency := range dependenciesToInstall {
 		command := strings.Split(strings.TrimSpace(dependency), " ")
 		cmd := exec.Command(command[0], command[1:]...)
