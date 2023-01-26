@@ -8,6 +8,16 @@ archive_dependencies() {
   tar -vf "$1" -c $2
 }
 
+UNPARSABLE_PACKAGE_VALUE=""
+
+if [ $# -gt 0 ]; then
+  if [ "$1" = "--unparsable-packages" ]; then
+    UNPARSABLE_PACKAGE_VALUE="$2"
+
+  fi
+fi
+
+
 BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 . "${BUILD_SCRIPTS}/docker/imports.sh"
 
@@ -31,6 +41,7 @@ docker build \
   --build-arg GIT_TOKEN="${GIT_TOKEN}" \
   --build-arg GO_IMAGE="${GO_IMAGE}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
+  --build-arg UNPARSABLE_PACKAGE="${UNPARSABLE_PACKAGE_VALUE}" \
   -t "go-deps-builder" --target license_output \
   --output "${BUILD_TMP}" .
 popd >/dev/null
