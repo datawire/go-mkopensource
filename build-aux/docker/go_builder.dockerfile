@@ -17,6 +17,7 @@ RUN cp scan-go.sh imports.sh /out/
 
 FROM ${GO_IMAGE} as go_dependency_scanner
 
+ARG UNPARSABLE_PACKAGE
 ARG APPLICATION_TYPE
 ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
 
@@ -43,7 +44,7 @@ ARG GIT_TOKEN
 RUN git config --global url."https://$GIT_TOKEN:@github.com/".insteadOf "https://github.com/"
 
 WORKDIR /app
-RUN /scripts/scan-go.sh
+RUN if [[ -z "$UNPARSABLE_PACKAGE" ]] ; then /scripts/scan-go.sh; else /scripts/scan-go.sh --unparsable-packages $UNPARSABLE_PACKAGE ; fi
 
 FROM scratch as license_output
 COPY --from=go_dependency_scanner /temp/* /
