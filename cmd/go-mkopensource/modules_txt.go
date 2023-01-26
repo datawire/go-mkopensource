@@ -113,6 +113,7 @@ func findAndGetDependencies(outputFromModVendor string) error {
 		}
 	}
 	if len(dependenciesToInstall) <= 0 {
+		log.Println(outputFromModVendor)
 		return fmt.Errorf("none dependency required installation")
 	}
 	for _, dependency := range dependenciesToInstall {
