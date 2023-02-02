@@ -17,6 +17,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '~${{ matrix.go_version }}'
+          cache: true
       - run: go test -race ./...
   lint:
     runs-on: ubuntu-latest
@@ -26,6 +27,7 @@ jobs:
         with:
           # Specify the most recent (1.Y.Z) Y release
           go-version-file: go.mod
+          cache: true
       - run: make lint
   generate:
     runs-on: ubuntu-latest
@@ -36,6 +38,7 @@ jobs:
           # Since `types.go` varies based on the exact version of Go,
           # pin an exact (1.Y.Z) Z release.
           go-version-file: go.mod
+          cache: true
       - run: make generate
       - run: |
           git add .
