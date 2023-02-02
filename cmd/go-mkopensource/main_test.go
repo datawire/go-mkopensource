@@ -52,6 +52,11 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 			testData:        "testdata/08-allowed-for-internal-use-only",
 			applicationType: "internal",
 		},
+		{
+			testName:        "09-out-of-date-dependencies - Dependency not found",
+			testData:        "testdata/09-out-of-date-dependencies-markdown",
+			applicationType: "external",
+		},
 	}
 
 	workingDir := getWorkingDir(t)
@@ -126,6 +131,11 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 			testName:        "GPL license is allowed for internal use",
 			testData:        "testdata/08-allowed-for-internal-use-only",
 			applicationType: "internal",
+		},
+		{
+			testName:        "09-out-of-date-dependencies - Dependency not found",
+			testData:        "testdata/09-out-of-date-dependencies-json",
+			applicationType: "external",
 		},
 	}
 
