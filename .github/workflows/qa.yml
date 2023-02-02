@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           # Specify the most recent (1.Y.Z) Y release
-          go-version: '~1.17.0'
+          go-version-file: go.mod
       - run: make lint
   generate:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
         with:
           # Since `types.go` varies based on the exact version of Go,
           # pin an exact (1.Y.Z) Z release.
-          go-version: '1.17.2'
+          go-version-file: go.mod
       - run: make generate
       - run: |
           git add .
