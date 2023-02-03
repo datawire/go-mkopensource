@@ -346,6 +346,13 @@ func TestErrorScenarios(t *testing.T) {
 			outputTypeFlag:          "external",
 			supportedGoVersionRegEx: `^go1\.17\..*`,
 		},
+		{
+			testName:                "Removed dependency is required by the application",
+			testData:                "testdata/10-removed-dependency-imported-by-app",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "external",
+			supportedGoVersionRegEx: `.*`,
+		},
 	}
 
 	workingDir := getWorkingDir(t)
