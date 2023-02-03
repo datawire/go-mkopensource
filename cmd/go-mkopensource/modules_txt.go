@@ -41,17 +41,23 @@ func NewModules() (m *Modules) {
 // configurations, but inferior in that it cannot be asked to only
 // consider dependencies of a specific package rather than the whole
 // module.
-func VendorList() ([]golist.Package, error) {
+func (m *Modules) VendorList() ([]golist.Package, error) {
 	// References: In the Go stdlib source code, see
 	// - `cmd/go/internal/modcmd/vendor.go` for the code that writes modules.txt, and
 	// - `cmd/go/internal/modload/vendor.go` for the code that parses it.
 	cmd := exec.Command("go", "mod", "vendor")
 	if out, err := cmd.CombinedOutput(); err != nil {
-		errInstall := findAndGetDependencies(string(out))
-		if errInstall == nil {
-			return VendorList()
+		if errInstall := m.findAndGetDependencies(string(out)); errInstall != nil {
+			if err := m.tryRemoveUnavailableDependencies(); err != nil {
+				return nil, err
+			}
 		}
-		return nil, fmt.Errorf("%q: %w", []string{"go", "mod", "vendor"}, err)
+
+		// Run go mod vendor again to update vendored dependencies
+		cmd = exec.Command("go", "mod", "vendor")
+		if err := cmd.Run(); err != nil {
+			return nil, err
+		}
 	}
 
 	file, err := os.Open("vendor/modules.txt")
@@ -126,7 +132,40 @@ func VendorList() ([]golist.Package, error) {
 	return pkgs, nil
 }
 
-func findAndGetDependencies(outputFromModVendor string) error {
+func (m *Modules) tryRemoveUnavailableDependencies() error {
+	dependenciesLeftToRemove := 0
+	for {
+		cmd := exec.Command("go", "mod", "vendor")
+		out, err := cmd.CombinedOutput()
+		if err == nil {
+			break
+		}
+
+		lines := strings.Split(string(out), "\n")
+		removedDependencies, err := m.getRemovedDependencies(lines)
+		if err != nil {
+			return err
+		}
+
+		if len(removedDependencies) == 0 {
+			return fmt.Errorf("%q: %w", []string{"go", "mod", "vendor"}, err)
+		}
+
+		if len(removedDependencies) == dependenciesLeftToRemove {
+			return fmt.Errorf("number of dependencies to remove didn't change, so removal is not working as expected")
+		}
+
+		err = m.updateDependenciesOfRemovedPackage(removedDependencies[0])
+		if err != nil {
+			return fmt.Errorf("error updating removed dependencies: %w", err)
+		}
+
+		dependenciesLeftToRemove = len(removedDependencies)
+	}
+	return nil
+}
+
+func (m *Modules) findAndGetDependencies(outputFromModVendor string) error {
 	lines := strings.Split(outputFromModVendor, "\n")
 	var dependenciesToInstall []string
 	for _, line := range lines {
@@ -192,7 +231,7 @@ func (m *Modules) getGoSemVer() (version string, err error) {
 	return match[1], nil
 }
 
-func updateDependenciesOfRemovedPackage(removedPackage string) (err error) {
+func (m *Modules) updateDependenciesOfRemovedPackage(removedPackage string) (err error) {
 	whyCmd := exec.Command("go", "mod", "why", removedPackage)
 	out, err := whyCmd.Output()
 	if err != nil {
