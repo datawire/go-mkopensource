@@ -127,3 +127,36 @@ func findAndGetDependencies(outputFromModVendor string) error {
 	}
 	return nil
 }
+
+func updateDependenciesOfRemovedPackage(removedPackage string) (err error) {
+	whyCmd := exec.Command("go", "mod", "why", removedPackage)
+	out, err := whyCmd.Output()
+	if err != nil {
+		log.Printf("'go mod why' failed:\n%s\n", err.(*exec.ExitError).Stderr)
+		return fmt.Errorf("'go mod why' failed with error %w", err)
+	}
+
+	outputLines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(outputLines) <= 3 {
+		return fmt.Errorf("Package %s is being imported directly and can't be removed", removedPackage)
+	}
+
+	for i := 2; i <= len(outputLines)-2; i++ {
+		dependencyToUpdate := outputLines[i]
+		updateCmd := exec.Command("go", "get", dependencyToUpdate)
+		out, err = updateCmd.CombinedOutput()
+		if err != nil {
+			log.Printf("'go get %s' failed:\n%s\n", dependencyToUpdate, out)
+			return fmt.Errorf("'go get %s' failed with error %w\n", dependencyToUpdate, err)
+		}
+
+		tidyCmd := exec.Command("go", "mod", "tidy")
+		out, err = tidyCmd.CombinedOutput()
+		if err != nil {
+			log.Printf("'go mod tidy' failed:\n%s\n", out)
+			return fmt.Errorf("'go mod tidy' failed with error %w", err)
+		}
+	}
+
+	return nil
+}
