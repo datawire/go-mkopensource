@@ -68,6 +68,12 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 			applicationType:         "external",
 			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
 		},
+		{
+			testName:                "11-dependency-missing-from-go-mod - Dependency missing from go.mod is added",
+			testData:                "testdata/11-dependency-missing-from-go-mod",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
+		},
 	}
 
 	workingDir := getWorkingDir(t)
