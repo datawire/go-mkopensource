@@ -3,10 +3,13 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
+	"fmt"
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -18,39 +21,58 @@ import (
 
 func TestSuccessfulMarkdownOutput(t *testing.T) {
 	testCases := []struct {
-		testName        string
-		testData        string
-		applicationType string
+		testName                string
+		testData                string
+		applicationType         string
+		supportedGoVersionRegEx string
 	}{
 		{
-			testName:        "01-intern-new - markdown output",
-			testData:        "testdata/01-intern-new",
-			applicationType: "external",
+			testName:                "01-intern-new - markdown output",
+			testData:                "testdata/01-intern-new",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "02-replace - markdown output",
-			testData:        "testdata/02-replace",
-			applicationType: "external",
+			testName:                "02-replace - markdown output",
+			testData:                "testdata/02-replace",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "04-nodeps - markdown output",
-			testData:        "testdata/04-nodeps",
-			applicationType: "external",
+			testName:                "04-nodeps - markdown output",
+			testData:                "testdata/04-nodeps",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "05-subpatent - markdown output",
-			testData:        "testdata/05-subpatent",
-			applicationType: "external",
+			testName:                "05-subpatent - markdown output",
+			testData:                "testdata/05-subpatent",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "One dependency with multiple licenses",
-			testData:        "testdata/06-multiple-licenses",
-			applicationType: "external",
+			testName:                "One dependency with multiple licenses",
+			testData:                "testdata/06-multiple-licenses",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "GPL license is allowed for internal use",
-			testData:        "testdata/08-allowed-for-internal-use-only",
-			applicationType: "internal",
+			testName:                "GPL license is allowed for internal use",
+			testData:                "testdata/08-allowed-for-internal-use-only",
+			applicationType:         "internal",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "09-out-of-date-dependencies - Dependency not found",
+			testData:                "testdata/09-out-of-date-dependencies-markdown",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
+		},
+		{
+			testName:                "11-dependency-missing-from-go-mod - Dependency missing from go.mod is added",
+			testData:                "testdata/11-dependency-missing-from-go-mod",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 	}
 
@@ -58,6 +80,11 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
+			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
+			if !re.Match([]byte(runtime.Version())) {
+				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+			}
+
 			defer func() {
 				require.NoError(t, os.Chdir(workingDir))
 			}()
@@ -93,39 +120,52 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 
 func TestSuccessfulJsonOutput(t *testing.T) {
 	testCases := []struct {
-		testName        string
-		testData        string
-		applicationType string
+		testName                string
+		testData                string
+		applicationType         string
+		supportedGoVersionRegEx string
 	}{
 		{
-			testName:        "01-intern-new",
-			testData:        "testdata/01-intern-new",
-			applicationType: "external",
+			testName:                "01-intern-new",
+			testData:                "testdata/01-intern-new",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "02-replace",
-			testData:        "testdata/02-replace",
-			applicationType: "external",
+			testName:                "02-replace",
+			testData:                "testdata/02-replace",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "04-nodeps",
-			testData:        "testdata/04-nodeps",
-			applicationType: "external",
+			testName:                "04-nodeps",
+			testData:                "testdata/04-nodeps",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "05-subpatent",
-			testData:        "testdata/05-subpatent",
-			applicationType: "external",
+			testName:                "05-subpatent",
+			testData:                "testdata/05-subpatent",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "One dependency with multiple licenses",
-			testData:        "testdata/06-multiple-licenses",
-			applicationType: "external",
+			testName:                "One dependency with multiple licenses",
+			testData:                "testdata/06-multiple-licenses",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:        "GPL license is allowed for internal use",
-			testData:        "testdata/08-allowed-for-internal-use-only",
-			applicationType: "internal",
+			testName:                "GPL license is allowed for internal use",
+			testData:                "testdata/08-allowed-for-internal-use-only",
+			applicationType:         "internal",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "09-out-of-date-dependencies - Dependency not found",
+			testData:                "testdata/09-out-of-date-dependencies-json",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
 		},
 	}
 
@@ -133,6 +173,11 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
+			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
+			if !re.Match([]byte(runtime.Version())) {
+				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+			}
+
 			defer func() {
 				require.NoError(t, os.Chdir(workingDir))
 			}()
@@ -164,36 +209,54 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 	}
 }
 
-func TestErrorScenarios(t *testing.T) {
+func TestSuccessfulTarOutput(t *testing.T) {
 	testCases := []struct {
-		testName       string
-		testData       string
-		packagesFlag   string
-		outputTypeFlag string
+		testName                string
+		testData                string
+		applicationType         string
+		supportedGoVersionRegEx string
 	}{
 		{
-			testName:       "testdata/00-intern-old",
-			testData:       "testdata/00-intern-old",
-			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			testName:                "01-intern-new - markdown output",
+			testData:                "testdata/01-intern-new",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:       "Multiple errors",
-			testData:       "testdata/03-multierror",
-			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			testName:                "02-replace - markdown output",
+			testData:                "testdata/02-replace",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:       "Forbidden license",
-			testData:       "testdata/07-forbidden-license",
-			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			testName:                "04-nodeps - markdown output",
+			testData:                "testdata/04-nodeps",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
 		},
 		{
-			testName:       "License not allowed on distributed applications",
-			testData:       "testdata/08-allowed-for-internal-use-only",
-			packagesFlag:   "mod",
-			outputTypeFlag: "full",
+			testName:                "05-subpatent - markdown output",
+			testData:                "testdata/05-subpatent",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "One dependency with multiple licenses",
+			testData:                "testdata/06-multiple-licenses",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "GPL license is allowed for internal use",
+			testData:                "testdata/08-allowed-for-internal-use-only",
+			applicationType:         "internal",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "09-out-of-date-dependencies - Dependency not found",
+			testData:                "testdata/09-out-of-date-dependencies-tar",
+			applicationType:         "external",
+			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
 		},
 	}
 
@@ -201,6 +264,112 @@ func TestErrorScenarios(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
+			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
+			if !re.Match([]byte(runtime.Version())) {
+				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+			}
+
+			defer func() {
+				require.NoError(t, os.Chdir(workingDir))
+			}()
+
+			require.NoError(t, os.Chdir(testCase.testData))
+
+			originalStdOut, r, w := interceptStdOut()
+			defer func() {
+				os.Stdout = originalStdOut
+			}()
+
+			actErr := main.Main(&main.CLIArgs{
+				OutputFormat:    "tar",
+				OutputName:      "",
+				GoTarFilename:   filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
+				Package:         "mod",
+				ApplicationType: testCase.applicationType,
+			})
+
+			_ = w.Close()
+
+			require.NoError(t, actErr)
+
+			fileContents, err := listTarContents(t, r)
+			require.NoError(t, err)
+
+			expectedTarContents := getFileContents(t, "expected_tar_contents.txt")
+
+			assert.Equal(t, string(expectedTarContents), fileContents)
+		})
+	}
+}
+
+func TestErrorScenarios(t *testing.T) {
+	testCases := []struct {
+		testName                string
+		testData                string
+		packagesFlag            string
+		outputTypeFlag          string
+		supportedGoVersionRegEx string
+	}{
+		{
+			testName:                "testdata/00-intern-old",
+			testData:                "testdata/00-intern-old",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "full",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "Multiple errors",
+			testData:                "testdata/03-multierror",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "full",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "Forbidden license",
+			testData:                "testdata/07-forbidden-license",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "full",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "License not allowed on distributed applications",
+			testData:                "testdata/08-allowed-for-internal-use-only",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "full",
+			supportedGoVersionRegEx: `.*`,
+		},
+		{
+			testName:                "Can't update dependencies due to Go version 1.16",
+			testData:                "testdata/09-out-of-date-dependencies-markdown",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "external",
+			supportedGoVersionRegEx: `^go1\.16\..*`,
+		},
+		{
+			testName:                "Can't update dependencies due to Go version 1.17",
+			testData:                "testdata/09-out-of-date-dependencies-json",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "external",
+			supportedGoVersionRegEx: `^go1\.17\..*`,
+		},
+		{
+			testName:                "Removed dependency is required by the application",
+			testData:                "testdata/10-removed-dependency-imported-by-app",
+			packagesFlag:            "mod",
+			outputTypeFlag:          "external",
+			supportedGoVersionRegEx: `.*`,
+		},
+	}
+
+	workingDir := getWorkingDir(t)
+
+	for _, testCase := range testCases {
+		t.Run(testCase.testName, func(t *testing.T) {
+			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
+			if !re.Match([]byte(runtime.Version())) {
+				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+			}
+
 			defer func() {
 				require.NoError(t, os.Chdir(workingDir))
 			}()
@@ -230,59 +399,6 @@ func getWorkingDir(t *testing.T) string {
 	workingDir, err := os.Getwd()
 	require.NoError(t, err)
 	return workingDir
-}
-
-func TestTarOutput(t *testing.T) {
-	root, err := os.Getwd()
-	require.NoError(t, err)
-
-	direntries, err := os.ReadDir("testdata")
-	require.NoError(t, err)
-	for _, direntry := range direntries {
-		if !direntry.IsDir() {
-			continue
-		}
-		name := direntry.Name()
-		t.Run(name, func(t *testing.T) {
-			defer func() {
-				require.NoError(t, os.Chdir(root))
-			}()
-
-			require.NoError(t, os.Chdir(filepath.Join("testdata", name)))
-
-			expectedError := getFileContents(t, "expected_err.txt")
-
-			originalStdOut, r, w := interceptStdOut()
-			defer func() {
-				os.Stdout = originalStdOut
-			}()
-
-			actErr := main.Main(&main.CLIArgs{
-				OutputFormat:  "tar",
-				OutputName:    "",
-				GoTarFilename: filepath.Join("..", "go1.17.3-testdata.src.tar.gz"),
-				Package:       "mod",
-			})
-
-			_ = w.Close()
-
-			if expectedError == nil {
-				require.NoError(t, actErr)
-
-				fileContents, err := listTarContents(t, r)
-				require.NoError(t, err)
-
-				expectedTarContents := getFileContents(t, "expected_tar_contents.txt")
-				assert.Equal(t, string(expectedTarContents), fileContents)
-			} else {
-				if assert.Error(t, actErr) {
-					// Use this instead of assert.EqualError so that we diff
-					// output, which is helpful for long strings.
-					assert.Equal(t, strings.TrimSpace(string(expectedError)), strings.TrimSpace(actErr.Error()))
-				}
-			}
-		})
-	}
 }
 
 func listTarContents(t *testing.T, r *os.File) (string, error) {

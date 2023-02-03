@@ -203,7 +203,8 @@ func Main(args *CLIArgs) error {
 	var listPkgs []golist.Package
 	if args.Package == "mod" {
 		// `go list`
-		listPkgs, err = VendorList()
+		m := NewModules()
+		listPkgs, err = m.VendorList()
 		if err != nil {
 			return err
 		}

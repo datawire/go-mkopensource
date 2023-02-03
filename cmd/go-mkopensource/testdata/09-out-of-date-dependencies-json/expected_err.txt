@@ -1,0 +1,1 @@
+error updating removed dependencies: 'go get k8s.io/client-go/rest' failed with error exit status 2
