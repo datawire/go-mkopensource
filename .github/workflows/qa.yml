@@ -21,7 +21,12 @@ jobs:
         with:
           go-version: '~${{ matrix.go_version }}'
           cache: true
-      - run: go test -race ./...
+      - run: |
+          if [[ "${{runner.debug}}" == "1" ]]; then
+            DEBUG_FLAGS="-v"
+          fi
+          
+          go test -race ${DEBUG_FLAGS} ./...
   lint:
     runs-on: ubuntu-latest
     steps:
