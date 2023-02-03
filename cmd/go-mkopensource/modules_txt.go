@@ -8,10 +8,32 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/datawire/go-mkopensource/pkg/golist"
 )
+
+const DEFAULT_DEPENDENCY_REGEX = "default"
+
+type Modules struct {
+	removedDependenciesRegex map[string]*regexp.Regexp
+}
+
+func NewModules() (m *Modules) {
+	m = &Modules{
+		removedDependenciesRegex: map[string]*regexp.Regexp{},
+	}
+
+	m.removedDependenciesRegex["go1.16"] = regexp.MustCompile(`\t+([^\s]+): module .* found .* but does not contain package`)
+	m.removedDependenciesRegex["go1.17"] = m.removedDependenciesRegex["go1.16"]
+	m.removedDependenciesRegex["go1.18"] = regexp.MustCompile(`\t+([^\s]+): no required module provides package`)
+	m.removedDependenciesRegex["go1.19"] = m.removedDependenciesRegex["go1.18"]
+	m.removedDependenciesRegex[DEFAULT_DEPENDENCY_REGEX] = m.removedDependenciesRegex["go1.18"]
+
+	return m
+}
 
 // VendorList returns a listing of all packages in
 // `vendor/modules.txt`, which is superior to `go list -deps` in that
@@ -126,6 +148,48 @@ func findAndGetDependencies(outputFromModVendor string) error {
 		}
 	}
 	return nil
+}
+
+func (m *Modules) getRemovedDependencies(lines []string) (removedDependencies []string, err error) {
+	re, err := m.getRemovedDependencyRegex()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, line := range lines {
+		p := re.FindStringSubmatch(line)
+		if len(p) == 2 {
+			dependency := p[1]
+			log.Printf("found package %s to remove\n", dependency)
+			removedDependencies = append(removedDependencies, dependency)
+		}
+	}
+	return removedDependencies, nil
+}
+
+func (m *Modules) getRemovedDependencyRegex() (*regexp.Regexp, error) {
+	goVersion, err := m.getGoSemVer()
+	if err != nil {
+		return nil, err
+	}
+
+	if re, ok := m.removedDependenciesRegex[goVersion]; ok {
+		return re, nil
+	}
+
+	return m.removedDependenciesRegex[DEFAULT_DEPENDENCY_REGEX], nil
+}
+
+func (m *Modules) getGoSemVer() (version string, err error) {
+	goVersionRegex := regexp.MustCompile(`^(go[0-9]+\.[0-9]+)\.[0-9]+$`)
+	runtimeVersion := runtime.Version()
+
+	match := goVersionRegex.FindStringSubmatch(runtimeVersion)
+	if match == nil {
+		return "", fmt.Errorf("could not get go version from %s", runtimeVersion)
+	}
+
+	return match[1], nil
 }
 
 func updateDependenciesOfRemovedPackage(removedPackage string) (err error) {
