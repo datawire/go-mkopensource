@@ -1,0 +1,37 @@
+name: 'Save dependabot changes'
+description: "Check if dependencies were changed by dependabot and commit the new dependency information."
+inputs:
+  github_token:
+    description: |
+      Token used to commit changes back into the repository. 
+      This should be a personal access token, or commits made by this action won't trigger a new workflow run.
+      See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
+    required: true
+
+outputs:
+  is_dirty:
+    description: "If there were changes made by dependabot, this variable will be true"
+    value: ${{ steps.check-dirty.outputs.DIRTY == 'true' }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check if dependencies changed
+      if: github.actor == 'dependabot[bot]' && github.ref_type == 'branch'
+      shell: bash
+      id: check-dirty
+      run: $GITHUB_ACTION_PATH/is_dirty.sh
+
+    - name: Update git credentials
+      if: steps.check-dirty.outputs.DIRTY == 'true'
+      shell: bash
+      run: |
+        set -o pipefail
+        AUTH=$(printf "%s""pat:${{ inputs.github_token }}" | base64)
+        echo "::add-mask::${AUTH}"
+        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${AUTH}"
+
+    - name: Commit updated dependency files
+      if: steps.check-dirty.outputs.DIRTY == 'true'
+      shell: bash
+      run: $GITHUB_ACTION_PATH/commit.sh
