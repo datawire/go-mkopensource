@@ -182,7 +182,7 @@ jobs:
       - name: Abort if dependencies changed
         if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
         run: |
-          echo "Dependabot triggered a depenency update. Aborting workflow."
+          echo "Dependabot triggered a dependency update. Aborting workflow."
           exit 1
       # Continue with other steps
 ```
