@@ -2,7 +2,7 @@
 # Python dependency scanner
 ########################################
 ARG PYTHON_IMAGE="need-a-base-image"
-FROM golang:1.17-alpine3.15 as builder
+FROM golang:1.19-alpine3.15 as builder
 
 WORKDIR /src
 COPY . ./

@@ -2,7 +2,7 @@
 # Go dependency scanner
 ########################################
 ARG GO_IMAGE="base-image-unknown"
-FROM golang:1.17-alpine3.15 as builder
+FROM golang:1.19-alpine3.15 as builder
 
 WORKDIR /src
 COPY . ./
