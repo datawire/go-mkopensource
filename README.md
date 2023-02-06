@@ -154,3 +154,39 @@ The scanner will complain with the message "Error installing dependency". In thi
 ### Remember to always create a ticket!
 When a problem arise, remember to always create a ticket so that the problem can be fixed. This will help all users
 of the `go-mkopensource` tool and in many cases also make the owner of the failing component aware of the problem.
+
+## Dependabot PRs
+
+When dependabot creates a PR, it's possible that license scanning will fail due so several factors:
+1. A Go package is unavailable in the new version of a module
+2. Dependency information is out of date.
+
+To reduce friction merging dependabot PRs, there is an action that will update a PR created by dependabot.
+
+Use the action in a workflow as follows:
+```yaml
+name: "Verify licenses"
+on: push
+jobs:
+  check_license_info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Generate dependency information"
+        run: make generate-dependency-info
+      - name: "Save changes made by dependabot"
+        id: changed-by-dependabot
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.1
+        with:
+          github_token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+      - name: Abort if dependencies changed
+        if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
+        run: |
+          echo "Dependabot triggered a depenency update. Aborting workflow."
+          exit 1
+      # Continue with other steps
+```
+
+*Note*: Action's input `github_token` is a GitHub personal access token with at least `repo` permissions.
+Don't use the workflow's `GITHUB_TOKEN` token, or it won't run after changes are commited.
+See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
