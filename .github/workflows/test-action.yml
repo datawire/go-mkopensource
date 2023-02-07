@@ -1,0 +1,70 @@
+name: "Smoke tests"
+on:
+  push:
+    paths:
+      - .github/workflows/test-action.yml
+permissions:
+  contents: write
+jobs:
+  generate_info:
+    name: "Generate dependency information"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: "Generate dependency information"
+        shell: bash
+        env:
+          APPLICATION: go-mkopensource
+          APPLICATION_TYPE: internal
+          BUILD_HOME: '.'
+          BUILD_TMP: '${{ runner.temp }}/license'
+          SCRIPTS_HOME: '.'
+          GIT_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          
+          export GO_IMAGE=$(grep -e 'FROM golang:' "build-aux/docker/go_builder.dockerfile" | cut -d ' ' -f2 )
+          mkdir -p "${BUILD_TMP}"
+          build-aux/generate.sh --output-format=txt --package=mod --output-type=markdown --gotar="go1.19.3.src.tar.gz" --unparsable-packages=./unparsable-packages.yaml
+
+          # Update dependency information to force action to run
+          echo -e "\n\nDependencies updated by '${GITHUB_WORKFLOW}' on $(date)" >> DEPENDENCY_LICENSES.md
+      
+
+      - name: "Verify if changes were made by dependabot"
+        id: changed-by-dependabot
+        uses: ./actions/save-dependabot-changes
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branches_to_skip: master
+
+      - name: "Check that action didn't do any changes"
+        run: |
+          if [[ "${{ steps.changed-by-dependabot.outputs.is_dirty }}"  == 'true' ]]; then
+            exit 1
+          fi
+
+      - name: "Save dependency changes made by the last committer"
+        id: changed-by-dependabot2
+        uses: ./actions/save-dependabot-changes
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branches_to_skip: master
+          actor: ${{ github.actor }}
+
+      - name: "Check that action pushed update back to the repository"
+        if:
+        run: |
+          if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
+            exit 1
+          fi
