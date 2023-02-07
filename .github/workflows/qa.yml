@@ -43,8 +43,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          # Since `types.go` varies based on the exact version of Go,
-          # pin an exact (1.Y.Z) Z release.
           go-version-file: go.mod
           cache: true
       - run: make generate
@@ -54,3 +52,4 @@ jobs:
              PAGER= git diff --cached
              exit 1
           fi
+      - run: make build
