@@ -1,4 +1,4 @@
-build: go-mkopensource
+build:  go-mkopensource py-mkopensource js-mkopensource
 .PHONY: build
 
 %-mkopensource: FORCE cmd/%-mkopensource
