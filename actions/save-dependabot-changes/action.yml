@@ -16,8 +16,26 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Check preconditions
+      id: preconditions
+      shell: bash
+      run: |
+        SOURCE_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+
+        if [[ "${GITHUB_ACTOR}" != 'dependabot[bot]' ]]; then
+          echo '::notice:: Action save-dependabot-changes is being skipped because actor is not dependabot'
+          echo "SKIP=true" >> $GITHUB_OUTPUT
+          exit
+        fi        
+        
+        if [[ "${GITHUB_REF_TYPE}" != 'branch' ]]; then
+          echo '::notice:: Action save-dependabot-changes is being skipped because workflow is not running against a branch'
+          echo "SKIP=true" >> $GITHUB_OUTPUT
+          exit
+        fi        
+
     - name: Check if dependencies changed
-      if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]' && github.ref_type == 'branch'
+      if: steps.preconditions.outputs.SKIP != 'true'
       shell: bash
       id: check-dirty
       run: $GITHUB_ACTION_PATH/is_dirty.sh
