@@ -11,4 +11,6 @@ git checkout "${DESTINATION_BRANCH}"
 echo '::notice:: Committing dependabot changes to DEPENDENCIES.md and/or DEPENDENCY_LICENSES.md'
 git commit -m  "Updated dependency information after dependabot change." DEPENDENCIES.md DEPENDENCY_LICENSES.md go.mod go.sum
 
-git push
+if [[ "${PUSH_CHANGES}" == 'true' ]]; then
+    git push
+fi

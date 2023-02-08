@@ -12,6 +12,12 @@ inputs:
     required: true
     default: 'dependabot[bot]'
 
+  push_changes:
+    description: |
+      If true, changes made to dependencies will be pushed to the remote. Used only for testing the action.
+    required: true
+    default: 'true'
+
 outputs:
   is_dirty:
     description: "If there were changes made by dependabot, this variable will be true"
@@ -57,6 +63,8 @@ runs:
 
     - name: Commit updated dependency files
       if: steps.check-dirty.outputs.DIRTY == 'true'
+      env:
+        PUSH_CHANGES: ${{ inputs.push_changes }}
       shell: bash
       run: $GITHUB_ACTION_PATH/commit.sh
 

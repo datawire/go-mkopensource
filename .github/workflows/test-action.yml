@@ -46,6 +46,7 @@ jobs:
         uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
         with:
           branches_to_skip: master
+          push_changes: false
 
       - name: "Check that action didn't do any changes"
         run: |
@@ -59,8 +60,9 @@ jobs:
         with:
           branches_to_skip: master
           actor: ${{ github.actor }}
+          push_changes: false
 
-      - name: "Check that action pushed update back to the repository"
+      - name: "Check that action committed changes to the repository"
         if: github.ref_type == 'branch'
         run: |
           if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
