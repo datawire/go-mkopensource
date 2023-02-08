@@ -161,7 +161,7 @@ When dependabot creates a PR, it's possible that license scanning will fail due 
 1. A Go package is unavailable in the new version of a module
 2. Dependency information is out of date.
 
-To reduce friction merging dependabot PRs, there is an action that will update a PR created by dependabot.
+To reduce friction merging dependabot PRs, there is an action (`save-dependabot-changes`) that will update a PR created by dependabot.
 
 Use the action in a workflow as follows:
 ```yaml
@@ -179,6 +179,7 @@ jobs:
         uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.1
         with:
           github_token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          branches_to_skip: 'master'
       - name: Abort if dependencies changed
         if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
         run: |
@@ -190,3 +191,15 @@ jobs:
 *Note*: Action's input `github_token` is a GitHub personal access token with at least `repo` permissions.
 Don't use the workflow's `GITHUB_TOKEN` token, or it won't run after changes are commited.
 See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
+
+### Testing changes to the `save-dependabot-changes` action
+
+After the action has been updated, you can verify that it works as expected by updating the [smoke tests](.github/workflows/test-action.yml)
+to point to the new version of the action.
+
+```yaml
+uses: datawire/go-mkopensource/actions/save-dependabot-changes@<VERSION>
+```
+
+Note: If you want to test your changes before they are complete, you could use a branch in the action reference, and 
+update it to a tag once you're ready to release.  

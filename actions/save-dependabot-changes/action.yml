@@ -1,4 +1,4 @@
-name: 'Save dependabot changes'
+name: 'Update dependency information after dependabot updates'
 description: "Check if dependencies were changed by dependabot and commit the new dependency information."
 inputs:
   github_token:
@@ -8,6 +8,17 @@ inputs:
       See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
     required: true
 
+  branches_to_skip:
+    description: Regex of branches where this action should not run. e.g. 'master'
+    required: true
+
+  actor:
+    description: |
+      The username of the user that triggered the initial workflow run. Used only for testing the action.
+      See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+    required: true
+    default: 'dependabot[bot]'
+
 outputs:
   is_dirty:
     description: "If there were changes made by dependabot, this variable will be true"
@@ -16,8 +27,37 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Check preconditions
+      id: preconditions
+      shell: bash
+      run: |
+        SOURCE_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+
+        if [[ "${GITHUB_ACTOR}" != '${{ inputs.actor }}' ]]; then
+          echo '::notice:: Action save-dependabot-changes is being skipped because actor is not ${{ inputs.actor }}'
+          echo "SKIP=true" >> $GITHUB_OUTPUT
+          exit
+        fi        
+        
+        if [[ "${GITHUB_REF_TYPE}" != 'branch' ]]; then
+          echo '::notice:: Action save-dependabot-changes is being skipped because workflow is not running against a branch'
+          echo "SKIP=true" >> $GITHUB_OUTPUT
+          exit
+        fi        
+
+        if [[ -z "${{ inputs.branches_to_skip }}" ]]; then
+          echo '::error:: Action save-dependabot-changes requires that parameter branches_to_skip have a non-empty value'
+          exit 1
+        fi
+
+        if grep --silent -E "${{ inputs.branches_to_skip }}" <(echo "${SOURCE_BRANCH}"); then
+          echo '::notice:: Action save-dependabot-changes is being skipped because branch matches the branches_to_skip regex'
+          echo "SKIP=true" >> $GITHUB_OUTPUT
+          exit
+        fi
+
     - name: Check if dependencies changed
-      if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]' && github.ref_type == 'branch'
+      if: steps.preconditions.outputs.SKIP != 'true'
       shell: bash
       id: check-dirty
       run: $GITHUB_ACTION_PATH/is_dirty.sh
