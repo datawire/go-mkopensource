@@ -1,8 +1,8 @@
-build: go-mkopensource
+build:  go-mkopensource py-mkopensource js-mkopensource
 .PHONY: build
 
-go-mkopensource: FORCE
-	cd cmd/go-mkopensource; \
+%-mkopensource: FORCE cmd/%-mkopensource
+	cd cmd/$*-mkopensource; \
 	go build .
 
 check:
