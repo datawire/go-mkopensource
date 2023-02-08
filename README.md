@@ -178,7 +178,6 @@ jobs:
         id: changed-by-dependabot
         uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.1
         with:
-          github_token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           branches_to_skip: 'master'
       - name: Abort if dependencies changed
         if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
@@ -188,9 +187,11 @@ jobs:
       # Continue with other steps
 ```
 
-*Note*: Action's input `github_token` is a GitHub personal access token with at least `repo` permissions.
-Don't use the workflow's `GITHUB_TOKEN` token, or it won't run after changes are commited.
-See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
+*Notes*:
+- The GitHub token GITHUB_TOKEN should have at least `contents:write` and `actions: write` 
+  [privileges](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
+- The workflow that invokes the action should have a `workflow_dispatch` 
+  [trigger](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch).
 
 ### Testing changes to the `save-dependabot-changes` action
 
