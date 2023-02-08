@@ -1,10 +1,12 @@
 name: "Smoke tests"
 on:
+  workflow_dispatch:
   push:
     paths:
       - .github/workflows/test-action.yml
 permissions:
   contents: write
+  actions: write
 jobs:
   generate_info:
     name: "Generate dependency information"
@@ -13,7 +15,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
 
       - name: Setup Go environment
         uses: actions/setup-go@v3
@@ -40,12 +41,10 @@ jobs:
           # Update dependency information to force action to run
           echo -e "\n\nDependencies updated by '${GITHUB_WORKFLOW}' on $(date)" >> DEPENDENCY_LICENSES.md
       
-
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.3
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           branches_to_skip: master
 
       - name: "Check that action didn't do any changes"
@@ -56,9 +55,8 @@ jobs:
 
       - name: "Save dependency changes made by the last committer"
         id: changed-by-dependabot2
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.3
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           branches_to_skip: master
           actor: ${{ github.actor }}
 
