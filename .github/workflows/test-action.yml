@@ -61,7 +61,7 @@ jobs:
           actor: ${{ github.actor }}
 
       - name: "Check that action pushed update back to the repository"
-        if:
+        if: github.ref_type == 'branch'
         run: |
           if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
             exit 1
