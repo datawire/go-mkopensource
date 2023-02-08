@@ -299,7 +299,7 @@ func Main(args *CLIArgs) error {
 			}
 		} else {
 			if _, ok := unparsablePackages[pkgName]; ok {
-				licErrs = append(licErrs, fmt.Errorf(`Package %q has a valid license. It must removed from %s`,
+				licErrs = append(licErrs, fmt.Errorf(`Package %q has a valid license. It must be removed from %s`,
 					pkgName, args.UnparsablePackages))
 			}
 		}

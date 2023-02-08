@@ -55,7 +55,8 @@ func (m *Modules) VendorList() ([]golist.Package, error) {
 
 		// Run go mod vendor again to update vendored dependencies
 		cmd = exec.Command("go", "mod", "vendor")
-		if err := cmd.Run(); err != nil {
+		if out, err = cmd.CombinedOutput(); err != nil {
+			log.Printf("'go mod vendor' failed:\n%s\n", out)
 			return nil, err
 		}
 	}
