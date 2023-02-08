@@ -1,4 +1,4 @@
-name: 'Save dependabot changes'
+name: 'Update dependency information after dependabot updates'
 description: "Check if dependencies were changed by dependabot and commit the new dependency information."
 inputs:
   github_token:
