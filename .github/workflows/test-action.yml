@@ -43,7 +43,7 @@ jobs:
 
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
-        uses: ./actions/save-dependabot-changes
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branches_to_skip: master
@@ -56,7 +56,7 @@ jobs:
 
       - name: "Save dependency changes made by the last committer"
         id: changed-by-dependabot2
-        uses: ./actions/save-dependabot-changes
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branches_to_skip: master
