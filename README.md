@@ -179,6 +179,7 @@ jobs:
         uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.1
         with:
           github_token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          branches_to_skip: 'master'
       - name: Abort if dependencies changed
         if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
         run: |
