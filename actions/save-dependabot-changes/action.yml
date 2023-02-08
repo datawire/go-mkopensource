@@ -12,6 +12,13 @@ inputs:
     description: Regex of branches where this action should not run. e.g. 'master'
     required: true
 
+  actor:
+    description: |
+      The username of the user that triggered the initial workflow run. Used only for testing the action.
+      See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+    required: true
+    default: 'dependabot[bot]'
+
 outputs:
   is_dirty:
     description: "If there were changes made by dependabot, this variable will be true"
@@ -26,8 +33,8 @@ runs:
       run: |
         SOURCE_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
 
-        if [[ "${GITHUB_ACTOR}" != 'dependabot[bot]' ]]; then
-          echo '::notice:: Action save-dependabot-changes is being skipped because actor is not dependabot'
+        if [[ "${GITHUB_ACTOR}" != '${{ inputs.actor }}' ]]; then
+          echo '::notice:: Action save-dependabot-changes is being skipped because actor is not ${{ inputs.actor }}'
           echo "SKIP=true" >> $GITHUB_OUTPUT
           exit
         fi        
