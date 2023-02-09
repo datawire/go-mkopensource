@@ -46,5 +46,8 @@ RUN git config --global url."https://$GIT_TOKEN:@github.com/".insteadOf "https:/
 WORKDIR /app
 RUN if [[ -z "$UNPARSABLE_PACKAGE" ]] ; then /scripts/scan-go.sh; else /scripts/scan-go.sh --unparsable-packages $UNPARSABLE_PACKAGE ; fi
 
+RUN cp go.mod go.sum /temp/
+
 FROM scratch as license_output
 COPY --from=go_dependency_scanner /temp/* /
+COPY --from=go_dependency_scanner /app/go.mod /app/go.sum /
