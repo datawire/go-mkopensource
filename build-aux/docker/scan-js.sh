@@ -4,6 +4,9 @@ set -o pipefail
 
 . /scripts/imports.sh
 
+BUILD_TMP=/temp
+mkdir -p "${BUILD_TMP}"
+
 validate_required_variable USER_ID
 
 scan_npm_package() {
@@ -20,7 +23,7 @@ scan_npm_package() {
   echo >&2 "Analyzing package ${PKG_NAME}"
   npm install -f >&2
 
-  echo >&2 "Packages excluded: "${EXCLUDED_PKG}""
+  echo >&2 "Packages excluded: ${EXCLUDED_PKG}"
 
   PACKAGE_DEPS="/temp/${PKG_NAME}-licenses.json"
   license-checker --excludePackages "${PKG_NAME};${EXCLUDED_PKG}" --customPath "/scripts/customLicenseFormat.json" \

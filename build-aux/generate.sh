@@ -82,19 +82,16 @@ if [ -n "${NPM_PACKAGES}" ]; then
   pushd "${BUILD_HOME}" >/dev/null
   docker build \
     -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/js_builder.dockerfile" \
+    --build-arg APPLICATION="${APPLICATION}" \
     --build-arg NODE_IMAGE="${NODE_IMAGE}" \
     --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
     --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
+    --build-arg EXCLUDED_PKG="${EXCLUDED_PKG}" \
+    --build-arg USER_ID="${UID}" \
     -t "js-deps-builder" \
-    --target npm_dependency_scanner .
+    --target license_output \
+    --output "${BUILD_TMP}" .
   popd >/dev/null
-
-  docker run --rm \
-    --env APPLICATION \
-    --env EXCLUDED_PKG="${EXCLUDED_PKG}" \
-    --env USER_ID=${UID} \
-    --volume "$(realpath ${BUILD_TMP})":/temp \
-    js-deps-builder /scripts/scan-js.sh
 fi
 
 # Generate DEPENDENCY_LICENSES.md
