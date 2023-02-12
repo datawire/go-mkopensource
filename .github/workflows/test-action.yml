@@ -33,17 +33,18 @@ jobs:
           GIT_TOKEN: ${{ github.token }}
           NODE_IMAGE: 'node:14.13.1-alpine'
         run: |
-          set -x
+          # Commit dummy license files
+          : > DEPENDENCY_LICENSES.md
+          : > DEPENDENCIES.md
+          git add DEPENDENCY_LICENSES.md DEPENDENCIES.md
           
+          # Generate license information
           export GO_IMAGE=$(grep -e 'FROM golang:' "build-aux/docker/go_builder.dockerfile" | cut -d ' ' -f2 )
           export NPM_PACKAGES=$( echo -e "./test-data/package.json\n./test-data/package-lock.json" )
           
           mkdir -p "${BUILD_TMP}"
           build-aux/generate.sh --output-format=txt --package=mod --output-type=markdown --gotar="go1.19.3.src.tar.gz" --unparsable-packages=./unparsable-packages.yaml
 
-          # Update dependency information to force action to run
-          echo -e "\n\nDependencies updated by '${GITHUB_WORKFLOW}' on $(date)" >> DEPENDENCY_LICENSES.md
-      
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
         uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
