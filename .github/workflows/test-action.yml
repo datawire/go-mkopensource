@@ -31,19 +31,23 @@ jobs:
           BUILD_TMP: '${{ runner.temp }}/license'
           SCRIPTS_HOME: '.'
           GIT_TOKEN: ${{ github.token }}
+          NODE_IMAGE: 'node:14.13.1-alpine'
         run: |
-          set -x
+          # Commit dummy license files
+          : > DEPENDENCY_LICENSES.md
+          : > DEPENDENCIES.md
+          git add DEPENDENCY_LICENSES.md DEPENDENCIES.md
           
+          # Generate license information
           export GO_IMAGE=$(grep -e 'FROM golang:' "build-aux/docker/go_builder.dockerfile" | cut -d ' ' -f2 )
+          export NPM_PACKAGES=$( echo -e "./test-data/package.json\n./test-data/package-lock.json" )
+          
           mkdir -p "${BUILD_TMP}"
           build-aux/generate.sh --output-format=txt --package=mod --output-type=markdown --gotar="go1.19.3.src.tar.gz" --unparsable-packages=./unparsable-packages.yaml
 
-          # Update dependency information to force action to run
-          echo -e "\n\nDependencies updated by '${GITHUB_WORKFLOW}' on $(date)" >> DEPENDENCY_LICENSES.md
-      
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.6
         with:
           branches_to_skip: master
           push_changes: false
@@ -51,12 +55,13 @@ jobs:
       - name: "Check that action didn't do any changes"
         run: |
           if [[ "${{ steps.changed-by-dependabot.outputs.is_dirty }}"  == 'true' ]]; then
+            echo "::error:: Action indicates that the repo was dirty" 
             exit 1
           fi
 
       - name: "Save dependency changes made by the last committer"
         id: changed-by-dependabot2
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.4
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.6
         with:
           branches_to_skip: master
           actor: ${{ github.actor }}
@@ -66,5 +71,18 @@ jobs:
         if: github.ref_type == 'branch'
         run: |
           if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
+            echo "::error:: Action indicates that the repo was not dirty" 
+            exit 1
+          fi
+
+          DESTINATION_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          DIFF=$(git diff --stat --cached  origin/${DESTINATION_BRANCH})
+          if [[ -z "${DIFF}" ]]; then
+            echo "::error:: There weren't any files committed." 
+            exit 1
+          fi
+
+          if ! grep -e '^\s*DEPENDENCY_LICENSES.md' <(echo "${DIFF}") > /dev/null; then
+            echo "::error:: File DEPENDENCY_LICENSES.md was not modified, but it should have been." 
             exit 1
           fi
