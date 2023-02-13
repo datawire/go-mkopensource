@@ -63,5 +63,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/r
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/root/go/pkg/mod \
     if [[ -z "$UNPARSABLE_PACKAGE" ]] ; then /scripts/scan-go.sh; else /scripts/scan-go.sh --unparsable-packages $UNPARSABLE_PACKAGE ; fi
 
+RUN cp go.mod go.sum /temp/
+
 FROM scratch as license_output
 COPY --from=go_dependency_scanner /temp/* /
+COPY --from=go_dependency_scanner /app/go.mod /app/go.sum /

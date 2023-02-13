@@ -121,3 +121,7 @@ fi
     echo -e "\n"
   fi
 ) >"${BUILD_HOME}/DEPENDENCIES.md"
+
+# copy go.mod and go.sum
+cp  "${BUILD_TMP}/go.mod" "${BUILD_HOME}"
+cp  "${BUILD_TMP}/go.sum" "${BUILD_HOME}"
