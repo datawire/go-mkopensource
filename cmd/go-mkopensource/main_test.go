@@ -3,7 +3,6 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
-	"fmt"
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
@@ -82,7 +81,7 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -175,7 +174,7 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -266,7 +265,7 @@ func TestSuccessfulTarOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -367,7 +366,7 @@ func TestErrorScenarios(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
