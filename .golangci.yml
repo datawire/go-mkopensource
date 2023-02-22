@@ -23,3 +23,6 @@ linters-settings:
     allow-leading-space: false
     require-explanation: true
     require-specific: true
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
