@@ -1,6 +1,7 @@
 package dependency_test
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path"
@@ -127,11 +128,11 @@ func getDependencyInfoFromFile(t *testing.T, path string) *dependencies.Dependen
 	data, readErr := io.ReadAll(f)
 	require.NoError(t, readErr)
 
-	dependencyInfo := &dependencies.DependencyInfo{}
-	unmarshalErr := dependencyInfo.Unmarshal(data)
+	var dependencyInfo dependencies.DependencyInfo
+	unmarshalErr := json.Unmarshal(data, &dependencyInfo)
 	require.NoError(t, unmarshalErr)
 
-	return dependencyInfo
+	return &dependencyInfo
 }
 
 func getFileContents(t *testing.T, path string) []byte {

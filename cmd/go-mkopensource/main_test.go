@@ -3,6 +3,7 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -449,9 +450,8 @@ func getDependencyInfoFromReader(t *testing.T, r io.Reader) *dependencies.Depend
 	data, readErr := io.ReadAll(r)
 	require.NoError(t, readErr)
 
-	jsonOutput := &dependencies.DependencyInfo{}
-	err := jsonOutput.Unmarshal(data)
-	require.NoError(t, err)
+	var jsonOutput dependencies.DependencyInfo
+	require.NoError(t, json.Unmarshal(data, &jsonOutput))
 
-	return jsonOutput
+	return &jsonOutput
 }

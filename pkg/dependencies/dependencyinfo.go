@@ -3,122 +3,143 @@ package dependencies
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
-	. "github.com/datawire/go-mkopensource/pkg/detectlicense"
+	"github.com/datawire/go-mkopensource/pkg/detectlicense"
+	"github.com/datawire/go-mkopensource/pkg/util"
 )
 
-//nolint:gochecknoglobals // Can't be a constant
-var licensesByName = map[string]License{
-	AmbassadorProprietary.Name: AmbassadorProprietary,
-	ZeroBSD.Name:               ZeroBSD,
-	Apache2.Name:               Apache2,
-	AFL21.Name:                 AFL21,
-	AGPL1Only.Name:             AGPL1Only,
-	AGPL1OrLater.Name:          AGPL1OrLater,
-	AGPL3Only.Name:             AGPL3Only,
-	AGPL3OrLater.Name:          AGPL3OrLater,
-	BSD1.Name:                  BSD1,
-	BSD2.Name:                  BSD2,
-	BSD3.Name:                  BSD3,
-	Cc010.Name:                 Cc010,
-	CcBy30.Name:                CcBy30,
-	CcBy40.Name:                CcBy40,
-	CcBySa40.Name:              CcBySa40,
-	EPL10.Name:                 EPL10,
-	GPL1Only.Name:              GPL1Only,
-	GPL1OrLater.Name:           GPL1OrLater,
-	GPL2Only.Name:              GPL2Only,
-	GPL2OrLater.Name:           GPL2OrLater,
-	GPL3Only.Name:              GPL3Only,
-	GPL3OrLater.Name:           GPL3OrLater,
-	ISC.Name:                   ISC,
-	LGPL2Only.Name:             LGPL2Only,
-	LGPL2OrLater.Name:          LGPL2OrLater,
-	LGPL21Only.Name:            LGPL21Only,
-	LGPL21OrLater.Name:         LGPL21OrLater,
-	LGPL3Only.Name:             LGPL3Only,
-	LGPL3OrLater.Name:          LGPL3OrLater,
-	MIT.Name:                   MIT,
-	MPL11.Name:                 MPL11,
-	MPL2.Name:                  MPL2,
-	ODCBy10.Name:               ODCBy10,
-	OFL11.Name:                 OFL11,
-	PSF.Name:                   PSF,
-	Python20.Name:              Python20,
-	PublicDomain.Name:          PublicDomain,
-	Unicode2015.Name:           Unicode2015,
-	Unlicense.Name:             Unlicense,
-	WTFPL.Name:                 WTFPL,
+//nolint:gochecknoglobals // Would be 'const'.
+var licensesByName = func() map[string]detectlicense.License {
+	var licenses = []detectlicense.License{
+		detectlicense.AmbassadorProprietary,
+		detectlicense.ZeroBSD,
+		detectlicense.Apache2,
+		detectlicense.AFL21,
+		detectlicense.AGPL1Only,
+		detectlicense.AGPL1OrLater,
+		detectlicense.AGPL3Only,
+		detectlicense.AGPL3OrLater,
+		detectlicense.BSD1,
+		detectlicense.BSD2,
+		detectlicense.BSD3,
+		detectlicense.CcBy30,
+		detectlicense.CcBy40,
+		detectlicense.CcBySa40,
+		detectlicense.Cc010,
+		detectlicense.EPL10,
+		detectlicense.GPL1Only,
+		detectlicense.GPL1OrLater,
+		detectlicense.GPL2Only,
+		detectlicense.GPL2OrLater,
+		detectlicense.GPL3Only,
+		detectlicense.GPL3OrLater,
+		detectlicense.ISC,
+		detectlicense.LGPL2Only,
+		detectlicense.LGPL2OrLater,
+		detectlicense.LGPL21Only,
+		detectlicense.LGPL21OrLater,
+		detectlicense.LGPL3Only,
+		detectlicense.LGPL3OrLater,
+		detectlicense.MIT,
+		detectlicense.MPL11,
+		detectlicense.MPL2,
+		detectlicense.ODCBy10,
+		detectlicense.OFL11,
+		detectlicense.Python20,
+		detectlicense.PSF,
+		detectlicense.PublicDomain,
+		detectlicense.Unicode2015,
+		detectlicense.Unlicense,
+		detectlicense.WTFPL,
+	}
+	var ret = make(map[string]detectlicense.License, len(licenses))
+	for _, lic := range licenses {
+		ret[lic.Name] = lic
+	}
+	return ret
+}()
+
+type Dependency struct {
+	Name     string
+	Version  string
+	Licenses util.Set[detectlicense.License]
+}
+
+var (
+	_ json.Marshaler   = Dependency{}
+	_ json.Unmarshaler = (*Dependency)(nil)
+)
+
+func (d Dependency) MarshalJSON() ([]byte, error) {
+	raw := struct {
+		Name     string   `json:"name"`
+		Version  string   `json:"version"`
+		Licenses []string `json:"licenses"`
+	}{
+		Name:    d.Name,
+		Version: d.Version,
+	}
+	for lic := range d.Licenses {
+		raw.Licenses = append(raw.Licenses, lic.Name)
+	}
+	sort.Strings(raw.Licenses)
+	return json.Marshal(raw)
+}
+
+func (d *Dependency) UnmarshalJSON(dat []byte) error {
+	var raw struct {
+		Name     string   `json:"name"`
+		Version  string   `json:"version"`
+		Licenses []string `json:"licenses"`
+	}
+	if err := json.Unmarshal(dat, &raw); err != nil {
+		return err
+	}
+	d.Name = raw.Name
+	d.Version = raw.Version
+	d.Licenses = make(util.Set[detectlicense.License], len(raw.Licenses))
+	for _, licName := range raw.Licenses {
+		d.Licenses.Insert(licensesByName[licName])
+	}
+	return nil
 }
 
 type DependencyInfo struct {
-	Dependencies []Dependency      `json:"dependencies"`
-	Licenses     map[string]string `json:"licenseInfo"`
+	Dependencies []Dependency `json:"dependencies"`
 }
 
-type Dependency struct {
-	Name     string   `json:"name"`
-	Version  string   `json:"version"`
-	Licenses []string `json:"licenses"`
-}
+var (
+	_ json.Marshaler = DependencyInfo{}
+)
 
-func NewDependencyInfo() DependencyInfo {
-	return DependencyInfo{
-		Dependencies: []Dependency{},
-		Licenses:     map[string]string{},
+func (di DependencyInfo) MarshalJSON() ([]byte, error) {
+	raw := struct {
+		Dependencies []Dependency      `json:"dependencies"`
+		Licenses     map[string]string `json:"licenseInfo"`
+	}{
+		Dependencies: di.Dependencies,
+		Licenses:     make(map[string]string),
 	}
-}
-
-func (d *DependencyInfo) Unmarshal(data []byte) error {
-	if err := json.Unmarshal(data, d); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (d *DependencyInfo) UpdateLicenseList() error {
-	usedLicenses := map[string]License{}
-
-	for _, dependency := range d.Dependencies {
-		for _, licenseName := range dependency.Licenses {
-			license, err := getLicenseFromName(licenseName)
-			if err != nil {
-				return err
-			}
-			usedLicenses[license.Name] = license
+	for _, dep := range di.Dependencies {
+		for lic := range dep.Licenses {
+			raw.Licenses[lic.Name] = lic.URL
 		}
 	}
-
-	for k, v := range usedLicenses {
-		d.Licenses[k] = v.URL
-	}
-
-	return nil
+	return json.Marshal(raw)
 }
 
-func getLicenseFromName(licenseName string) (License, error) {
-	license, ok := licensesByName[licenseName]
-	if !ok {
-		return License{}, fmt.Errorf("license details for '%s' are not known", licenseName)
+func (dependency Dependency) CheckLicenseRestrictions(licenseRestriction detectlicense.LicenseRestriction) []error {
+	var errs []error
+	for license := range dependency.Licenses {
+		switch {
+		case license.Restriction == detectlicense.Forbidden:
+			errs = append(errs, fmt.Errorf("Dependency '%s@%s' uses license '%s' which is forbidden.", dependency.Name,
+				dependency.Version, license.Name))
+		case license.Restriction < licenseRestriction:
+			errs = append(errs, fmt.Errorf("Dependency '%s@%s' uses license '%s' which is not allowed on applications that run on customer machines.",
+				dependency.Name, dependency.Version, license.Name))
+		}
 	}
-	return license, nil
-}
-
-func CheckLicenseRestrictions(dependency Dependency, licenseName string, licenseRestriction LicenseRestriction) error {
-	license, err := getLicenseFromName(licenseName)
-	if err != nil {
-		return err
-	}
-
-	if license.Restriction == Forbidden {
-		return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is forbidden.", dependency.Name,
-			dependency.Version, license.Name)
-	}
-
-	if license.Restriction < licenseRestriction {
-		return fmt.Errorf("Dependency '%s@%s' uses license '%s' which is not allowed on applications that run on customer machines.",
-			dependency.Name, dependency.Version, license.Name)
-	}
-	return nil
+	return errs
 }

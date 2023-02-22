@@ -1,19 +1,20 @@
 package dependencies_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
+	"github.com/datawire/go-mkopensource/pkg/util"
 )
 
 //nolint:gochecknoglobals // Can't be a constant
 var (
 	emptyDependencies = dependencies.DependencyInfo{
 		Dependencies: []dependencies.Dependency{},
-		Licenses:     map[string]string{},
 	}
 
 	dependenciesWithUniqueLicenses = dependencies.DependencyInfo{
@@ -21,15 +22,14 @@ var (
 			{
 				Name:     "library1",
 				Version:  "1.0.2",
-				Licenses: []string{detectlicense.MIT.Name},
+				Licenses: util.NewSet(detectlicense.MIT),
 			},
 			{
 				Name:     "library2",
 				Version:  "3.1.2",
-				Licenses: []string{detectlicense.BSD1.Name},
+				Licenses: util.NewSet(detectlicense.BSD1),
 			},
 		},
-		Licenses: map[string]string{},
 	}
 
 	dependencyWithMultipleLicenses = dependencies.DependencyInfo{
@@ -37,10 +37,9 @@ var (
 			{
 				Name:     "library1",
 				Version:  "1.0.2",
-				Licenses: []string{detectlicense.GPL3Only.Name, detectlicense.BSD2.Name},
+				Licenses: util.NewSet(detectlicense.GPL3Only, detectlicense.BSD2),
 			},
 		},
-		Licenses: map[string]string{},
 	}
 
 	dependenciesWithOverlappingLicenses = dependencies.DependencyInfo{
@@ -48,20 +47,19 @@ var (
 			{
 				Name:     "library1",
 				Version:  "1.0.2",
-				Licenses: []string{detectlicense.GPL3Only.Name, detectlicense.BSD2.Name},
+				Licenses: util.NewSet(detectlicense.GPL3Only, detectlicense.BSD2),
 			},
 			{
 				Name:     "library2",
 				Version:  "3.1.2",
-				Licenses: []string{detectlicense.BSD2.Name},
+				Licenses: util.NewSet(detectlicense.BSD2),
 			},
 			{
 				Name:     "library2",
 				Version:  "3.1.2",
-				Licenses: []string{detectlicense.Apache2.Name, detectlicense.GPL3Only.Name},
+				Licenses: util.NewSet(detectlicense.Apache2, detectlicense.GPL3Only),
 			},
 		},
-		Licenses: map[string]string{},
 	}
 
 	licensesWithoutUrls = dependencies.DependencyInfo{
@@ -69,10 +67,9 @@ var (
 			{
 				Name:     "library1",
 				Version:  "1.0.2",
-				Licenses: []string{detectlicense.PublicDomain.Name},
+				Licenses: util.NewSet(detectlicense.PublicDomain),
 			},
 		},
-		Licenses: map[string]string{},
 	}
 )
 
@@ -123,10 +120,15 @@ func TestLicenseListIsCorrect(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			err := testCase.dependencies.UpdateLicenseList()
+			var jsonObj struct {
+				Dependencies []dependencies.Dependency `json:"dependencies"`
+				Licenses     map[string]string         `json:"licenseInfo"`
+			}
+			jsonBytes, err := json.Marshal(testCase.dependencies)
 			require.NoError(t, err)
+			require.NoError(t, json.Unmarshal(jsonBytes, &jsonObj))
 
-			require.Equal(t, testCase.expectedLicenses, testCase.dependencies.Licenses)
+			require.Equal(t, testCase.expectedLicenses, jsonObj.Licenses)
 		})
 	}
 }
@@ -134,22 +136,22 @@ func TestLicenseListIsCorrect(t *testing.T) {
 func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 	testCases := []struct {
 		testName           string
-		licenseName        string
+		licenses           util.Set[detectlicense.License]
 		licenseRestriction detectlicense.LicenseRestriction
 	}{
 		{
 			"Unrestricted licenses are OK on Ambassador Labs servers",
-			detectlicense.MIT.Name,
+			util.NewSet(detectlicense.MIT),
 			detectlicense.AmbassadorServers,
 		},
 		{
 			"Unrestricted licenses are OK everywhere",
-			detectlicense.MIT.Name,
+			util.NewSet(detectlicense.MIT),
 			detectlicense.Unrestricted,
 		},
 		{
 			"Restricted licenses are OK on Ambassador Labs servers",
-			detectlicense.GPL3Only.Name,
+			util.NewSet(detectlicense.GPL3Only),
 			detectlicense.AmbassadorServers,
 		},
 	}
@@ -157,13 +159,12 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
 			testDependency := dependencies.Dependency{
-				Name:    "library1",
-				Version: "1.0.2",
+				Name:     "library1",
+				Version:  "1.0.2",
+				Licenses: testCase.licenses,
 			}
-
-			err := dependencies.CheckLicenseRestrictions(testDependency, testCase.licenseName, testCase.licenseRestriction)
-
-			require.NoError(t, err)
+			errs := testDependency.CheckLicenseRestrictions(testCase.licenseRestriction)
+			require.Len(t, errs, 0)
 		})
 	}
 }
@@ -171,27 +172,27 @@ func TestCheckLicensesValidatesAllowedLicenseCorrectly(t *testing.T) {
 func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 	testCases := []struct {
 		testName           string
-		licenseName        string
+		licenses           util.Set[detectlicense.License]
 		licenseRestriction detectlicense.LicenseRestriction
 	}{
 		{
 			"It's not possible to allow the use of forbidden licenses by mistake",
-			detectlicense.AGPL1Only.Name,
+			util.NewSet(detectlicense.AGPL1Only),
 			detectlicense.Forbidden,
 		},
 		{
 			"Forbidden licenses are not allowed on Ambassador Labs servers",
-			detectlicense.AGPL1Only.Name,
+			util.NewSet(detectlicense.AGPL1Only),
 			detectlicense.AmbassadorServers,
 		},
 		{
 			"Forbidden licenses are not allowed on customer machines",
-			detectlicense.AGPL1Only.Name,
+			util.NewSet(detectlicense.AGPL1Only),
 			detectlicense.Unrestricted,
 		},
 		{
 			"Restricted licenses are not OK on customer machines",
-			detectlicense.GPL3Only.Name,
+			util.NewSet(detectlicense.GPL3Only),
 			detectlicense.Unrestricted,
 		},
 	}
@@ -199,13 +200,12 @@ func TestCheckLicensesValidatesForbiddenLicensesCorrectly(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
 			testDependency := dependencies.Dependency{
-				Name:    "library1",
-				Version: "1.0.2",
+				Name:     "library1",
+				Version:  "1.0.2",
+				Licenses: testCase.licenses,
 			}
-
-			err := dependencies.CheckLicenseRestrictions(testDependency, testCase.licenseName, testCase.licenseRestriction)
-
-			require.Error(t, err)
+			errs := testDependency.CheckLicenseRestrictions(testCase.licenseRestriction)
+			require.Len(t, errs, 1)
 		})
 	}
 }

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
 	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
+	"github.com/datawire/go-mkopensource/pkg/util"
 )
 
 type NodeDependencies map[string]nodeDependency
@@ -49,25 +49,19 @@ func (n *nodeDependency) licenses() (string, error) {
 }
 
 func GetDependencyInformation(r io.Reader, licenseRestriction detectlicense.LicenseRestriction) (dependencyInfo dependencies.DependencyInfo, err error) {
-	nodeDependencies := &NodeDependencies{}
+	var nodeDependencies NodeDependencies
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return
 	}
 
-	err = json.Unmarshal(data, nodeDependencies)
-	if err != nil {
-		return
+	if err := json.Unmarshal(data, &nodeDependencies); err != nil {
+		return dependencies.DependencyInfo{}, err
 	}
 
-	sortedDependencies := getSortedDependencies(nodeDependencies)
-
-	dependencyInfo = dependencies.NewDependencyInfo()
 	licErrs := []error{}
-
-loop:
-	for _, dependencyId := range sortedDependencies {
-		nodeDependency := (*nodeDependencies)[dependencyId]
+	for _, dependencyId := range util.SortedMapKeys(nodeDependencies) {
+		nodeDependency := nodeDependencies[dependencyId]
 
 		dependency, dependencyErr := getDependencyDetails(nodeDependency, dependencyId)
 		if dependencyErr != nil {
@@ -75,11 +69,9 @@ loop:
 			continue
 		}
 
-		for _, license := range dependency.Licenses {
-			if licenseErr := dependencies.CheckLicenseRestrictions(*dependency, license, licenseRestriction); licenseErr != nil {
-				licErrs = append(licErrs, licenseErr)
-				continue loop
-			}
+		if licenseErr := dependency.CheckLicenseRestrictions(licenseRestriction); licenseErr != nil {
+			licErrs = append(licErrs, licenseErr...)
+			continue
 		}
 
 		dependencyInfo.Dependencies = append(dependencyInfo.Dependencies, *dependency)
@@ -89,10 +81,6 @@ loop:
 		return dependencyInfo, scanningerrors.ExplainErrors(licErrs)
 	}
 
-	if err := dependencyInfo.UpdateLicenseList(); err != nil {
-		return dependencyInfo, fmt.Errorf("Could not generate list of license URLs for JavaScript: %v\n", err)
-	}
-
 	return dependencyInfo, err
 }
 
@@ -100,9 +88,8 @@ func getDependencyDetails(nodeDependency nodeDependency, dependencyId string) (*
 	name, version := splitDependencyIdentifier(dependencyId)
 
 	dependency := &dependencies.Dependency{
-		Name:     name,
-		Version:  version,
-		Licenses: []string{},
+		Name:    name,
+		Version: version,
 	}
 
 	allLicenses, err := getDependencyLicenses(dependencyId, nodeDependency)
@@ -114,7 +101,7 @@ func getDependencyDetails(nodeDependency nodeDependency, dependencyId string) (*
 	return dependency, nil
 }
 
-func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) ([]string, error) {
+func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) (util.Set[detectlicense.License], error) {
 	licenseString, err := nodeDependency.licenses()
 	if err != nil {
 		return nil, err
@@ -136,17 +123,17 @@ func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) (
 	}
 	licenses := separatorRe.Split(licenseString, -1)
 
-	allLicenses := []string{}
+	allLicenses := make(util.Set[detectlicense.License])
 	for _, spdxId := range licenses {
-		license, ok := detectlicense.SpdxIdentifiers[spdxId]
-		if ok {
-			allLicenses = append(allLicenses, license.Name)
+		if license, ok := detectlicense.SpdxIdentifiers[spdxId]; ok {
+			allLicenses.Insert(license)
 			continue
 		}
 
-		licenses, ok := hardcodedJsDependencies[dependencyId]
-		if ok {
-			allLicenses = licenses
+		if licenses, ok := hardcodedJsDependencies[dependencyId]; ok {
+			for _, lic := range licenses {
+				allLicenses.Insert(lic)
+			}
 			break
 		}
 
@@ -154,17 +141,7 @@ func getDependencyLicenses(dependencyId string, nodeDependency nodeDependency) (
 			nodeDependency.Name, nodeDependency.Version, spdxId)
 	}
 
-	sort.Strings(allLicenses)
 	return allLicenses, nil
-}
-
-func getSortedDependencies(nodeDependencies *NodeDependencies) []string {
-	sortedDependencies := make([]string, 0, len(*nodeDependencies))
-	for k := range *nodeDependencies {
-		sortedDependencies = append(sortedDependencies, k)
-	}
-	sort.Strings(sortedDependencies)
-	return sortedDependencies
 }
 
 func splitDependencyIdentifier(identifier string) (name string, version string) {
