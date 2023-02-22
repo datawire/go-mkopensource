@@ -3,7 +3,6 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
-	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	main "github.com/datawire/go-mkopensource/cmd/go-mkopensource"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 )
 
 func TestSuccessfulMarkdownOutput(t *testing.T) {

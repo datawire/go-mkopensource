@@ -3,13 +3,14 @@ package dependency
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/datawire/go-mkopensource/pkg/dependencies"
-	"github.com/datawire/go-mkopensource/pkg/detectlicense"
-	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 	"io"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
+	"github.com/datawire/go-mkopensource/pkg/detectlicense"
+	"github.com/datawire/go-mkopensource/pkg/scanningerrors"
 )
 
 type NodeDependencies map[string]nodeDependency

@@ -1,11 +1,13 @@
 package main_test
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	main "github.com/datawire/go-mkopensource/cmd/go-mkopensource"
 	. "github.com/datawire/go-mkopensource/pkg/detectlicense"
 	"github.com/datawire/go-mkopensource/pkg/golist"
-	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 //nolint:gochecknoglobals // Can't be a constant

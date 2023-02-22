@@ -2,6 +2,7 @@ linters:
   enable:
     - depguard
     - forbidigo
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - nolintlint
@@ -18,6 +19,11 @@ linters-settings:
     forbid:
       - '^os\.(DirEntry|FileInfo|FileMode|PathError)$' # deprecated in Go 1.16, import them from 'io/fs' instead
       - '\.Readdir$' # deprecated in Go 1.16, use ReadDir instead
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/datawire)
   nolintlint:
     allow-unused: false
     allow-leading-space: false

@@ -1,15 +1,17 @@
 package dependency_test
 
 import (
-	"github.com/datawire/go-mkopensource/cmd/js-mkopensource/dependency"
-	"github.com/datawire/go-mkopensource/pkg/dependencies"
-	"github.com/datawire/go-mkopensource/pkg/detectlicense"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/datawire/go-mkopensource/cmd/js-mkopensource/dependency"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
+	"github.com/datawire/go-mkopensource/pkg/detectlicense"
 )
 
 func TestSuccessfulGeneration(t *testing.T) {

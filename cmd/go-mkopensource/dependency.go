@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"sort"
+
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
 	"github.com/datawire/go-mkopensource/pkg/golist"
-	"sort"
 )
 
 func GenerateDependencyList(modNames []string, modLicenses map[string]map[detectlicense.License]struct{},

@@ -3,6 +3,7 @@ package dependencies
 import (
 	"encoding/json"
 	"fmt"
+
 	. "github.com/datawire/go-mkopensource/pkg/detectlicense"
 )
 

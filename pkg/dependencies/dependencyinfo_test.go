@@ -1,10 +1,12 @@
 package dependencies_test
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
-	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 //nolint:gochecknoglobals // Can't be a constant
