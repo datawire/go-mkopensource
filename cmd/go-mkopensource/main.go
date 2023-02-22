@@ -507,7 +507,12 @@ func markdownOutput(readme *bytes.Buffer, dependencyList dependencies.Dependency
 	_, _ = io.WriteString(table, "  \t----\t-------\t----------\n")
 
 	for _, dependency := range dependencyList.Dependencies {
-		depLicenses := strings.Join(dependency.Licenses, ", ")
+		licNames := make([]string, 0, len(dependency.Licenses))
+		for lic := range dependency.Licenses {
+			licNames = append(licNames, lic.Name)
+		}
+		sort.Strings(licNames)
+		depLicenses := strings.Join(licNames, ", ")
 		if depLicenses == "" {
 			panic(fmt.Errorf("this should not happen: empty license string for %q", dependency.Name))
 		}

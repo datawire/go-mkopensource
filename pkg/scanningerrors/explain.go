@@ -31,6 +31,7 @@ func categorizeError(errStr string) string {
 	}
 }
 
+//nolint:gochecknoglobals // Would be 'const'.
 var errCategoryExplanations = map[string]string{
 
 	licenseIssue: `This probably means that you added or upgraded a dependency, and the

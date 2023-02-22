@@ -3,8 +3,7 @@ package main_test
 import (
 	"archive/tar"
 	"compress/gzip"
-	"fmt"
-	"github.com/datawire/go-mkopensource/pkg/dependencies"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	main "github.com/datawire/go-mkopensource/cmd/go-mkopensource"
+	"github.com/datawire/go-mkopensource/pkg/dependencies"
 )
 
 func TestSuccessfulMarkdownOutput(t *testing.T) {
@@ -82,7 +82,7 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -175,7 +175,7 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -266,7 +266,7 @@ func TestSuccessfulTarOutput(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -367,7 +367,7 @@ func TestErrorScenarios(t *testing.T) {
 		t.Run(testCase.testName, func(t *testing.T) {
 			re := regexp.MustCompile(testCase.supportedGoVersionRegEx)
 			if !re.Match([]byte(runtime.Version())) {
-				t.Skip(fmt.Sprintf("Test does not support go version %s", runtime.Version()))
+				t.Skipf("Test does not support go version %s", runtime.Version())
 			}
 
 			defer func() {
@@ -450,9 +450,8 @@ func getDependencyInfoFromReader(t *testing.T, r io.Reader) *dependencies.Depend
 	data, readErr := io.ReadAll(r)
 	require.NoError(t, readErr)
 
-	jsonOutput := &dependencies.DependencyInfo{}
-	err := jsonOutput.Unmarshal(data)
-	require.NoError(t, err)
+	var jsonOutput dependencies.DependencyInfo
+	require.NoError(t, json.Unmarshal(data, &jsonOutput))
 
-	return jsonOutput
+	return &jsonOutput
 }

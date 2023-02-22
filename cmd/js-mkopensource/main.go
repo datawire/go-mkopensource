@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
+	"github.com/spf13/pflag"
+
 	"github.com/datawire/go-mkopensource/cmd/js-mkopensource/dependency"
 	"github.com/datawire/go-mkopensource/pkg/detectlicense"
-	"github.com/spf13/pflag"
-	"os"
 )
 
 const (

@@ -3,17 +3,17 @@ package dependency
 import . "github.com/datawire/go-mkopensource/pkg/detectlicense"
 
 //nolint:gochecknoglobals // Would be 'const'.
-var hardcodedJsDependencies = map[string][]string{
-	"cyclist@0.2.2":                {MIT.Name},
-	"doctrine@1.5.0":               {BSD2.Name, Apache2.Name},
-	"emitter-component@1.1.1":      {MIT.Name},
-	"flexboxgrid@6.3.1":            {Apache2.Name},
-	"indexof@0.0.1":                {MIT.Name},
-	"intro.js@4.1.0":               {AGPL3OrLater.Name},
-	"json-schema@0.2.3":            {AFL21.Name},
-	"node-forge@0.10.0":            {BSD3.Name},
-	"pako@1.0.10":                  {MIT.Name},
-	"regenerator-transform@0.10.1": {BSD2.Name},
-	"regjsparser@0.1.5":            {BSD2.Name},
-	"node-forge@1.3.1":		{BSD3.Name},
+var hardcodedJsDependencies = map[string][]License{
+	"cyclist@0.2.2":                {MIT},
+	"doctrine@1.5.0":               {BSD2, Apache2},
+	"emitter-component@1.1.1":      {MIT},
+	"flexboxgrid@6.3.1":            {Apache2},
+	"indexof@0.0.1":                {MIT},
+	"intro.js@4.1.0":               {AGPL3OrLater},
+	"json-schema@0.2.3":            {AFL21},
+	"node-forge@0.10.0":            {BSD3},
+	"pako@1.0.10":                  {MIT},
+	"regenerator-transform@0.10.1": {BSD2},
+	"regjsparser@0.1.5":            {BSD2},
+	"node-forge@1.3.1":             {BSD3},
 }

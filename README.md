@@ -32,8 +32,8 @@ blows up in your face, asking a human to verify the result.
 
 ## License scanning scripts
 
-Folder `/build-aux` contains scripts to scan licenses for Go, Python 
-and Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and 
+Folder `/build-aux` contains scripts to scan licenses for Go and
+Node.Js. Script will generate both `DEPENDENCY_LICENSES.md` and
 `DEPENDENCIES.md`
 
 The following environment variables are used to configure the 
@@ -56,15 +56,6 @@ application behaviour.
   repositories
 
 * `GO_IMAGE` Required. Image to use for generating Go
-  dependencies.
-
-* `PYTHON_PACKAGES`: Optional. List of requirement.txt files to scan.
-  Paths should be relative to `BUILD_HOME`.      
-  Example:
-
-  `export PYTHON_PACKAGES="./python/requirements.txt ./builder/requirements.txt"`
-
-* `PYTHON_IMAGE`: Required. Image to use for generating Python 
   dependencies.
 
 * `NPM_PACKAGES`: Optional. List of package.json and package-lock.json 
