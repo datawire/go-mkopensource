@@ -4,9 +4,6 @@ set -e
 JS_LICENSES="/temp/js_licenses.txt"
 JS_DEPENDENCIES="/temp/js_dependencies.txt"
 
-PY_LICENSES="/temp/py_licenses.txt"
-PY_DEPENDENCIES="/temp/py_dependencies.txt"
-
 GO_DEPENDENCIES="/temp/go_dependencies.txt"
 GO_LICENSES="/temp/go_licenses.txt"
 

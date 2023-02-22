@@ -56,30 +56,6 @@ docker build \
 popd >/dev/null
 
 ######################################################################
-# Python dependencies
-######################################################################
-if [ -n "${PYTHON_PACKAGES}" ]; then
-  echo "Scanning Python dependency licenses"
-  validate_required_variable PYTHON_IMAGE
-
-  archive_dependencies "${BUILD_SCRIPTS}/docker/python_dependencies.tar" "${PYTHON_PACKAGES}"
-
-  pushd "${BUILD_HOME}" >/dev/null
-  docker build \
-    -f "${BUILD_HOME}/${SCRIPTS_HOME}/build-aux/docker/py_builder.dockerfile" \
-    --build-arg PYTHON_IMAGE="${PYTHON_IMAGE}" \
-    --build-arg APPLICATION_TYPE="${APPLICATION_TYPE}" \
-    --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
-    -t "py-deps-builder" \
-    --target python_dependency_scanner .
-  popd >/dev/null
-
-  docker run --rm --env APPLICATION \
-    --volume "$(realpath ${BUILD_TMP})":/temp \
-    py-deps-builder /scripts/scan-py.sh
-fi
-
-######################################################################
 # Node.Js dependencies
 ######################################################################
 if [ -n "${NPM_PACKAGES}" ]; then
@@ -108,7 +84,6 @@ fi
   echo -e "${APPLICATION} incorporates Free and Open Source software under the following licenses:\n"
   (
     if [ -f "${BUILD_TMP}/go_licenses.txt" ]; then cat "${BUILD_TMP}/go_licenses.txt"; fi
-    if [ -f "${BUILD_TMP}/py_licenses.txt" ]; then cat "${BUILD_TMP}/py_licenses.txt"; fi
     if [ -f "${BUILD_TMP}/js_licenses.txt" ]; then cat "${BUILD_TMP}/js_licenses.txt"; fi
   ) | sort | uniq | sed -e 's/\[\([^]]*\)]()/\1/'
 ) >"${BUILD_HOME}/DEPENDENCY_LICENSES.md"
@@ -117,11 +92,6 @@ fi
 (
   if [ -f "${BUILD_TMP}/go_dependencies.txt" ]; then
     cat "${BUILD_TMP}/go_dependencies.txt"
-    echo -e "\n"
-  fi
-
-  if [ -f "${BUILD_TMP}/py_dependencies.txt" ]; then
-    cat "${BUILD_TMP}/py_dependencies.txt"
     echo -e "\n"
   fi
 

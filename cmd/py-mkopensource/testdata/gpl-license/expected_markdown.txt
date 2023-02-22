@@ -1,6 +1,0 @@
-The Emissary-ingress Python code makes use of the following Free and Open Source
-libraries:
-
-    Name      Version  License(s)
-    ----      -------  ----------
-    docutils  0.17.1   2-clause BSD license, GNU General Public License v3.0 or later, Public domain, Python Software Foundation license
