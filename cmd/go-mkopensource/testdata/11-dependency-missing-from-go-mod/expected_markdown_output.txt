@@ -1,9 +1,0 @@
-The Go module "testmod" incorporates the following Free and Open Source
-software:
-
-    Name                                      Version  License(s)
-    ----                                      -------  ----------
-    the Go language standard library ("std")  v1.17.3  3-clause BSD license
-    github.com/go-logr/logr                   v1.2.3   Apache License 2.0
-    k8s.io/apimachinery                       v0.26.1  Apache License 2.0
-    k8s.io/klog/v2                            v2.80.1  Apache License 2.0
