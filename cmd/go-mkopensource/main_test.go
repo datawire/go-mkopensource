@@ -62,18 +62,6 @@ func TestSuccessfulMarkdownOutput(t *testing.T) {
 			applicationType:         "internal",
 			supportedGoVersionRegEx: `.*`,
 		},
-		{
-			testName:                "09-out-of-date-dependencies - Dependency not found",
-			testData:                "testdata/09-out-of-date-dependencies-markdown",
-			applicationType:         "external",
-			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
-		},
-		{
-			testName:                "11-dependency-missing-from-go-mod - Dependency missing from go.mod is added",
-			testData:                "testdata/11-dependency-missing-from-go-mod",
-			applicationType:         "external",
-			supportedGoVersionRegEx: `.*`,
-		},
 	}
 
 	workingDir := getWorkingDir(t)
@@ -161,12 +149,6 @@ func TestSuccessfulJsonOutput(t *testing.T) {
 			applicationType:         "internal",
 			supportedGoVersionRegEx: `.*`,
 		},
-		{
-			testName:                "09-out-of-date-dependencies - Dependency not found",
-			testData:                "testdata/09-out-of-date-dependencies-json",
-			applicationType:         "external",
-			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
-		},
 	}
 
 	workingDir := getWorkingDir(t)
@@ -251,12 +233,6 @@ func TestSuccessfulTarOutput(t *testing.T) {
 			testData:                "testdata/08-allowed-for-internal-use-only",
 			applicationType:         "internal",
 			supportedGoVersionRegEx: `.*`,
-		},
-		{
-			testName:                "09-out-of-date-dependencies - Dependency not found",
-			testData:                "testdata/09-out-of-date-dependencies-tar",
-			applicationType:         "external",
-			supportedGoVersionRegEx: `^go1\.1[89]\..*`,
 		},
 	}
 
@@ -351,13 +327,6 @@ func TestErrorScenarios(t *testing.T) {
 			packagesFlag:            "mod",
 			outputTypeFlag:          "external",
 			supportedGoVersionRegEx: `^go1\.17\..*`,
-		},
-		{
-			testName:                "Removed dependency is required by the application",
-			testData:                "testdata/10-removed-dependency-imported-by-app",
-			packagesFlag:            "mod",
-			outputTypeFlag:          "external",
-			supportedGoVersionRegEx: `.*`,
 		},
 	}
 

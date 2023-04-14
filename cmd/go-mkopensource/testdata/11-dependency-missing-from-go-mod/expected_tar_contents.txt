@@ -1,3 +1,0 @@
-/DEPENDENCIES.md
-/github.com/josharian/intern/LICENSE.md
-/std/LICENSE
