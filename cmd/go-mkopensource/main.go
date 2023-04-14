@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -195,6 +196,10 @@ func Main(args *CLIArgs) error {
 	// `tar xf go{version}.src.tar.gz`
 	goVersion, goLicense, err := loadGoTar(args.GoTarFilename)
 	if err != nil {
+		return err
+	}
+
+	if err := tidyGoModFile(); err != nil {
 		return err
 	}
 
@@ -430,6 +435,16 @@ func Main(args *CLIArgs) error {
 		}
 	}
 
+	return nil
+}
+
+func tidyGoModFile() error {
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	out, err := tidyCmd.CombinedOutput()
+	if err != nil {
+		log.Printf("'go mod tidy' failed:\n%s\n", out)
+		return fmt.Errorf("'go mod tidy' failed: %w", err)
+	}
 	return nil
 }
 
