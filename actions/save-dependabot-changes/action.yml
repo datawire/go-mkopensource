@@ -61,6 +61,16 @@ runs:
           echo "SKIP=true" >> $GITHUB_OUTPUT
           exit
         fi
+        
+        if ! git diff --name-only --exit-code go.mod; then
+          echo '::error:: go.mod is dirty.'
+          exit 1
+        fi
+        
+        if ! git diff --name-only --exit-code go.sum; then
+          echo '::error:: go.sum is dirty. Did you run `go mod tidy` before pushing?'
+          exit 1
+        fi
 
     - name: Check if dependencies changed
       if: steps.preconditions.outputs.SKIP != 'true'
