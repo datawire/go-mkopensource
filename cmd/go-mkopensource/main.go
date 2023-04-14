@@ -17,6 +17,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/spf13/pflag"
 
 	"github.com/datawire/go-mkopensource/pkg/dependencies"
@@ -435,6 +436,16 @@ func Main(args *CLIArgs) error {
 		}
 	}
 
+	isDirty, err := isGoModDirty()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARNING: could not verify if go.mod or go.sum are dirty: %s.\n", err.Error())
+	}
+
+	if isDirty {
+		fmt.Fprintln(os.Stderr, "WARNING: go.mod or go.sum are dirty.\nMake sure that these files are commited with the "+
+			"license information files to maintain consistency between the dependencies and the license information.")
+	}
+
 	return nil
 }
 
@@ -446,6 +457,33 @@ func tidyGoModFile() error {
 		return fmt.Errorf("'go mod tidy' failed: %w", err)
 	}
 	return nil
+}
+
+func isGoModDirty() (result bool, err error) {
+	var repo *git.Repository
+	if repo, err = git.PlainOpen("."); err != nil {
+		return false, err
+	}
+
+	var worktree *git.Worktree
+	if worktree, err = repo.Worktree(); err != nil {
+		return false, err
+	}
+
+	var status git.Status
+	if status, err = worktree.Status(); err != nil {
+		return false, err
+	}
+
+	if status.File("go.mod").Worktree == git.Modified {
+		return true, nil
+	}
+
+	if status.File("go.sum").Worktree == git.Modified {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func getLicenseRestriction(applicationType string) detectlicense.LicenseRestriction {
