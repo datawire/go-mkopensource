@@ -70,7 +70,7 @@ jobs:
       - name: "Check that action committed changes to the repository"
         if: github.ref_type == 'branch'
         run: |
-          if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
+          if [[ "${{ steps.changed-by-dependabot2.outputs.license_information_committed }}"  != 'true' ]]; then
             echo "::error:: Action indicates that the repo was not dirty" 
             exit 1
           fi
