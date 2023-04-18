@@ -47,7 +47,7 @@ jobs:
 
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc1
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc2
         with:
           branches_to_skip: master
           push_changes: false
@@ -61,7 +61,7 @@ jobs:
 
       - name: "Save dependency changes made by the last committer"
         id: changed-by-dependabot2
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc1
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc2
         with:
           branches_to_skip: master
           actor: ${{ github.actor }}
