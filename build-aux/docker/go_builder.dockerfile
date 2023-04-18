@@ -58,6 +58,9 @@ RUN chmod +x *.sh go-mkopensource
 
 WORKDIR /app
 COPY . ./
+
+RUN [[ -z "${UNPARSABLE_PACKAGE}" ]] || stat "${UNPARSABLE_PACKAGE}" > /dev/null
+
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/root/go/pkg/mod \
     go mod download
 
