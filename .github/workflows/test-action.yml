@@ -43,7 +43,7 @@ jobs:
           export NPM_PACKAGES=$( echo -e "./test-data/package.json\n./test-data/package-lock.json" )
           
           mkdir -p "${BUILD_TMP}"
-          build-aux/generate.sh --output-format=txt --package=mod --output-type=markdown --gotar="go1.19.3.src.tar.gz" --unparsable-packages=./unparsable-packages.yaml
+          build-aux/generate.sh --unparsable-packages ./unparsable-packages.yaml
 
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
