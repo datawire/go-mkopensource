@@ -43,11 +43,11 @@ jobs:
           export NPM_PACKAGES=$( echo -e "./test-data/package.json\n./test-data/package-lock.json" )
           
           mkdir -p "${BUILD_TMP}"
-          build-aux/generate.sh --output-format=txt --package=mod --output-type=markdown --gotar="go1.19.3.src.tar.gz" --unparsable-packages=./unparsable-packages.yaml
+          build-aux/generate.sh --unparsable-packages ./unparsable-packages.yaml
 
       - name: "Verify if changes were made by dependabot"
         id: changed-by-dependabot
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.7
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc2
         with:
           branches_to_skip: master
           push_changes: false
@@ -61,7 +61,7 @@ jobs:
 
       - name: "Save dependency changes made by the last committer"
         id: changed-by-dependabot2
-        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.7
+        uses: datawire/go-mkopensource/actions/save-dependabot-changes@v0.0.9-rc2
         with:
           branches_to_skip: master
           actor: ${{ github.actor }}
@@ -70,7 +70,7 @@ jobs:
       - name: "Check that action committed changes to the repository"
         if: github.ref_type == 'branch'
         run: |
-          if [[ "${{ steps.changed-by-dependabot2.outputs.is_dirty }}"  != 'true' ]]; then
+          if [[ "${{ steps.changed-by-dependabot2.outputs.license_information_committed }}"  != 'true' ]]; then
             echo "::error:: Action indicates that the repo was not dirty" 
             exit 1
           fi

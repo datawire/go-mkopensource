@@ -1,6 +1,13 @@
 name: 'Update dependency information after dependabot updates'
 description: "Check if dependencies were changed by dependabot and commit the new dependency information."
 inputs:
+  github_token:
+    description: |
+      Token used to commit changes back into the repository. 
+      This should be a personal access token, or commits made by this action won't trigger a new workflow run.
+      See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow for more info.
+    required: true
+
   branches_to_skip:
     description: Regex of branches where this action should not run. e.g. 'master'
     required: true
@@ -19,8 +26,8 @@ inputs:
     default: 'true'
 
 outputs:
-  is_dirty:
-    description: "If there were changes made by dependabot, this variable will be true"
+  license_information_committed:
+    description: "If there were changes to license information files and they were commited, this variable will be true"
     value: ${{ steps.check-dirty.outputs.DIRTY == 'true' }}
 
 runs:
@@ -54,6 +61,16 @@ runs:
           echo "SKIP=true" >> $GITHUB_OUTPUT
           exit
         fi
+        
+        if ! git diff --name-only --exit-code go.mod; then
+          echo '::error:: go.mod is dirty.'
+          exit 1
+        fi
+        
+        if ! git diff --name-only --exit-code go.sum; then
+          echo '::error:: go.sum is dirty. Did you run `go mod tidy` before pushing?'
+          exit 1
+        fi
 
     - name: Check if dependencies changed
       if: steps.preconditions.outputs.SKIP != 'true'
@@ -61,18 +78,18 @@ runs:
       id: check-dirty
       run: $GITHUB_ACTION_PATH/is_dirty.sh
 
+    - name: Update git credentials
+      if: steps.check-dirty.outputs.DIRTY == 'true'
+      shell: bash
+      run: |
+        set -o pipefail
+        AUTH=$(printf "%s""pat:${{ inputs.github_token }}" | base64)
+        echo "::add-mask::${AUTH}"
+        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${AUTH}"
+
     - name: Commit updated dependency files
       if: steps.check-dirty.outputs.DIRTY == 'true'
       env:
         PUSH_CHANGES: ${{ inputs.push_changes }}
       shell: bash
       run: $GITHUB_ACTION_PATH/commit.sh
-
-    - name: Trigger workflow with the latest changes
-      if: steps.check-dirty.outputs.DIRTY == 'true' && github.actor == 'dependabot[bot]'
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        DESTINATION_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
-        gh workflow run "${GITHUB_WORKFLOW}" -r "${DESTINATION_BRANCH}"

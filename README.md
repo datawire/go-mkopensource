@@ -186,7 +186,7 @@ jobs:
         with:
           branches_to_skip: 'master'
       - name: Abort if dependencies changed
-        if: steps.changed-by-dependabot.outputs.is_dirty == 'true'
+        if: steps.changed-by-dependabot.outputs.license_information_committed == 'true'
         run: |
           echo "Dependabot triggered a dependency update. Aborting workflow."
           exit 1
