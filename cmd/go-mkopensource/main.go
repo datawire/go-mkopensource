@@ -442,7 +442,7 @@ func Main(args *CLIArgs) error {
 	}
 
 	if isDirty {
-		fmt.Fprintln(os.Stderr, "WARNING: go.mod or go.sum are dirty.\nMake sure that these files are commited with the "+
+		return fmt.Errorf("WARNING: go.mod or go.sum are dirty.\nMake sure that these files are commited with the " +
 			"license information files to maintain consistency between the dependencies and the license information.")
 	}
 
