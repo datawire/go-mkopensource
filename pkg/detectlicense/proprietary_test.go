@@ -19,7 +19,6 @@ func TestReadProprietarySoftwareFile(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Len(t, proprietarySoftware, len(ambassadorPrivateRepos)+2)
-	require.Subset(t, proprietarySoftware,
-		[]string{"github.com/datawire/secretprogram", "github.com/datawire/othersecretprogram"},
-	)
+	require.Contains(t, proprietarySoftware, "github.com/datawire/secretprogram")
+	require.Contains(t, proprietarySoftware, "github.com/datawire/othersecretprogram")
 }

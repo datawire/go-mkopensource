@@ -7,41 +7,46 @@ import (
 )
 
 //nolint:gochecknoglobals // Would be 'const'.
-var ambassadorPrivateRepos = []string{
-	"github.com/datawire/telepresence2-proprietary/",
-	"github.com/datawire/saas_app/",
-	"github.com/datawire/telepresence-pro/",
+var ambassadorPrivateRepos = map[string]struct{}{
+	"github.com/datawire/telepresence2-proprietary/": {},
+	"github.com/datawire/saas_app/":                  {},
+	"github.com/datawire/telepresence-pro/":          {},
 }
 
-type AmbassadorProprietarySoftware []string
+type AmbassadorProprietarySoftware map[string]struct{}
 
 func GetAmbassadorProprietarySoftware(proprietarySoftware ...string) AmbassadorProprietarySoftware {
 	ambProprietarySoftware := AmbassadorProprietarySoftware{}
-	ambProprietarySoftware = append(ambProprietarySoftware, ambassadorPrivateRepos...)
-	ambProprietarySoftware = append(ambProprietarySoftware, proprietarySoftware...)
+
+	for k, v := range ambassadorPrivateRepos {
+		ambProprietarySoftware[k] = v
+	}
+
+	for _, v := range proprietarySoftware {
+		ambProprietarySoftware[v] = struct{}{}
+	}
+
 	return ambProprietarySoftware
 }
 
 func (a AmbassadorProprietarySoftware) IsProprietarySoftware(packageName string) bool {
-	for _, proprietarySoftware := range a {
-		if packageName == proprietarySoftware {
-			return true
-		}
-	}
-	return false
+	_, ok := a[packageName]
+	return ok
 }
 
-func (a *AmbassadorProprietarySoftware) ReadProprietarySoftwareFile(name string) error {
+func (a AmbassadorProprietarySoftware) ReadProprietarySoftwareFile(name string) error {
 	data, err := os.ReadFile(name)
 	if err != nil {
 		return err
 	}
 
-	var proprietary_software []string
-	if err = yaml.Unmarshal(data, &proprietary_software); err != nil {
+	var proprietarySoftware []string
+	if err = yaml.Unmarshal(data, &proprietarySoftware); err != nil {
 		return err
 	}
 
-	*a = append(*a, proprietary_software...)
+	for _, v := range proprietarySoftware {
+		a[v] = struct{}{}
+	}
 	return nil
 }
