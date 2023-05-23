@@ -2,16 +2,7 @@ package detectlicense
 
 import (
 	"fmt"
-	"strings"
 )
-
-func isAmbassadorProprietarySoftware(packageName string) bool {
-	const SmartAgentRepo = "github.com/datawire/telepresence2-proprietary/"
-	const AmbassadorCloudRepo = "github.com/datawire/saas_app/"
-	const TelepresencePro = "github.com/datawire/telepresence-pro/"
-
-	return strings.HasPrefix(packageName, SmartAgentRepo) || strings.HasPrefix(packageName, AmbassadorCloudRepo) || strings.HasPrefix(packageName, TelepresencePro)
-}
 
 // knownDependencies will return a list of licenses for any dependency that has been
 // hardcoded due to the difficulty to parse the license file(s).

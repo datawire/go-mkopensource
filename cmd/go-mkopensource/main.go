@@ -27,13 +27,14 @@ import (
 )
 
 type CLIArgs struct {
-	OutputFormat       string
-	OutputName         string
-	OutputType         string
-	ApplicationType    string
-	UnparsablePackages string
-	GoTarFilename      string
-	Package            string
+	OutputFormat        string
+	OutputName          string
+	OutputType          string
+	ApplicationType     string
+	UnparsablePackages  string
+	ProprietarySoftware string
+	GoTarFilename       string
+	Package             string
 }
 
 const (
@@ -66,6 +67,7 @@ func parseArgs() (*CLIArgs, error) {
 			"External applications run on customer machines", internalApplication, externalApplication))
 	argparser.StringVar(&args.UnparsablePackages, "unparsable-packages", "",
 		"Yaml file containing SPDX License IDs for packages that have valid licenses, but cannot be parsed by this license checker")
+	argparser.StringVar(&args.ProprietarySoftware, "proprietary-software", "", "Yaml file containing proprietary packages")
 
 	if err := argparser.Parse(os.Args[1:]); err != nil {
 		return nil, err
@@ -293,7 +295,22 @@ func Main(args *CLIArgs) error {
 			return err
 		}
 	}
+
+	ambProprietarySoftware := detectlicense.GetAmbassadorProprietarySoftware()
+	if args.ProprietarySoftware != "" {
+		err = ambProprietarySoftware.ReadProprietarySoftwareFile(args.ProprietarySoftware)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, pkgName := range pkgNames {
+		if ambProprietarySoftware.IsProprietarySoftware(pkgName) {
+			// Ambassador's proprietary software has a proprietary license
+			pkgLicenses[pkgName] = map[detectlicense.License]struct{}{detectlicense.AmbassadorProprietary: {}}
+			continue
+		}
+
 		pkgLicenses[pkgName], err = detectlicense.DetectLicenses(pkgName, pkgVersions[pkgName], pkgFiles[pkgName])
 		if err != nil {
 			if licenses, ok := unparsablePackages[pkgName]; ok {
