@@ -162,12 +162,6 @@ func expectsNotice(licenses map[License]struct{}) bool {
 
 func DetectLicenses(packageName string, packageVersion string, files map[string][]byte) (map[License]struct{}, error) {
 
-	if isAmbassadorProprietarySoftware(packageName) {
-		// Ambassador's proprietary software has a proprietary license
-		softwareLicenses := map[License]struct{}{AmbassadorProprietary: {}}
-		return softwareLicenses, nil
-	}
-
 	if knownDependencies, isKnown := knownDependencies(packageName, packageVersion); isKnown {
 		licenses := map[License]struct{}{}
 		for _, license := range knownDependencies {
