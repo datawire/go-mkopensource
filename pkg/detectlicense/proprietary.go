@@ -11,6 +11,7 @@ var ambassadorPrivateRepos = map[string]struct{}{
 	"github.com/datawire/telepresence2-proprietary/": {},
 	"github.com/datawire/saas_app/":                  {},
 	"github.com/datawire/telepresence-pro/":          {},
+	"github.com/datawire/apro/":                      {},
 }
 
 type AmbassadorProprietarySoftware map[string]struct{}
