@@ -23,7 +23,6 @@ BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 
 # Delete test data
 rm -fr "${BUILD_SCRIPTS}/../test-data"
-exit
 
 validate_required_variable APPLICATION
 validate_required_variable APPLICATION_TYPE
