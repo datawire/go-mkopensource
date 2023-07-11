@@ -40,7 +40,10 @@ jobs:
           
           # Generate license information
           export GO_IMAGE=$(grep -e 'FROM golang:' "build-aux/docker/go_builder.dockerfile" | cut -d ' ' -f2 )
-          export NPM_PACKAGES=$( echo -e "./test-data/package.json\n./test-data/package-lock.json" )
+
+          #Copy test data to another folder since it can't be used from there
+          cp -a ./test-data ./ui
+          export NPM_PACKAGES=$( echo -e "./ui/package.json\n./ui/package-lock.json" )
           
           mkdir -p "${BUILD_TMP}"
           build-aux/generate.sh --unparsable-packages ./unparsable-packages.yaml

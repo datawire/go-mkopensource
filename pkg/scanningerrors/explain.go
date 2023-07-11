@@ -46,9 +46,9 @@ var errCategoryExplanations = map[string]string{
 
 		Some possible causes for  this issue are:
 
-		- Dependency is proprietary Ambassador Labs software: Update function 
-		  IsAmbassadorProprietarySoftware() to correctly identify the 
-		  dependency
+		- Dependency is proprietary Ambassador Labs software: Create a yaml file with the proprietary 
+          dependencies and pass it to the generate.sh script using the --proprietary-packages command line option.
+          See the README.md file for more information.
 
 		- License information can't be identified: Add an entry to 
           hardcodedGoDependencies, hardcodedPythonDependencies 

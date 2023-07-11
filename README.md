@@ -140,6 +140,7 @@ We then use the flag `--unparsable-packages unparsable-packages.yaml` when runni
 Example:
 In previous versions of this scanner, sometimes the scanner complains about missing dependencies when the scanner gets
 the list of all the packages in the file "vendor/modules.txt" using the command "go mod vendor" You can see that in the following output.
+
 ```bash
 #26 18.21 go: downloading github.com/docker/go-metrics v0.0.0-20180209012529-399ea8c73916
 #26 18.24 go: downloading github.com/containerd/cgroups v0.0.0-20200531161412-0dbf7f05ba59
@@ -151,11 +152,33 @@ the list of all the packages in the file "vendor/modules.txt" using the command 
 #26 36.85 /scripts/go-mkopensource: fatal: ["go" "mod" "vendor"]: exit status 1
 #26 ERROR: executor failed running [/bin/sh -c /scripts/scan-go.sh]: exit code: 1
 ```
+
 Now the scanner is smart enough to follow the indications of the "go mod vendor"  install the dependencies, and then 
 get the list of packages from the file ''vendor/modules.txt"
 
 Sometimes it isn't possible to install the dependecies sugested by the "go mod vendor" command. 
 The scanner will complain with the message "Error installing dependency". In this case the project will require human intervention to solve the problem.
+
+Another reason that may cause a failure is the use of our proprietary packages, like `github.com/datawire/telepresence-pro/rpc/proconnector`. 
+The error will message will be similar to this one: 
+
+```bash
+/scripts/go-mkopensource: fatal: 1 license-detection errors:
+  1. Package "github.com/datawire/telepresence-pro/rpc/proconnector": could not identify a license for all sources (had no global LICENSE file)
+```
+
+Fo exclude these packages, add a yaml file like this
+```yaml
+- github.com/datawire/telepresence-pro/rpc/userdaemon
+- github.com/datawire/telepresence-pro/rpc/proconnector
+- github.com/datawire/telepresence2-proprietary/rpc/systema
+```
+
+And pass it to the generate.sh script using the argument `--proprietary-packages`:
+
+```bash
+./generate.sh" --proprietary-packages proprietary-packages.yaml;
+```
 
 ### Remember to always create a ticket!
 When a problem arise, remember to always create a ticket so that the problem can be fixed. This will help all users
