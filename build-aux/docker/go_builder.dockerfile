@@ -33,6 +33,8 @@ RUN mkdir -p "${GOMODCACHE}"
 
 ARG UNPARSABLE_PACKAGE
 ENV UNPARSABLE_PACKAGE="${UNPARSABLE_PACKAGE}"
+ARG PROPRIETARY_PACKAGES
+ENV PROPRIETARY_PACKAGES="${PROPRIETARY_PACKAGES}"
 ARG APPLICATION_TYPE
 ENV APPLICATION_TYPE="${APPLICATION_TYPE}"
 
@@ -59,13 +61,14 @@ RUN chmod +x *.sh go-mkopensource
 WORKDIR /app
 COPY . ./
 
-RUN [[ -z "${UNPARSABLE_PACKAGE}" ]] || stat "${UNPARSABLE_PACKAGE}" > /dev/null
+RUN test -z "${UNPARSABLE_PACKAGE}" || stat "${UNPARSABLE_PACKAGE}" > /dev/null
+RUN test -z "${PROPRIETARY_PACKAGES}" || stat "${PROPRIETARY_PACKAGES}" > /dev/null
 
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/root/go/pkg/mod \
     go mod download
 
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/root/go/pkg/mod \
-    if [[ -z "$UNPARSABLE_PACKAGE" ]] ; then /scripts/scan-go.sh; else /scripts/scan-go.sh --unparsable-packages $UNPARSABLE_PACKAGE ; fi
+    /scripts/scan-go.sh
 
 RUN cp go.mod go.sum /temp/
 

@@ -10,13 +10,18 @@ archive_dependencies() {
 
 UNPARSABLE_PACKAGE_VALUE=""
 
-if [ $# -gt 0 ]; then
-  if [ "$1" = "--unparsable-packages" ]; then
-    UNPARSABLE_PACKAGE_VALUE="$2"
-
-  fi
-fi
-
+# Parse command line arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+   --unparsable-packages)
+      UNPARSABLE_PACKAGE_VALUE="$2"
+      ;;
+    --proprietary-packages)
+      PROPRIETARY_PACKAGES_VALUE="$2"
+      ;;
+  esac
+  shift
+done
 
 BUILD_SCRIPTS=$(dirname $(realpath "$0"))
 . "${BUILD_SCRIPTS}/docker/imports.sh"
@@ -45,6 +50,7 @@ docker build \
   --build-arg GO_IMAGE="${GO_IMAGE}" \
   --build-arg SCRIPTS_HOME="${SCRIPTS_HOME}" \
   --build-arg UNPARSABLE_PACKAGE="${UNPARSABLE_PACKAGE_VALUE}" \
+  --build-arg PROPRIETARY_PACKAGES="${PROPRIETARY_PACKAGES_VALUE}" \
   -t "go-deps-builder" --target license_output \
   --output "${BUILD_TMP}" .
 popd >/dev/null
