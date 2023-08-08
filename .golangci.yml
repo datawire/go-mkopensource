@@ -7,10 +7,11 @@ linters:
     - nolintlint
 linters-settings:
   depguard:
-    list-type: blacklist
-    include-go-root: true
-    packages-with-error-message:
-      - io/ioutil: "`io/ioutil` is deprecated in Go 1.16, use `io` or `os` instead"
+    rules:
+      main:
+        deny:
+          - pkg: "io/ioutil"
+            desc: "`io/ioutil` is deprecated in Go 1.16, use `io` or `os` instead"
   errcheck:
     exclude-functions:
       - "io.WriteString(*text/tabwriter.Writer)"

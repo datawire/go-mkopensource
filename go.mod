@@ -1,6 +1,6 @@
 module github.com/datawire/go-mkopensource
 
-go 1.17
+go 1.20
 
 require (
 	github.com/datawire/dlib v1.2.5-0.20211116212847-0316f8d7af2b
