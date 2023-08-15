@@ -9,26 +9,27 @@ import (
 // These definitions are copied verbatim from `go help list`.
 
 type Package struct {
-	Dir           string   // directory containing package sources
-	ImportPath    string   // import path of package in dir
-	ImportComment string   // path in import comment on package statement
-	Name          string   // package name
-	Doc           string   // package documentation string
-	Target        string   // install path
-	Shlib         string   // the shared library that contains this package (only set when -linkshared)
-	Goroot        bool     // is this package in the Go root?
-	Standard      bool     // is this package part of the standard Go library?
-	Stale         bool     // would 'go install' do anything for this package?
-	StaleReason   string   // explanation for Stale==true
-	Root          string   // Go root or Go path dir containing this package
-	ConflictDir   string   // this directory shadows Dir in $GOPATH
-	BinaryOnly    bool     // binary-only package (no longer supported)
-	ForTest       string   // package is only for use in named test
-	Export        string   // file containing export data (when using -export)
-	BuildID       string   // build ID of the compiled package (when using -export)
-	Module        *Module  // info about package's containing module, if any (can be nil)
-	Match         []string // command-line patterns matching this package
-	DepOnly       bool     // package is only a dependency, not explicitly listed
+	Dir            string   // directory containing package sources
+	ImportPath     string   // import path of package in dir
+	ImportComment  string   // path in import comment on package statement
+	Name           string   // package name
+	Doc            string   // package documentation string
+	Target         string   // install path
+	Shlib          string   // the shared library that contains this package (only set when -linkshared)
+	Goroot         bool     // is this package in the Go root?
+	Standard       bool     // is this package part of the standard Go library?
+	Stale          bool     // would 'go install' do anything for this package?
+	StaleReason    string   // explanation for Stale==true
+	Root           string   // Go root or Go path dir containing this package
+	ConflictDir    string   // this directory shadows Dir in $GOPATH
+	BinaryOnly     bool     // binary-only package (no longer supported)
+	ForTest        string   // package is only for use in named test
+	Export         string   // file containing export data (when using -export)
+	BuildID        string   // build ID of the compiled package (when using -export)
+	Module         *Module  // info about package's containing module, if any (can be nil)
+	Match          []string // command-line patterns matching this package
+	DepOnly        bool     // package is only a dependency, not explicitly listed
+	DefaultGODEBUG string   // default GODEBUG setting, for main packages
 
 	// Source files
 	GoFiles           []string // .go source files (excluding CgoFiles, TestGoFiles, XTestGoFiles)
@@ -89,9 +90,9 @@ type Context struct {
 	GOROOT        string   // Go root
 	GOPATH        string   // Go path
 	CgoEnabled    bool     // whether cgo can be used
-	UseAllFiles   bool     // use files regardless of +build lines, file names
+	UseAllFiles   bool     // use files regardless of //go:build lines, file names
 	Compiler      string   // compiler to assume when computing target paths
-	BuildTags     []string // build constraints to match in +build lines
+	BuildTags     []string // build constraints to match in //go:build lines
 	ToolTags      []string // toolchain-specific build constraints
 	ReleaseTags   []string // releases the current release is compatible with
 	InstallSuffix string   // suffix to use in the name of the install dir

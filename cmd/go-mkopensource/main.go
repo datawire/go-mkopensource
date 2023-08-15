@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -146,6 +147,7 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 	}
 	defer func() { _ = goTarUncompressed.Close() }()
 	goTar := tar.NewReader(goTarUncompressed)
+	vrx := regexp.MustCompile(`go(\d+\.\d+\.\d+(?:-\S+)?)`)
 	for {
 		header, err := goTar.Next()
 		if err != nil {
@@ -160,7 +162,9 @@ func loadGoTar(goTarFilename string) (version string, license []byte, err error)
 			if err != nil {
 				return "", nil, err
 			}
-			version = "v" + strings.TrimPrefix(strings.TrimSpace(string(fc)), "go")
+			if m := vrx.FindStringSubmatch(string(fc)); len(m) == 2 {
+				version = "v" + m[1]
+			}
 		case "go/LICENSE":
 			fc, err := io.ReadAll(goTar)
 			if err != nil {
