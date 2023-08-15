@@ -1,9 +1,9 @@
 module github.com/datawire/go-mkopensource
 
-go 1.20
+go 1.21
 
 require (
-	github.com/datawire/dlib v1.2.5-0.20211116212847-0316f8d7af2b
+	github.com/datawire/dlib v1.3.1
 	github.com/go-git/go-git/v5 v5.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
