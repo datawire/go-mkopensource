@@ -36,6 +36,7 @@ type CLIArgs struct {
 	ProprietarySoftware string
 	GoTarFilename       string
 	Package             string
+	IgnoreDirty         bool
 }
 
 const (
@@ -69,6 +70,7 @@ func parseArgs() (*CLIArgs, error) {
 	argparser.StringVar(&args.UnparsablePackages, "unparsable-packages", "",
 		"Yaml file containing SPDX License IDs for packages that have valid licenses, but cannot be parsed by this license checker")
 	argparser.StringVar(&args.ProprietarySoftware, "proprietary-software", "", "Yaml file containing proprietary packages")
+	argparser.BoolVar(&args.IgnoreDirty, "ignore-dirty", false, "ignore go mod being dirty and generate dependencies")
 
 	if err := argparser.Parse(os.Args[1:]); err != nil {
 		return nil, err
@@ -457,14 +459,15 @@ func Main(args *CLIArgs) error {
 		}
 	}
 
-	isDirty, err := isGoModDirty()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "WARNING: could not verify if go.mod or go.sum are dirty: %s.\n", err.Error())
-	}
-
-	if isDirty {
-		return fmt.Errorf("WARNING: go.mod or go.sum are dirty.\nMake sure that these files are commited with the " +
-			"license information files to maintain consistency between the dependencies and the license information.")
+	if !args.IgnoreDirty {
+		isDirty, err := isGoModDirty()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "WARNING: could not verify if go.mod or go.sum are dirty: %s.\n", err.Error())
+		}
+		if isDirty {
+			return fmt.Errorf("WARNING: go.mod or go.sum are dirty.\nMake sure that these files are commited with the " +
+				"license information files to maintain consistency between the dependencies and the license information.")
+		}
 	}
 
 	return nil
