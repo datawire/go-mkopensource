@@ -2,7 +2,7 @@
 # Go dependency scanner
 ########################################
 ARG GO_IMAGE="base-image-unknown"
-FROM golang:1.19-alpine3.15 as builder
+FROM golang:1.20.12-alpine3.19 as builder
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"
@@ -47,7 +47,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     jq
 
 WORKDIR /data
-RUN set -ex; GO_VERSION=$(go version | sed -E 's/.*go([1-9\.]*).*/\1/') && \
+RUN set -ex; GO_VERSION=$(go version | sed -E 's/.*go([0-9\.]*).*/\1/') && \
     GO_TAR="go${GO_VERSION}.src.tar.gz" && \
     curl -o "${GO_TAR}" --fail -L "https://dl.google.com/go/go${GO_VERSION}.src.tar.gz"
 
