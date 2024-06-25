@@ -71,7 +71,7 @@ jobs:
           push_changes: false
 
       - name: "Check that action committed changes to the repository"
-        if: github.ref_type == 'branch'
+        if: github.ref_type == 'branch' && !contains(github.ref, 'master')
         run: |
           if [[ "${{ steps.changed-by-dependabot2.outputs.license_information_committed }}"  != 'true' ]]; then
             echo "::error:: Action indicates that the repo was not dirty"
