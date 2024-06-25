@@ -25,7 +25,7 @@ jobs:
           if [[ "${{runner.debug}}" == "1" ]]; then
             DEBUG_FLAGS="-v"
           fi
-          
+
           go test -race ${DEBUG_FLAGS} ./...
   lint:
     runs-on: ubuntu-latest

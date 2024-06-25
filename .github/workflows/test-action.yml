@@ -37,14 +37,14 @@ jobs:
           : > DEPENDENCY_LICENSES.md
           : > DEPENDENCIES.md
           git add DEPENDENCY_LICENSES.md DEPENDENCIES.md
-          
+
           # Generate license information
           export GO_IMAGE=$(grep -e 'FROM golang:' "build-aux/docker/go_builder.dockerfile" | cut -d ' ' -f2 )
 
           #Copy test data to another folder since it can't be used from there
           cp -a ./test-data ./ui
           export NPM_PACKAGES=$( echo -e "./ui/package.json\n./ui/package-lock.json" )
-          
+
           mkdir -p "${BUILD_TMP}"
           build-aux/generate.sh --unparsable-packages ./unparsable-packages.yaml
 
@@ -58,7 +58,7 @@ jobs:
       - name: "Check that action didn't do any changes"
         run: |
           if [[ "${{ steps.changed-by-dependabot.outputs.is_dirty }}"  == 'true' ]]; then
-            echo "::error:: Action indicates that the repo was dirty" 
+            echo "::error:: Action indicates that the repo was dirty"
             exit 1
           fi
 
@@ -74,18 +74,18 @@ jobs:
         if: github.ref_type == 'branch'
         run: |
           if [[ "${{ steps.changed-by-dependabot2.outputs.license_information_committed }}"  != 'true' ]]; then
-            echo "::error:: Action indicates that the repo was not dirty" 
+            echo "::error:: Action indicates that the repo was not dirty"
             exit 1
           fi
 
           DESTINATION_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
           DIFF=$(git diff --stat --cached  origin/${DESTINATION_BRANCH})
           if [[ -z "${DIFF}" ]]; then
-            echo "::error:: There weren't any files committed." 
+            echo "::error:: There weren't any files committed."
             exit 1
           fi
 
           if ! grep -e '^\s*DEPENDENCY_LICENSES.md' <(echo "${DIFF}") > /dev/null; then
-            echo "::error:: File DEPENDENCY_LICENSES.md was not modified, but it should have been." 
+            echo "::error:: File DEPENDENCY_LICENSES.md was not modified, but it should have been."
             exit 1
           fi
