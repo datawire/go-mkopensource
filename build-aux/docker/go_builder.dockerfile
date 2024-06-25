@@ -2,7 +2,7 @@
 # Go dependency scanner
 ########################################
 ARG GO_IMAGE="base-image-unknown"
-FROM golang:1.20.12-alpine3.19 as builder
+FROM golang:1.22.4-alpine3.20 as builder
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"

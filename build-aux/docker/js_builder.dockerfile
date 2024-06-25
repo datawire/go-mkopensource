@@ -2,7 +2,7 @@
 # builder for Js scanning
 ######################################################################
 ARG NODE_IMAGE="need-a-base-image"
-FROM golang:1.19-alpine3.15 as builder
+FROM golang:1.22.4-alpine3.20 as builder
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"
