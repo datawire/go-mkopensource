@@ -455,11 +455,30 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		// sigs.k8s.io/yaml/LICENSE
 		licenses[MIT] = struct{}{}
 		licenses[BSD3] = struct{}{}
-	case reMatch(regexp.MustCompile(``+
-		`\s*-*\s*[^\n]*[Ff]iles [^\n]*licensed under:\s*`+reApacheLicense.String()+
-		`\s*-*\s*[^\n]*[Ff]iles [^\n]*licensed under:\s*`+reBSD3.String()),
+	case reMatch(regexp.MustCompile(reMIT.String()+
+		reBSD3.String()+
+		reWrap(`# The forked go-yaml\.v3 library under this project is covered by two different licenses \(MIT and Apache\):`)+`\s*`+
+		`#+ MIT License #+\s*`+
+		reWrap(yamlHeader)+`\s*`+
+		reMIT.String()+`\s*`+
+		`#+ Apache License #+\s*`+
+		reQuote(`All the remaining project files are covered by the Apache license:`)+`\s*`+
+		reApacheStatement.String()+
+		reWrap(`# The forked go-yaml\.v2 library under the project is covered by an Apache license:`)+`\s*`+
+		reApacheLicense.String()),
+		body):
+		// sigs.k8s.io/yaml/LICENSE
+		licenses[Apache2] = struct{}{}
+		licenses[BSD3] = struct{}{}
+		licenses[MIT] = struct{}{}
+	case reMatch(regexp.MustCompile(`\s*`+
+		`(([-=]*|[^\n]*[Ff]iles [^\n]*licensed under:)\n)*\s*`+
+		reApacheLicense.String()+
+		`(([-=]*|[^\n]*[Ff]iles [^\n]*licensed under:|The common/types/pb/equal\.go modification of proto\.Equal logic)\n)*\s*`+
+		reBSD3.String()),
 		body):
 		// sigs.k8s.io/json/LICENSE
+		// github.com/google/cel-go
 		licenses[Apache2] = struct{}{}
 		licenses[BSD3] = struct{}{}
 	case reMatch(regexp.MustCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
@@ -475,6 +494,9 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		licenses[Apache2] = struct{}{}
 		licenses[BSD3] = struct{}{}
 		licenses[MIT] = struct{}{}
+	case reMatch(regexp.MustCompile(reBSD3.String()+`\s*=+\s*`+reBSD3.String()), body):
+		// github.com/cloudflare/circl/LICENSE
+		licenses[BSD3] = struct{}{}
 	case string(body) == xzPublicDomain:
 		// github.com/xi2/xz/LICENSE
 		licenses[PublicDomain] = struct{}{}
