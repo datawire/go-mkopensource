@@ -34,10 +34,7 @@ jobs:
           # Specify the most recent (1.Y.Z) Y release
           go-version-file: go.mod
           cache: true
-      - uses: golangci/golangci-lint-action@v5
-        with:
-          version: latest
-          args: --timeout=10m
+      - run: make lint
   generate:
     runs-on: ubuntu-latest
     steps:
