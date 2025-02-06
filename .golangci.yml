@@ -1,10 +1,56 @@
 linters:
-  enable:
-    - depguard
-    - forbidigo
-    - gochecknoglobals
-    - gochecknoinits
-    - nolintlint
+  enable-all: true
+  disable:
+    # Go version madness: Use only one of these
+    - copyloopvar # enable (comment out) only if *everyone* using go-mkopensource has upgraded to Go 1.22 or newer
+    #- exportloopref # enable (comment out) if we must support Go 1.21 or older
+ 
+    # Not currently passing.
+    #
+    # This list is provided without commentary on whether it's a bad
+    # thing that a given linter isn't passing, or whether the linter
+    # is bad.
+    #
+    # TODO: Over time, go through this list and for each linter either
+    # get it to pass or write a comment about why the linter is bad.
+    - cyclop
+    - dupword
+    - err113
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - funlen
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofumpt
+    - goimports
+    - gosec
+    - lll
+    - maintidx
+    - mirror
+    - misspell
+    - mnd
+    - musttag
+    - nakedret
+    - nestif
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - revive
+    - stylecheck
+    - testpackage
+    - thelper
+    - unparam
+    - varnamelen
+    - whitespace
+    - wrapcheck
+    - wsl
 linters-settings:
   depguard:
     rules:
