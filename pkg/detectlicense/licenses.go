@@ -497,6 +497,9 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 	case reMatch(regexp.MustCompile(reBSD3.String()+`\s*=+\s*`+reBSD3.String()), body):
 		// github.com/cloudflare/circl/LICENSE
 		licenses[BSD3] = struct{}{}
+	case reMatch(regexp.MustCompile(`goproperties - properties file decoder for Go\s*`+reBSD2.String()), body):
+		// github.com/magiconair/properties/LICENSE
+		licenses[BSD2] = struct{}{}
 	case string(body) == xzPublicDomain:
 		// github.com/xi2/xz/LICENSE
 		licenses[PublicDomain] = struct{}{}
