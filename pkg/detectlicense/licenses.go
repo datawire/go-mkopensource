@@ -455,6 +455,13 @@ func IdentifyLicenses(body []byte) map[License]struct{} {
 		// sigs.k8s.io/yaml/LICENSE
 		licenses[MIT] = struct{}{}
 		licenses[BSD3] = struct{}{}
+	case reMatch(regexp.MustCompile(``+
+		`\s*-*\s*[^\n]*[Ff]iles [^\n]*licensed under:\s*`+reApacheLicense.String()+
+		`\s*-*\s*[^\n]*[Ff]iles [^\n]*licensed under:\s*`+reBSD3.String()),
+		body):
+		// sigs.k8s.io/json/LICENSE
+		licenses[Apache2] = struct{}{}
+		licenses[BSD3] = struct{}{}
 	case reMatch(regexp.MustCompile(reMIT.String()+`\s*- Based on \S*, which has the following license:\n"""\s*`+reMIT.String()+`\s*"""\s*`), body):
 		// github.com/shopspring/decimal/LICENSE
 		licenses[MIT] = struct{}{}
