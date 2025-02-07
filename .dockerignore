@@ -1,5 +1,4 @@
 cmd/go-mkopensource/go-mkopensource
-cmd/py-mkopensource/py-mkopensource
 cmd/js-mkopensource/js-mkopensource
 vendor
 DEPENDENCIES.md
