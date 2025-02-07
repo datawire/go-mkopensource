@@ -2,7 +2,7 @@
 # builder for Js scanning
 ######################################################################
 ARG NODE_IMAGE="need-a-base-image"
-FROM golang:1.22.4-alpine3.20 as builder
+FROM golang:1.23.6-alpine3.21 AS builder
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"
@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/r
 WORKDIR /src/${SCRIPTS_HOME}/build-aux/docker/
 RUN cp scan-js.sh imports.sh customLicenseFormat.json npm_dependencies.tar /out/
 
-FROM ${NODE_IMAGE} as npm_dependency_scanner
+FROM ${NODE_IMAGE} AS npm_dependency_scanner
 
 ARG APPLICATION
 ENV APPLICATION="${APPLICATION}"
@@ -53,5 +53,5 @@ RUN --mount=type=cache,target=/root/.npm,sharing=locked \
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     /scripts/scan-js.sh
 
-FROM scratch as license_output
+FROM scratch AS license_output
 COPY --from=npm_dependency_scanner /temp/js_dependencies.txt /temp/js_licenses.txt /

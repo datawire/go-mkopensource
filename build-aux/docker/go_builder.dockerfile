@@ -2,7 +2,7 @@
 # Go dependency scanner
 ########################################
 ARG GO_IMAGE="base-image-unknown"
-FROM golang:1.22.4-alpine3.20 as builder
+FROM golang:1.23.6-alpine3.21 AS builder
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"
@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/r
 WORKDIR /src/${SCRIPTS_HOME}/build-aux/docker/
 RUN cp scan-go.sh imports.sh /out/
 
-FROM ${GO_IMAGE} as go_dependency_scanner
+FROM ${GO_IMAGE} AS go_dependency_scanner
 
 ENV GOCACHE=/root/.cache/go-build
 RUN mkdir -p "${GOCACHE}"
@@ -72,6 +72,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/r
 
 RUN cp go.mod go.sum /temp/
 
-FROM scratch as license_output
+FROM scratch AS license_output
 COPY --from=go_dependency_scanner /temp/* /
 COPY --from=go_dependency_scanner /app/go.mod /app/go.sum /

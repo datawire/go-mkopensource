@@ -111,25 +111,22 @@ option. The flag argument is a file name that maps package names to valid SPDX l
 Example:
 The scanner complains about some package that cannot be parsed:
 
-```
+```bash
 fatal: 2 license-detection errors:
- 1. package "sigs.k8s.io/json": could not identify license in file "sigs.k8s.io/json/LICENSE"
- 2. package "sigs.k8s.io/json/internal/golang/encoding/json": could not identify license in file "sigs.k8s.io/json/LICENSE"
+ 1. Package "github.com/Masterminds/squirrel": could not identify license in file "github.com/Masterminds/squirrel/LICENSE"
+ 2. Package "github.com/gosimple/unidecode": could not identify license in file "github.com/gosimple/unidecode/LICENSE"
 ```
 
-A quick look at the package reveals that it uses an Apache License, but adds extra text at the top of the actual LICENSE
-file indicating that it also uses files from golang/encoding/json. We know that golang uses a 3-clause BSD license. So we consult the [SPDX License List](https://spdx.org/licenses/) to get the canonical
-identifiers for the licenses, and add them to an `unparsable-packages.yaml` file to our build system
-with the following contents:
+Confirm the licenses used in the identified repositories. Consult the [SPDX License List](https://spdx.org/licenses/) to get the canonical identifiers and add them to a YAML file.
 
-```
-sigs.k8s.io/json:
+```yaml
+github.com/Masterminds/squirrel:
+  - MIT
+github.com/gosimple/unidecode:
   - Apache-2.0
-sigs.k8s.io/json/internal/golang/encoding/json:
-  - BSD-3-Clause
 ```
 
-We then use the flag `--unparsable-packages unparsable-packages.yaml` when running `go-mkopensource`.
+Use the flag `--unparsable-packages <filename.yaml>` when running `go-mkopensource`.
 
 Example:
 In previous versions of this scanner, sometimes the scanner complains about missing dependencies when the scanner gets
