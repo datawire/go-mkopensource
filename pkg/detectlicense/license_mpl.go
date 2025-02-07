@@ -8,7 +8,8 @@ func starify(str string) string {
 	return regexp.MustCompile(`\s+`).ReplaceAllLiteralString(str, `\s+(?:\*+\s+)*`)
 }
 
-var reMPL = regexp.MustCompile(`\s*` + reWrap(`Mozilla Public License,? [Vv]ersion 2\.0
+var reMPL = regexp.MustCompile(`(?:Copyright [^\n]*\n)*\s*` +
+	reWrap(`Mozilla Public License,? [Vv]ersion 2\.0
 =*
 
 1\. Definitions
